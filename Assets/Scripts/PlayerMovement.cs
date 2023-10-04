@@ -6,11 +6,14 @@ public class PlayerMovement : MonoBehaviour
 {
     private PlayerController controller;
     private Rigidbody rb;
+    
 
     public float moveSpeed = 5f;
     public float rotateSpeed = 180f;
+    private Vector3 moveVec;
+    
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         controller = GetComponent<PlayerController>();
         rb = GetComponent<Rigidbody>();
@@ -18,28 +21,26 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        moveVec = new Vector3(-controller.moveFB, 0, controller.moveLR) * moveSpeed * Time.deltaTime;
         Move();
         Rotate();
-    }
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     private void Move()
     {
         var position = rb.position;
-
-        position = rb.position + transform.forward * controller.moveFB * moveSpeed * Time.deltaTime;
+        position += moveVec;
         rb.MovePosition(position);
     }
 
     private void Rotate()
     {
-        var rotation = rb.rotation;
+        if (moveVec.sqrMagnitude == 0)
+            return;
 
-        rotation *= Quaternion.Euler(Vector3.up * controller.moveLR * rotateSpeed * Time.deltaTime);
-        rb.MoveRotation(rotation);
+        var rotation = rb.rotation;
+        var dirQuat = Quaternion.LookRotation(moveVec);
+        Quaternion moveQuat = Quaternion.Slerp(rb.rotation, dirQuat, 180f);
+        rb.MoveRotation(moveQuat);
     }
 }
