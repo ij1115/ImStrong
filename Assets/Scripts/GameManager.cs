@@ -20,13 +20,7 @@ public class GameManager : MonoBehaviour
 
     private static GameManager singleton;
 
-    public enum SceneState
-    {
-        Title,
-        Lobby,
-        Dungeon,
-        BossRoom,
-    }
+
 
     public SceneState currentState = SceneState.Title;
 
@@ -48,6 +42,7 @@ public class GameManager : MonoBehaviour
                 break;
             case SceneState.Dungeon:
                 currentState = SceneState.Dungeon;
+                StateManager.MonsterInfoSet();
                 SceneManager.LoadScene(state);
                 break;
             case SceneState.BossRoom:

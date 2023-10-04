@@ -8,12 +8,23 @@ public class DungeonManager : MonoBehaviour
     public GameObject playerPrefab;
     public FixedJoystick joystic;
 
-    public List<GameObject> monsterSpawner = new List<GameObject>();
+    public List<GameObject> monsterSpawnerPool = new List<GameObject>();
+
+
+    public int SpawnCount = 0;
 
     private void Awake()
     {
         PlayerSpawn();
     }
+
+    //private void MonsterSpawn()
+    //{
+    //    foreach(var spawn in monsterSpawner)
+    //    {
+    //        spawn.GetComponent<MonsterSpawner>().Spawn();
+    //    }
+    //}
 
     private void PlayerSpawn()
     {
