@@ -1,3 +1,4 @@
+using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,22 +7,39 @@ public class PlayerMovement : MonoBehaviour
 {
     private PlayerController controller;
     private Rigidbody rb;
-    
 
     public float moveSpeed = 5f;
     public float rotateSpeed = 180f;
+
+    public CinemachineVirtualCamera vCamera;
     private Vector3 moveVec;
+    private Quaternion cameraRot;
+
     
     // Start is called before the first frame update
-    void Awake()
+    public void Setup()
     {
         controller = GetComponent<PlayerController>();
         rb = GetComponent<Rigidbody>();
+        cameraRot = vCamera.transform.rotation;
+        cameraRot.x = 0;
+        cameraRot.z = 0;
     }
 
     private void FixedUpdate()
     {
-        moveVec = new Vector3(-controller.moveFB, 0, controller.moveLR) * moveSpeed * Time.deltaTime;
+        if (controller ==null)
+            return;
+
+        Vector3 dir = new Vector3(controller.moveLR, 0, controller.moveFB);
+
+        moveVec = cameraRot * dir;
+
+        if (moveVec.magnitude > 1f)
+        {
+            moveVec.Normalize();
+        }
+
         Move();
         Rotate();
     }
@@ -29,7 +47,7 @@ public class PlayerMovement : MonoBehaviour
     private void Move()
     {
         var position = rb.position;
-        position += moveVec;
+        position += moveVec * moveSpeed * Time.deltaTime;
         rb.MovePosition(position);
     }
 
@@ -38,9 +56,8 @@ public class PlayerMovement : MonoBehaviour
         if (moveVec.sqrMagnitude == 0)
             return;
 
-        var rotation = rb.rotation;
-        var dirQuat = Quaternion.LookRotation(moveVec);
-        Quaternion moveQuat = Quaternion.Slerp(rb.rotation, dirQuat, 180f);
+        var dirQuat = Quaternion.LookRotation(moveVec * moveSpeed * Time.deltaTime);
+        Quaternion moveQuat = Quaternion.Slerp(rb.rotation, dirQuat, rotateSpeed);
         rb.MoveRotation(moveQuat);
     }
 }

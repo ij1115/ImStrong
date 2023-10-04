@@ -33,8 +33,8 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        moveFB = joystick.Vertical;
-        moveLR = joystick.Horizontal;
+        moveFB = joystick.Vertical + Input.GetAxis(moveFBAixsName);
+        moveLR = joystick.Horizontal + Input.GetAxis(moveLRAixsName);
         attack = Input.GetButtonDown(attackButtonName);
         firstSkill = Input.GetButtonDown(firstSkillButtonName);
         secondSkill = Input.GetButtonDown(secondSkillButtonName);
