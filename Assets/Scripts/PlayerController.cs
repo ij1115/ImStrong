@@ -19,6 +19,10 @@ public class PlayerController : MonoBehaviour
     public bool secondSkill { get; private set; }
 
 
+    private float joystickVer;
+
+    private float joystickHor;
+
     public void Update()
     {
 

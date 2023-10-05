@@ -6,7 +6,7 @@ public class MonsterSpawner : MonoBehaviour
 {
     public GameObject monsterPrefabs;
     private SphereCollider collider;
-
+    private List<GameObject> monsters = new List<GameObject>();
     private void Awake()
     {
         collider = GetComponent<SphereCollider>();
@@ -22,7 +22,7 @@ public class MonsterSpawner : MonoBehaviour
 
     public void Spawn()
     {
-        int spawnCount = Random.RandomRange(3, 5);
+        int spawnCount = Random.RandomRange(3, 6);
 
         Vector3 spawnPos;
 
@@ -33,6 +33,7 @@ public class MonsterSpawner : MonoBehaviour
             spawnPos.z = Random.Range(collider.bounds.min.z, collider.bounds.max.z);
             
             Instantiate(monsterPrefabs, spawnPos, Quaternion.identity);
+            monsters.Add(monsterPrefabs);
         }
     }
 }
