@@ -54,6 +54,11 @@ public class MonsterSpawner : MonoBehaviour
 
             var obj = Instantiate(monsterPrefabs, spawnPos, Quaternion.identity);
             obj.transform.parent = this.transform;
+            
+            var info = obj.GetComponent<MonsterInfo>();
+            info.StateUpdate();
+            info.SetUp();
+
             monsters.Add(obj);
         }
     }

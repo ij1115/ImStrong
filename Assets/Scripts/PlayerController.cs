@@ -18,11 +18,6 @@ public class PlayerController : MonoBehaviour
     public bool firstSkill { get; private set; }
     public bool secondSkill { get; private set; }
 
-
-    private float joystickVer;
-
-    private float joystickHor;
-
     public void Update()
     {
 

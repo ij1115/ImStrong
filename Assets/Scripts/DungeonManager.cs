@@ -1,8 +1,9 @@
 using Cinemachine;
 using System.Collections.Generic;
 using Unity.VisualScripting;
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
+using UnityEngine.Pool;
 
 public class DungeonManager : MonoBehaviour
 {
@@ -23,6 +24,7 @@ public class DungeonManager : MonoBehaviour
     public CinemachineVirtualCamera vCam;
     public GameObject playerPrefab;
     public FixedJoystick joystic;
+
     public float spawnTimer = 3f;
 
     private List<GameObject> monsterSpawnerPool = new List<GameObject>();
@@ -43,7 +45,6 @@ public class DungeonManager : MonoBehaviour
             monsterSpawnerPool.Add(spawner.gameObject);
         }
     }
-
 
     private void Update()
     {
@@ -107,6 +108,10 @@ public class DungeonManager : MonoBehaviour
         GameObject player = Instantiate(playerPrefab, transform.position, Quaternion.identity);
         var controller = player.GetComponent<PlayerController>();
         var movement = player.GetComponent<PlayerMovement>();
+        var info = player.GetComponent<PlayerInfo>();
+
+        info.StateUpdate();
+        info.SetUp();
 
         controller.joystick = joystic;
         movement.vCamera = vCam;

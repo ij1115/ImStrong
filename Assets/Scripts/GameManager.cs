@@ -20,8 +20,6 @@ public class GameManager : MonoBehaviour
 
     private static GameManager singleton;
 
-
-
     public SceneState currentState = SceneState.Title;
 
     public bool isGameover = false;
@@ -42,11 +40,12 @@ public class GameManager : MonoBehaviour
                 break;
             case SceneState.Dungeon:
                 currentState = SceneState.Dungeon;
-                StateManager.MonsterInfoSet();
+                StateManager.Instance.MobInfoSave();
                 SceneManager.LoadScene(state);
                 break;
             case SceneState.BossRoom:
                 currentState = SceneState.BossRoom;
+                StateManager.Instance.MobInfoSave();
                 SceneManager.LoadScene(state);
                 break;
         }

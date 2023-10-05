@@ -20,16 +20,10 @@ public class LobbyManager : MonoBehaviour
 
     private static LobbyManager singleton;
 
-    private GameManager gameManager;
-
     public Button start;
 
-    private void Awake()
-    {
-        gameManager = GameManager.instance;
-    }
     public void OnClickStartTravel()
     {
-        gameManager.ChangeScene("Dungeon");
+        GameManager.instance.ChangeScene("Dungeon");
     }
 }
