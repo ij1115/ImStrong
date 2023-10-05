@@ -4,6 +4,20 @@ using UnityEngine;
 
 public class TitleManager : MonoBehaviour
 {
+    public static TitleManager instance
+    {
+        get
+        {
+            if (singleton == null)
+            {
+                singleton = FindObjectOfType<TitleManager>();
+            }
+            return singleton;
+        }
+    }
+
+    private static TitleManager singleton;
+
     private GameManager gameManager;
 
     private void Awake()
