@@ -18,19 +18,12 @@ public class TitleManager : MonoBehaviour
 
     private static TitleManager singleton;
 
-    private GameManager gameManager;
-
-    private void Awake()
-    {
-        gameManager = GameManager.instance;
-    }
-
     // Update is called once per frame
     void Update()
     {
         if(Input.anyKeyDown)
         {
-            gameManager.ChangeScene("Lobby");
+            GameManager.instance.ChangeScene("Lobby");
         }
     }
 }
