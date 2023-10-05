@@ -1,54 +1,104 @@
 using Cinemachine;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using System.Collections;
 
 public class DungeonManager : MonoBehaviour
 {
+    public static DungeonManager instance
+    {
+        get
+        {
+            if (singleton == null)
+            {
+                singleton = FindObjectOfType<DungeonManager>();
+            }
+            return singleton;
+        }
+    }
+
+    private static DungeonManager singleton;
+
     public CinemachineVirtualCamera vCam;
     public GameObject playerPrefab;
     public FixedJoystick joystic;
+    public float spawnTimer = 3f;
 
-    public List<GameObject> monsterSpawnerPool = new List<GameObject>();
+    private List<GameObject> monsterSpawnerPool = new List<GameObject>();
     private List<GameObject> activeSpawner = new List<GameObject>();
-    private List<GameObject> deactivationSpawner = new List<GameObject>();
 
+    private GameObject NonSpawn =null;
+    private bool spawn = true;
     public int SpawnCount = 0;
 
     private void Awake()
     {
         PlayerSpawn();
 
-        foreach (var obj in monsterSpawnerPool)
+        var list = gameObject.GetComponentsInChildren<MonsterSpawner>();
+
+        foreach (var spawner in list)
         {
-            deactivationSpawner.Add(obj);
+            monsterSpawnerPool.Add(spawner.gameObject);
         }
     }
 
 
     private void Update()
     {
-        Debug.Log(activeSpawner.Count);
-        if(activeSpawner.Count<SpawnCount)
+        if(Input.GetKeyDown(KeyCode.K))
+        {
+            activeSpawner[0].GetComponent<MonsterSpawner>().Die();
+        }
+        if(activeSpawner.Count<SpawnCount && spawn)
         {
             MonsterSpawn();
         }
     }
+
     private void MonsterSpawn()
     {
-        if (SpawnCount > monsterSpawnerPool.Count)
+        if(activeSpawner.Count+monsterSpawnerPool.Count<SpawnCount)
         {
-            Debug.Log("Spawn Count err");
+            Debug.Log("Spawn Count Err");
             return;
         }
 
         while (activeSpawner.Count<SpawnCount)
         {
-            int randomIndex = Random.RandomRange(0, deactivationSpawner.Count);
-            var obj = deactivationSpawner[randomIndex];
+            int randomIndex;
+            GameObject obj;
+            while(true)
+            {
+                randomIndex = Random.RandomRange(0, monsterSpawnerPool.Count);
+                obj = monsterSpawnerPool[randomIndex];
+
+                if(obj == NonSpawn)
+                {
+                    continue;
+                }
+                break;
+            }
             activeSpawner.Add(obj);
-            deactivationSpawner.Remove(obj);
+            monsterSpawnerPool.Remove(obj);
 
             obj.GetComponent<MonsterSpawner>().Spawn();
+        }
+    }
+
+    public void SpawnerRelese()
+    {
+        foreach (var obj in activeSpawner)
+        {
+            if (obj.GetComponent<MonsterSpawner>().ActiveSpawner)
+            {
+                NonSpawn = obj;
+                monsterSpawnerPool.Add(obj);
+                activeSpawner.Remove(obj);
+                StartCoroutine(SpawnRoutine());
+                return;
+            }
         }
     }
 
@@ -63,5 +113,12 @@ public class DungeonManager : MonoBehaviour
         movement.vCamera.Follow = player.transform;
         movement.vCamera.LookAt = player.transform;
         movement.Setup();
+    }
+
+    private IEnumerator SpawnRoutine()
+    {
+        spawn = false;
+        yield return new WaitForSeconds(spawnTimer);
+        spawn = true;
     }
 }

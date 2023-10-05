@@ -1199,7 +1199,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
-  rotateSpeed: 180
+  rotateSpeed: 300
   vCamera: {fileID: 0}
 --- !u!1 &3518407083101974727
 GameObject:
