@@ -1264,8 +1264,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vCam: {fileID: 888627366}
-  playerPrefab: {fileID: 7342045014972485384, guid: 2ea8e4eca5506b94ab92831394ad0e5f, type: 3}
+  playerPrefab: {fileID: 3347972453416264188, guid: 400ec6485c41c2843b81a5dab39f2909, type: 3}
   joystic: {fileID: 596913913}
+  spawnTimer: 3
   SpawnCount: 5
 --- !u!114 &1429352740
 MonoBehaviour:
