@@ -19,6 +19,11 @@ public class LobbyManager : MonoBehaviour
 
     public Button start;
 
+    private void Awake()
+    {
+        StateManager.Instance.StandardSetUp();
+    }
+
     public void OnClickStartTravel()
     {
         GameManager.instance.ChangeScene("Dungeon");

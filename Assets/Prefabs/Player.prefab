@@ -1211,7 +1211,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e32dc556ea9f384aa3dc7d71d4e8885, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
   rotateSpeed: 300
   vCamera: {fileID: 0}
 --- !u!1 &3518407083101974727
@@ -1363,7 +1362,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3108002313935941305
 Transform:
   m_ObjectHideFlags: 0

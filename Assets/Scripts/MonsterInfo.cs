@@ -15,7 +15,21 @@ public class MonsterInfo : MonoBehaviour
     }
     public void StateUpdate()
     {
-        state = StateManager.Instance.monster;
+        switch(type)
+        {
+            case MonsterType.Mob:
+                state = StateManager.Instance.MobState();
+                break;
+
+            case MonsterType.SubBoss:
+                state = StateManager.Instance.SubBossState();
+                break;
+
+            case MonsterType.Boss:
+                state = StateManager.Instance.BossState();
+                break;
+        }
+
     }
 
     public void SetType(MonsterType type)

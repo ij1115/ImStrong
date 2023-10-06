@@ -36,18 +36,39 @@ public class GameManager : MonoBehaviour
                 break;
             case SceneState.Lobby:
                 currentState = SceneState.Lobby;
+                StateManager.Instance.CurrentToStandard();
                 SceneManager.LoadScene(state);
                 break;
             case SceneState.Dungeon:
                 currentState = SceneState.Dungeon;
-                StateManager.Instance.MobInfoSave();
+                StateManager.Instance.MonsterSetUp();
                 SceneManager.LoadScene(state);
                 break;
             case SceneState.BossRoom:
                 currentState = SceneState.BossRoom;
-                StateManager.Instance.MobInfoSave();
+                StateManager.Instance.MonsterSetUp();
                 SceneManager.LoadScene(state);
                 break;
+        }
+    }
+
+    public void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Alpha7))
+        {
+            StateManager.Instance.PlayerStateLog();
+        }
+        if(Input.GetKeyDown(KeyCode.Alpha8))
+        {
+            StateManager.Instance.MobStateLog();
+        }
+        if(Input.GetKeyDown(KeyCode.Alpha9))
+        { 
+            StateManager.Instance.SubBossStateLog();
+        }
+        if(Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            StateManager.Instance.BossStateLog();
         }
     }
 

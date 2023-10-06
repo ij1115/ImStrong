@@ -6,7 +6,6 @@ public class PlayerMovement : MonoBehaviour
     private PlayerController controller;
     private Rigidbody rb;
 
-    public float moveSpeed = 5f;
     public float rotateSpeed = 180f;
 
     public CinemachineVirtualCamera vCamera;
@@ -19,7 +18,6 @@ public class PlayerMovement : MonoBehaviour
         controller = GetComponent<PlayerController>();
         rb = GetComponent<Rigidbody>();
         worldCam = Camera.main;
-
         //cameraRot = vCamera.transform.rotation;
         //cameraRot.x = 0;
         //cameraRot.z = 0;
@@ -66,7 +64,7 @@ public class PlayerMovement : MonoBehaviour
     private void Move()
     {
         var position = rb.position;
-        position += moveVec * moveSpeed * Time.deltaTime;
+        position += moveVec * StateManager.Instance.current.movSp * Time.deltaTime;
         rb.MovePosition(position);
     }
 

@@ -15,6 +15,7 @@ public class PlayerInfo : MonoBehaviour
     }
     public void StateUpdate()
     {
+        StateManager.Instance.PlayerStateSet();
         state = StateManager.Instance.current;
     }
 
