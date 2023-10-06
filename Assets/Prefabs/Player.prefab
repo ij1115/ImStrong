@@ -1073,6 +1073,7 @@ GameObject:
   - component: {fileID: 7731436946578862338}
   - component: {fileID: 4295026030414598564}
   - component: {fileID: -2068225806632068868}
+  - component: {fileID: 8517022511032275383}
   - component: {fileID: 1225611522235022302}
   m_Layer: 0
   m_Name: Player
@@ -1108,7 +1109,7 @@ Animator:
   m_GameObject: {fileID: 3347972453416264188}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: b69174d668ba02d44b14a084b217670a, type: 3}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 1769ee7fe8d8ff14bb373957633e9b95, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1199,6 +1200,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90a051c21e763304aa76a3da697210d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &8517022511032275383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3347972453416264188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28799b8207ada0c489392586a07ed89e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 0
+  swordAni: {fileID: 9100000, guid: 1769ee7fe8d8ff14bb373957633e9b95, type: 2}
+  axeAni: {fileID: 9100000, guid: c1a8cddc4a3762c478d6b68da7d08cc3, type: 2}
+  spearAni: {fileID: 9100000, guid: 1124cfbb8a5cb38489b4f5941d5b0674, type: 2}
 --- !u!114 &1225611522235022302
 MonoBehaviour:
   m_ObjectHideFlags: 0

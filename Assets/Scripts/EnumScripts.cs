@@ -24,3 +24,18 @@ public enum MonsterType
     SubBoss,
     Boss,
 }
+
+public enum UnitState
+{
+    NIdle, // 기본
+    Idle, // 경계
+    Attack, // 공격
+    Skill_F, // 스킬 1
+    Skill_S, // 스킬 2
+    Impact, // 피격
+    Die, // 사망
+    Stun, // 행동불가
+    Down, // 넘어짐
+    Air, // 부양
+    Knockback, // 밀림
+}

@@ -9,6 +9,8 @@ public class StateManager : MonoBehaviour
     public State current;
     public State monster;
 
+    public Weapons currentWeapons;
+
     public int maxHp = 100;
     public int atk = 20;
     public int def = 0;
@@ -58,6 +60,7 @@ public class StateManager : MonoBehaviour
         standard = new State();
         current = new State();
         monster = new State();
+        currentWeapons = Weapons.Sword;
     }
 
     public void StandardSetUp()
@@ -85,6 +88,15 @@ public class StateManager : MonoBehaviour
         current.def = standard.def;
         current.atkSp = standard.atkSp;
         current.movSp = standard.movSp;
+    }
+
+    public Weapons GetCurrentWeapons()
+    {
+        return currentWeapons;
+    }
+    public void SetCurrentWeapons(Weapons type)
+    {
+        currentWeapons = type;
     }
 
     public void MonsterSetUp()
@@ -127,7 +139,6 @@ public class StateManager : MonoBehaviour
 
         return state;
     }
-
 
     // 디버깅용 코드
     public void PlayerStateLog()

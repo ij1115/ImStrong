@@ -1367,6 +1367,7 @@ MonoBehaviour:
   joystic: {fileID: 596913913}
   spawnTimer: 3
   SpawnCount: 5
+  huntSubBossCount: 0
 --- !u!114 &1429352740
 MonoBehaviour:
   m_ObjectHideFlags: 0

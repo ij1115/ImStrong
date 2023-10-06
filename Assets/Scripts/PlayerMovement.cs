@@ -4,6 +4,9 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     private PlayerController controller;
+    private PlayerInfo playerInfo;
+    private PlayerWeapons weapons;
+    private Animator ani;
     private Rigidbody rb;
 
     public float rotateSpeed = 180f;
@@ -17,7 +20,11 @@ public class PlayerMovement : MonoBehaviour
     {
         controller = GetComponent<PlayerController>();
         rb = GetComponent<Rigidbody>();
+        weapons = GetComponent<PlayerWeapons>();
+        ani = GetComponent<Animator>(); 
+        playerInfo = GetComponent<PlayerInfo>();
         worldCam = Camera.main;
+        ani.runtimeAnimatorController = weapons.GetAni();
         //cameraRot = vCamera.transform.rotation;
         //cameraRot.x = 0;
         //cameraRot.z = 0;
@@ -27,6 +34,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (controller ==null)
             return;
+
 
         //Vector3 dir = new Vector3(controller.moveLR, 0, controller.moveFB);
 
@@ -40,24 +48,29 @@ public class PlayerMovement : MonoBehaviour
 
         Move();
         Rotate();
+
+        ani.SetFloat("Move", moveVec.magnitude);
     }
 
     private void Update()
     {
-        var forward = worldCam.transform.forward;
-        forward.y = 0f;
-        forward.Normalize();
-
-        var right = worldCam.transform.right;
-        right.y = 0f;
-        right.Normalize();
-
-        moveVec = forward * controller.moveFB;
-        moveVec += right * controller.moveLR;
-
-        if(moveVec.magnitude > 1f)
+        if (playerInfo.unitState == UnitState.NIdle || playerInfo.unitState == UnitState.Idle)
         {
-            moveVec.Normalize();
+            var forward = worldCam.transform.forward;
+            forward.y = 0f;
+            forward.Normalize();
+
+            var right = worldCam.transform.right;
+            right.y = 0f;
+            right.Normalize();
+
+            moveVec = forward * controller.moveFB;
+            moveVec += right * controller.moveLR;
+
+            if (moveVec.magnitude > 1f)
+            {
+                moveVec.Normalize();
+            }
         }
     }
 
