@@ -3,14 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerInfo : MonoBehaviour
-{  
-    public StateInfo state { get; private set; }
+{
+    public State state;
 
     private int hp;
 
+
+    public void Awake()
+    {
+        state= new State();
+    }
     public void StateUpdate()
     {
-        state = StateManager.Instance.currentInfo;
+        state = StateManager.Instance.current;
     }
 
     public void SetUp()

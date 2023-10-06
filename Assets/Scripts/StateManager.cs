@@ -1,15 +1,25 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Rendering;
+
 
 public class StateManager : MonoBehaviour
 {
     private static StateManager instance;
-    public StateInfo standardInfo { get; private set; }
-    public StateInfo currentInfo { get; private set; }
-    public StateInfo monsterInfo { get; private set; }
+
+    public int maxHp = 100;
+    public int atk = 20;
+    public int def = 0;
+    public float atkSp = 1f;
+    public float movSp = 1f;
+
+    public State standard;
+    public State current;
+    public State monster;
+
+    public float mobHpSet = 1f;
+    public float mobAtkSet = 0.5f;
+    public float mobDefSet = 0.1f;
+    public float mobAtkSpSet = 1f;
+    public float mobMovSpSet = 0.5f;
 
     public static StateManager Instance
     {
@@ -25,7 +35,6 @@ public class StateManager : MonoBehaviour
         }
     }
 
-
     private void Awake()
     {
         if(instance != null && instance!=this)
@@ -33,15 +42,35 @@ public class StateManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+        standard = new State();
+        current = new State();
+        monster = new State();
 
-        standardInfo = new StateInfo(100,20,0,1f,1f);
-        currentInfo = new StateInfo(standardInfo);
-        monsterInfo = new StateInfo(currentInfo);
     }
-
 
     public void MobInfoSave()
     {
-        monsterInfo = currentInfo;
+        monster = current;
     }
+
+    public State MobState()
+    {
+        var state = new State();
+        state.maxHp = Mathf.RoundToInt((float)current.maxHp * mobHpSet);
+        state.atk = Mathf.RoundToInt((float)current.atk * mobAtkSet);
+        state.def = Mathf.RoundToInt((float)current.def * mobDefSet);
+        state.atkSp = current.atkSp * mobAtkSpSet;
+        state.movSp = current.movSp * mobMovSpSet;
+
+        return state;
+    }
+}
+
+public class State
+{
+    public int maxHp;
+    public int atk;
+    public int def;
+    public float atkSp;
+    public float movSp;
 }
