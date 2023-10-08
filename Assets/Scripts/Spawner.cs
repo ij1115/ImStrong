@@ -35,6 +35,11 @@ public class Spawner : MonoBehaviour
                 break;
 
             case MonsterType.SubBoss:
+                if (monsters.Count==0)
+                {
+                    dm.SubBossRelese();
+                    ActiveSpawner = false;
+                }
                 break;
 
             case MonsterType.Boss:
@@ -51,7 +56,24 @@ public class Spawner : MonoBehaviour
         }
         monsters.Clear();
     }
+    
+    public void Die(GameObject mob)
+    {
+        if(mob.GetComponent<MonsterInfo>().type == MonsterType.SubBoss)
+        {
+            dm.huntSubBossCount++;
+        }
 
+        foreach(var obj in monsters)
+        {
+            if(obj == mob)
+            {
+                monsters.Remove(obj);
+                break;
+            }
+        }
+        Destroy(mob, 5f);
+    }
     public void Spawn()
     {
         ActiveSpawner = true;
@@ -78,7 +100,7 @@ public class Spawner : MonoBehaviour
                         info.SetType(type);
                         info.StateUpdate();
                         movement.SetUp();
-
+                        movement.spawner = this.gameObject;
                         monsters.Add(obj);
                     }
                 }
@@ -98,6 +120,7 @@ public class Spawner : MonoBehaviour
                     info.SetType(type);
                     info.StateUpdate();
                     movement.SetUp();
+                    movement.spawner = this.gameObject;
                     monsters.Add(obj);
                 }
                 break;

@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 public class MonsterInfo : MonoBehaviour
@@ -9,10 +11,16 @@ public class MonsterInfo : MonoBehaviour
 
     private int hp;
 
+    public event Action onDeath;
+
+    public bool dead { get; private set; }
+
     public void Awake()
     {
         state = new State();
+        dead = false;
     }
+
     public void StateUpdate()
     {
         switch(type)
@@ -38,5 +46,27 @@ public class MonsterInfo : MonoBehaviour
     public void SetType(MonsterType type)
     {
         this.type = type;
+    }
+
+    public void OnDamage(int damage)
+    {
+        int hitDamage = damage - Mathf.RoundToInt((float)state.def * 0.1f);
+        
+        hp -= hitDamage;
+
+        if (hp <= 0 && !dead)
+        {
+            Die();
+        }
+    }
+
+    public void Die()
+    {
+        if(onDeath != null)
+        {
+            onDeath();
+        }
+
+        dead = true;
     }
 }

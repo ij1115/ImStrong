@@ -118,6 +118,13 @@ public class DungeonManager : MonoBehaviour
 
     private void Update()
     {
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            Reset();
+            GameManager.instance.ChangeScene("Lobby");
+            return;
+        }
+
         if(Input.GetKeyDown(KeyCode.K))
         {
             mobActive[0].GetComponent<Spawner>().Die();

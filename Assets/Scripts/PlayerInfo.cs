@@ -8,6 +8,7 @@ public class PlayerInfo : MonoBehaviour
 
     private int hp;
 
+    private bool dead = false;
 
     public void Awake()
     {
@@ -23,5 +24,22 @@ public class PlayerInfo : MonoBehaviour
     public void SetUp()
     {
         hp = state.maxHp;
+    }
+
+    public void OnDamage(int damage)
+    {
+        int hitDamage = damage - Mathf.RoundToInt((float)state.def * 0.1f);
+
+        hp -= damage;
+
+        if(hp <=0 && !dead)
+        {
+            Die();
+        }
+    }
+
+    public void Die()
+    {
+        dead = true;
     }
 }

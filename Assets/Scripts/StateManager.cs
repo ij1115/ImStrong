@@ -60,7 +60,7 @@ public class StateManager : MonoBehaviour
         standard = new State();
         current = new State();
         monster = new State();
-        currentWeapons = Weapons.Spear;
+        currentWeapons = Weapons.Axe;
     }
 
     public void StandardSetUp()

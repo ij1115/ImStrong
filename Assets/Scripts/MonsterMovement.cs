@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class MonsterMovement : MonoBehaviour
 {
+    public GameObject spawner;
+
     private Coroutine currentCo;
     private PlayerWeapons weapons;
     private MonsterInfo mInfo;
@@ -20,15 +22,20 @@ public class MonsterMovement : MonoBehaviour
 
     public UnitState unitState {  get; private set; }
 
+    public GameObject[] hitRanges;
+
+
     public void SetUp()
     {
         mInfo = GetComponent<MonsterInfo>();
+        mInfo.onDeath += Die;
         rb = GetComponent<Rigidbody>();
         weapons = GetComponent<PlayerWeapons>();
         ani = GetComponent<Animator>();
         ani.runtimeAnimatorController = weapons.GetAni();
         unitState = UnitState.NIdle;
     }
+
     public void RunTimeSwap()
     {
         weapons.RunTimeSwap();
@@ -40,15 +47,6 @@ public class MonsterMovement : MonoBehaviour
         if (target == null)
             return;
 
-        //Vector3 dir = new Vector3(controller.moveLR, 0, controller.moveFB);
-
-        //moveVec = cameraRot * dir;
-        //Debug.Log($"전 : {moveVec}");
-        //if (moveVec.magnitude > 1f)
-        //{
-        //    moveVec.Normalize();
-        //}
-        //Debug.Log($"후{moveVec}");
         if (unitState == UnitState.NIdle || unitState == UnitState.Idle)
         {
             Move();
@@ -60,23 +58,6 @@ public class MonsterMovement : MonoBehaviour
 
     private void Update()
     {
-        /*
-        //if (unitState == UnitState.NIdle ||unitState == UnitState.Idle)
-        //{
-        //    var forward = worldCam.transform.forward;
-        //    forward.y = 0f;
-        //    forward.Normalize();
-        //    var right = worldCam.transform.right;
-        //    right.y = 0f;
-        //    right.Normalize();
-        //    moveVec = forward * controller.moveFB;
-        //    moveVec += right * controller.moveLR;
-        //    if (moveVec.magnitude > 1f)
-        //    {
-        //        moveVec.Normalize();
-        //    }
-        */
-
         switch (unitState)
         {
             case UnitState.NIdle:
@@ -94,7 +75,6 @@ public class MonsterMovement : MonoBehaviour
             default:
                 return;
         }
-
     }
 
     private void IdleUpdate()
@@ -139,6 +119,7 @@ public class MonsterMovement : MonoBehaviour
         }
 
     }
+
     private void Move()
     {
         var position = rb.position;
@@ -147,14 +128,6 @@ public class MonsterMovement : MonoBehaviour
     }
     private void Rotate()
     {
-        //if (moveVec.sqrMagnitude == 0)
-        //    return;
-
-        //var dirQuat = Quaternion.LookRotation(moveVec * moveSpeed * Time.deltaTime);
-        //Quaternion moveQuat = Quaternion.Slerp(rb.rotation, dirQuat, rotateSpeed);
-        //rb.MoveRotation(moveQuat);
-
-
         if (moveVec == Vector3.zero)
             return;
 
@@ -162,7 +135,6 @@ public class MonsterMovement : MonoBehaviour
         var targetRotateion = Quaternion.LookRotation(moveVec, Vector3.up);
         rotation = Quaternion.RotateTowards(rotation, targetRotateion, rotateSpeed * Time.deltaTime);
         rb.MoveRotation(rotation);
-
     }
 
     private IEnumerator IdleToNIdle()
@@ -181,14 +153,47 @@ public class MonsterMovement : MonoBehaviour
     }
 
     // 이벤트
+
+    public void Die()
+    {
+        unitState = UnitState.Die;
+
+        var colls = GetComponents<Collider>();
+        foreach (var coll in colls)
+        {
+            coll.enabled = false;
+        }
+
+        ani.SetTrigger("Die");
+        spawner.GetComponent<Spawner>().Die(this.gameObject);
+    }
+
+    public void Hit()
+    {
+        unitState = UnitState.Impact;
+        ani.SetBool("Fight", true);
+        ani.SetTrigger("Impact");
+    }
+
     public void ReturnIdle()
     {
         switch (unitState)
         {
             case UnitState.Attack:
-                Input.ResetInputAxes();
                 unitState = UnitState.Idle;
                 ani.SetBool("Attack_2", false);
+                break;
+
+            case UnitState.Skill_F:
+                unitState = UnitState.Idle;
+                break;
+
+            case UnitState.Skill_S:
+                unitState = UnitState.Idle;
+                break;
+
+            case UnitState.Impact:
+                unitState = UnitState.Idle;
                 break;
         }
     }
@@ -203,5 +208,23 @@ public class MonsterMovement : MonoBehaviour
         }
 
         currentCo = StartCoroutine(IdleToNIdle());
+    }
+
+    public void SwordAttack()
+    {
+        BoxCollider col = hitRanges[0].GetComponent<BoxCollider>();
+
+        Vector3 center = col.bounds.center;
+        Vector3 half = col.bounds.extents;
+
+        Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[0].transform.rotation);
+
+        foreach (var obj in colliders)
+        {
+            if (obj.CompareTag("Player"))
+            {
+                obj.GetComponent<PlayerInfo>().OnDamage(mInfo.state.atk);
+            }
+        }
     }
 }
