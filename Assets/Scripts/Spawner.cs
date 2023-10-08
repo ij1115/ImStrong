@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MonsterSpawner : MonoBehaviour
+public class Spawner : MonoBehaviour
 {
     public GameObject monsterPrefabs;
     public MonsterType type = MonsterType.Mob;
@@ -74,9 +74,10 @@ public class MonsterSpawner : MonoBehaviour
                         obj.transform.parent = this.transform;
 
                         var info = obj.GetComponent<MonsterInfo>();
+                        var movement = obj.GetComponent<MonsterMovement>();
                         info.SetType(type);
                         info.StateUpdate();
-                        info.SetUp();
+                        movement.SetUp();
 
                         monsters.Add(obj);
                     }
@@ -93,13 +94,24 @@ public class MonsterSpawner : MonoBehaviour
                     obj.transform.parent = this.transform;
                     obj.transform.localScale *= 1.5f;
                     var info = obj.GetComponent<MonsterInfo>();
+                    var movement = obj.GetComponent<MonsterMovement>();
                     info.SetType(type);
                     info.StateUpdate();
-                    info.SetUp();
+                    movement.SetUp();
                     monsters.Add(obj);
                 }
                 break;
         }
 
+    }
+
+    //런타임 변경사항
+    public void MonsterStateSwap()
+    {
+        foreach (var monster in monsters)
+        {
+            monster.GetComponent<MonsterInfo>().StateUpdate();
+            monster.GetComponent<MonsterMovement>().RunTimeSwap();
+        }
     }
 }

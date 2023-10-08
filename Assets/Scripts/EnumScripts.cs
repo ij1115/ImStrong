@@ -23,6 +23,7 @@ public enum MonsterType
     Mob,
     SubBoss,
     Boss,
+    Portal,
 }
 
 public enum UnitState

@@ -1,39 +1,34 @@
-using Cinemachine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class MonsterMovement : MonoBehaviour
 {
     private Coroutine currentCo;
-    private PlayerController controller;
     private PlayerWeapons weapons;
+    private MonsterInfo mInfo;
     private Animator ani;
     private Rigidbody rb;
 
     public float rotateSpeed = 180f;
-
     public float fightTimer = 10f;
+    private Vector3 moveVec = Vector3.zero;
 
-    public CinemachineVirtualCamera vCamera;
-    private Camera worldCam;
+    private GameObject target = null;
 
-    private Vector3 moveVec;
-    public UnitState unitState { get; private set; }
+    private bool attack = true;
 
-    public void Setup()
+    public UnitState unitState {  get; private set; }
+
+    public void SetUp()
     {
-        controller = GetComponent<PlayerController>();
+        mInfo = GetComponent<MonsterInfo>();
         rb = GetComponent<Rigidbody>();
         weapons = GetComponent<PlayerWeapons>();
-        ani = GetComponent<Animator>(); 
-        worldCam = Camera.main;
+        ani = GetComponent<Animator>();
         ani.runtimeAnimatorController = weapons.GetAni();
         unitState = UnitState.NIdle;
-        //cameraRot = vCamera.transform.rotation;
-        //cameraRot.x = 0;
-        //cameraRot.z = 0;
     }
-
     public void RunTimeSwap()
     {
         weapons.RunTimeSwap();
@@ -42,7 +37,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (controller ==null)
+        if (target == null)
             return;
 
         //Vector3 dir = new Vector3(controller.moveLR, 0, controller.moveFB);
@@ -82,7 +77,7 @@ public class PlayerMovement : MonoBehaviour
         //    }
         */
 
-        switch(unitState)
+        switch (unitState)
         {
             case UnitState.NIdle:
                 NIdleUpdate();
@@ -99,14 +94,14 @@ public class PlayerMovement : MonoBehaviour
             default:
                 return;
         }
-        
+
     }
 
     private void IdleUpdate()
     {
         MoveVecSet();
 
-        if (controller.attack)
+        if (!attack)
         {
             moveVec = Vector3.zero;
             unitState = UnitState.Attack;
@@ -118,7 +113,7 @@ public class PlayerMovement : MonoBehaviour
     {
         MoveVecSet();
 
-        if (controller.attack)
+        if (!attack)
         {
             moveVec = Vector3.zero;
             unitState = UnitState.Attack;
@@ -129,25 +124,14 @@ public class PlayerMovement : MonoBehaviour
 
     private void AttackUpdate()
     {
-        if (controller.attack)
+        if (attack)
         {
-            ani.SetBool("Attack_2",true);
+            ani.SetBool("Attack_2", true);
         }
     }
 
     private void MoveVecSet()
     {
-        var forward = worldCam.transform.forward;
-        forward.y = 0f;
-        forward.Normalize();
-
-        var right = worldCam.transform.right;
-        right.y = 0f;
-        right.Normalize();
-
-        moveVec = forward * controller.moveFB;
-        moveVec += right * controller.moveLR;
-        
 
         if (moveVec.magnitude > 1f)
         {
@@ -158,7 +142,7 @@ public class PlayerMovement : MonoBehaviour
     private void Move()
     {
         var position = rb.position;
-        position += moveVec * StateManager.Instance.current.movSp * Time.deltaTime;
+        position += moveVec * mInfo.state.movSp * Time.deltaTime;
         rb.MovePosition(position);
     }
     private void Rotate()
@@ -184,8 +168,8 @@ public class PlayerMovement : MonoBehaviour
     private IEnumerator IdleToNIdle()
     {
         float timer = fightTimer;
-        
-        while (timer>0)
+
+        while (timer > 0)
         {
             yield return null;
             timer -= Time.deltaTime;
@@ -199,7 +183,7 @@ public class PlayerMovement : MonoBehaviour
     // ¿Ã∫•∆Æ
     public void ReturnIdle()
     {
-        switch(unitState)
+        switch (unitState)
         {
             case UnitState.Attack:
                 Input.ResetInputAxes();
@@ -211,7 +195,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void FightCoroutine()
     {
-        if (currentCo!=null)
+        if (currentCo != null)
         {
             StopCoroutine(currentCo);
             currentCo = StartCoroutine(IdleToNIdle());

@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     public bool firstSkill { get; private set; }
     public bool secondSkill { get; private set; }
 
+
     public void Update()
     {
 
@@ -34,8 +35,10 @@ public class PlayerController : MonoBehaviour
 
         moveFB = joystick.Vertical + Input.GetAxis(moveFBAixsName);
         moveLR = joystick.Horizontal + Input.GetAxis(moveLRAixsName);
-        attack = Input.GetButtonDown(attackButtonName);
-        firstSkill = Input.GetButtonDown(firstSkillButtonName);
-        secondSkill = Input.GetButtonDown(secondSkillButtonName);
+
+        Debug.Log(moveFB + " " + moveLR);
+        attack =  Input.GetKeyDown(KeyCode.Alpha1); //Input.GetButtonDown(attackButtonName) ||
+        firstSkill =  Input.GetKeyDown(KeyCode.Alpha2); //Input.GetButtonDown(firstSkillButtonName) ||
+        secondSkill =  Input.GetKeyDown(KeyCode.Alpha3); //Input.GetButtonDown(secondSkillButtonName) ||
     }
 }

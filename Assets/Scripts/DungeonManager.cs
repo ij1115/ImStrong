@@ -22,6 +22,7 @@ public class DungeonManager : MonoBehaviour
 
     public CinemachineVirtualCamera vCam;
     public GameObject playerPrefab;
+    private GameObject playerManager;
     public FixedJoystick joystic;
 
     public float spawnTimer = 3f;
@@ -33,6 +34,7 @@ public class DungeonManager : MonoBehaviour
     private GameObject mobSpawnPos = null;
     
     private bool spawn = true;
+
     public int SpawnCount = 0;
 
     private List<GameObject> subBossSpawner = new List<GameObject>();
@@ -42,16 +44,22 @@ public class DungeonManager : MonoBehaviour
     private GameObject subBossSpawnPos = null;
     public int huntSubBossCount = 0;
 
+    private List<GameObject> portalSpawner = new List<GameObject>();
+    private List<GameObject> portalActive = new List<GameObject>();
+
     private void Awake()
     {
         huntSubBossCount = 0;
         foreach (Transform obj in gameObject.transform)
         {
+            if (obj == null)
+                return;
+
             switch (obj.name)
             {
                 case "MobSpawner":
                     {
-                        var list = obj.GetComponentsInChildren<MonsterSpawner>();
+                        var list = obj.GetComponentsInChildren<Spawner>();
 
                         foreach (var spawn in list)
                         {
@@ -61,11 +69,21 @@ public class DungeonManager : MonoBehaviour
                     break;
                 case "SubBossSpawner":
                     {
-                        var list = obj.GetComponentsInChildren<MonsterSpawner>();
+                        var list = obj.GetComponentsInChildren<Spawner>();
 
                         foreach (var spawn in list)
                         {
                             subBossSpawner.Add(spawn.gameObject);
+                        }
+                    }
+                    break;
+                case "PortalSpawner":
+                    {
+                        var list = obj.GetComponentsInChildren<Spawner>();
+
+                        foreach(var spawn in list)
+                        {
+                           portalSpawner.Add(spawn.gameObject);
                         }
                     }
                     break;
@@ -75,27 +93,76 @@ public class DungeonManager : MonoBehaviour
         PlayerSpawn();
 
         //이전 코드
-        //var list = gameObject.GetComponentsInChildren<MonsterSpawner>();
+        //var list = gameObject.GetComponentsInChildren<Spawner>();
         //foreach (var spawner in list)
         //{
         //    mobSpawner.Add(spawner.gameObject);
         //}
     }
 
+    public void Reset()
+    {
+        huntSubBossCount = 0;
+
+        mobSpawner.Clear();
+        mobActive.Clear();
+        mobSpawnPos = null;
+
+        subBossSpawner.Clear();
+        subBossActive.Clear();
+        subBossSpawnPos = null;
+
+        portalSpawner.Clear();
+        portalActive.Clear();
+    }
+
     private void Update()
     {
         if(Input.GetKeyDown(KeyCode.K))
         {
-            mobActive[0].GetComponent<MonsterSpawner>().Die();
+            mobActive[0].GetComponent<Spawner>().Die();
         }
 
-        if(mobActive.Count<SpawnCount && 
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            var obj = StateManager.Instance;
+
+            obj.StandardSetUp();
+            obj.CurrentToStandard();
+            obj.MonsterSetUp();
+
+            if(playerManager!=null)
+            {
+                playerManager.GetComponent<PlayerInfo>().StateUpdate();
+                playerManager.GetComponent<PlayerMovement>().RunTimeSwap();
+            }
+
+            if(mobActive.Count>0)
+            {
+                foreach(var mob in mobActive)
+                {
+                    mob.GetComponent<Spawner>().MonsterStateSwap();
+                }
+            }
+            if(subBossActive.Count>0)
+            {
+                foreach(var sub in subBossActive)
+                {
+                    sub.GetComponent<Spawner>().MonsterStateSwap();
+                }
+            }
+
+        }
+
+        if (mobActive.Count + mobSpawner.Count >0 &&
+            mobActive.Count<SpawnCount && 
             spawn)
         {
             MonsterSpawn();
         }
 
-        if(subBossActive.Count<1 &&
+        if(subBossActive.Count + subBossSpawner.Count >0 &&
+            subBossActive.Count<1 &&
             huntSubBossCount< 2 &&
             spawn)
         {
@@ -129,7 +196,7 @@ public class DungeonManager : MonoBehaviour
             mobActive.Add(obj);
             mobSpawner.Remove(obj);
 
-            obj.GetComponent<MonsterSpawner>().Spawn();
+            obj.GetComponent<Spawner>().Spawn();
         }
     }
 
@@ -159,7 +226,7 @@ public class DungeonManager : MonoBehaviour
             subBossActive.Add(obj);
             subBossSpawner.Remove(obj);
 
-            obj.GetComponent<MonsterSpawner>().Spawn();
+            obj.GetComponent<Spawner>().Spawn();
         }
     }
 
@@ -167,7 +234,7 @@ public class DungeonManager : MonoBehaviour
     {
         foreach (var obj in mobActive)
         {
-            if (obj.GetComponent<MonsterSpawner>().ActiveSpawner)
+            if (obj.GetComponent<Spawner>().ActiveSpawner)
             {
                 mobSpawnPos = obj;
                 mobSpawner.Add(obj);
@@ -182,7 +249,7 @@ public class DungeonManager : MonoBehaviour
     {
         foreach (var obj in subBossActive)
         {
-            if (obj.GetComponent<MonsterSpawner>().ActiveSpawner)
+            if (obj.GetComponent<Spawner>().ActiveSpawner)
             {
                 subBossSpawnPos = obj;
                 subBossSpawner.Add(obj);
@@ -199,8 +266,6 @@ public class DungeonManager : MonoBehaviour
         var controller = player.GetComponent<PlayerController>();
         var movement = player.GetComponent<PlayerMovement>();
         var info = player.GetComponent<PlayerInfo>();
-
-
       
         info.StateUpdate();
         info.SetUp();
@@ -211,6 +276,7 @@ public class DungeonManager : MonoBehaviour
         movement.vCamera.LookAt = player.transform;
         movement.Setup();
 
+        playerManager = player;
     }
 
     private IEnumerator SpawnRoutine()
