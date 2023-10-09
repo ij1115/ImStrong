@@ -8,12 +8,12 @@ public class PlayerInfo : MonoBehaviour
 
     private int hp;
 
-    private bool dead = false;
+    public bool dead { get; private set; }
 
     public void Awake()
     {
         state= new State();
-
+        dead = false;
     }
     public void StateUpdate()
     {
@@ -30,7 +30,7 @@ public class PlayerInfo : MonoBehaviour
     {
         int hitDamage = damage - Mathf.RoundToInt((float)state.def * 0.1f);
 
-        hp -= damage;
+        hp -= hitDamage;
 
         if(hp <=0 && !dead)
         {

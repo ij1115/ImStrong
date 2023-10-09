@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.Build.Content;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -21,7 +18,6 @@ public class PlayerController : MonoBehaviour
 
     public void Update()
     {
-
         if(GameManager.instance !=null &&GameManager.instance.isGameover)
         {
             moveFB = 0;

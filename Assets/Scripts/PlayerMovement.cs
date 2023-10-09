@@ -1,12 +1,12 @@
 using Cinemachine;
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
     private Coroutine currentCo;
+    private Vector3 knockbackVec;
     private PlayerController controller;
     private PlayerWeapons weapons;
     private Animator ani;
@@ -214,6 +214,18 @@ public class PlayerMovement : MonoBehaviour
         rb.MoveRotation(rotation);
     }
 
+    public void HitKB()
+    {
+        unitState = UnitState.Knockback;
+        ani.SetBool("Fight", true);
+        ani.SetTrigger("Knockback");
+    }
+    public void Hit()
+    {
+        unitState = UnitState.Impact;
+        ani.SetBool("Fight", true);
+        ani.SetTrigger("Impact");
+    }
     private IEnumerator IdleToNIdle()
     {
         float timer = fightTimer;
@@ -254,31 +266,77 @@ public class PlayerMovement : MonoBehaviour
         sSkillDelay = false;
     }
 
+    private IEnumerator SpearSSkillMove()
+    {
+        var startPos = rb.transform.position;
+        var endPos = rb.transform.position + knockbackVec * 3f;
+        float duration = 0.15f;
+        float moveTimer = 0f;
+
+        while (moveTimer < duration)
+        {
+            rb.MovePosition(Vector3.Lerp(startPos, endPos, moveTimer / duration));
+            moveTimer += Time.deltaTime;
+            yield return null;
+        }
+
+        rb.MovePosition(endPos);
+    }
     // ÀÌº¥Æ®
+
+    public void Knockback(Vector3 vec)
+    {
+        knockbackVec = vec;
+
+        StartCoroutine(SpearSSkillMove());
+    }
+
+    public void ReturnIdle_Attack()
+    {
+        Input.ResetInputAxes();
+        moveVec = Vector3.zero;
+        unitState = UnitState.Idle;
+        ani.SetBool("Attack_2", false);
+    }
     public void ReturnIdle()
     {
         switch (unitState)
         {
             case UnitState.Attack:
+                if(ani.GetBool("Attack_2"))
+                {
+                    break;
+                }
                 Input.ResetInputAxes();
+                moveVec = Vector3.zero;
                 unitState = UnitState.Idle;
                 ani.SetBool("Attack_2", false);
                 break;
 
             case UnitState.Skill_F:
                 Input.ResetInputAxes();
+                moveVec = Vector3.zero;
                 unitState = UnitState.Idle;
                 break;
 
             case UnitState.Skill_S:
                 Input.ResetInputAxes();
+                moveVec = Vector3.zero;
                 unitState = UnitState.Idle;
                 break;
 
             case UnitState.Impact:
                 Input.ResetInputAxes();
+                moveVec = Vector3.zero;
                 unitState = UnitState.Idle;
                 break;
+
+            case UnitState.Knockback:
+                Input.ResetInputAxes();
+                moveVec = Vector3.zero;
+                unitState = UnitState.Idle;
+                break;
+
         }
     }
 
@@ -307,13 +365,22 @@ public class PlayerMovement : MonoBehaviour
         {
             if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
             {
-                obj.GetComponent<MonsterMovement>().Hit();
                 obj.GetComponent<MonsterInfo>().OnDamage(info.state.atk);
+                var com = obj.gameObject.GetComponent<MonsterMovement>();
+
+                if (com.unitState == UnitState.Stun ||
+                    com.unitState == UnitState.Down ||
+                    com.unitState == UnitState.Air ||
+                    com.unitState == UnitState.Knockback||
+                    com.unitState == UnitState.Die)
+                    continue;
+
+                com.Hit();
             }
         }
     }
 
-    public void SwordFSkill()
+    public void SwordFSkill_1()
     {
         BoxCollider col = hitRanges[1].GetComponent<BoxCollider>();
 
@@ -326,12 +393,104 @@ public class PlayerMovement : MonoBehaviour
         {
             if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
             {
-                obj.GetComponent<MonsterMovement>().Hit();
-                obj.GetComponent<MonsterInfo>().OnDamage(info.state.atk);
+                obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk*0.5f));
+                var com = obj.gameObject.GetComponent<MonsterMovement>();
+
+                if (com.unitState == UnitState.Stun ||
+                    com.unitState == UnitState.Down ||
+                    com.unitState == UnitState.Air ||
+                    com.unitState == UnitState.Knockback ||
+                    com.unitState == UnitState.Die)
+                    continue;
+
+                com.Hit();
             }
         }
     }
 
+    public void SwordFSkill_2()
+    {
+        BoxCollider col = hitRanges[1].GetComponent<BoxCollider>();
+
+        Vector3 center = col.bounds.center;
+        Vector3 half = col.bounds.extents;
+
+        Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[1].transform.rotation);
+
+        foreach (var obj in colliders)
+        {
+            if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
+            {
+                obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk*0.5f));
+                var com = obj.gameObject.GetComponent<MonsterMovement>();
+
+                if (com.unitState == UnitState.Stun ||
+                    com.unitState == UnitState.Down ||
+                    com.unitState == UnitState.Air ||
+                    com.unitState == UnitState.Knockback ||
+                    com.unitState == UnitState.Die)
+                    continue;
+
+                com.Hit();
+            }
+        }
+    }
+
+    public void SwordFSkill_3()
+    {
+        BoxCollider col = hitRanges[1].GetComponent<BoxCollider>();
+
+        Vector3 center = col.bounds.center;
+        Vector3 half = col.bounds.extents;
+
+        Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[1].transform.rotation);
+
+        foreach (var obj in colliders)
+        {
+            if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
+            {
+                obj.GetComponent<MonsterInfo>().OnDamage(info.state.atk);
+                var com = obj.gameObject.GetComponent<MonsterMovement>();
+
+                if (com.unitState == UnitState.Stun ||
+                    com.unitState == UnitState.Down ||
+                    com.unitState == UnitState.Air ||
+                    com.unitState == UnitState.Knockback ||
+                    com.unitState == UnitState.Die)
+                    continue;
+
+                com.Hit();
+            }
+        }
+    }
+
+    public void SwordSSkill()
+    {
+        BoxCollider col = hitRanges[2].GetComponent<BoxCollider>();
+
+        Vector3 center = col.bounds.center;
+        Vector3 half = col.bounds.extents;
+
+        Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[2].transform.rotation);
+
+        foreach (var obj in colliders)
+        {
+            if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
+            {
+                obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk*3f));
+                var com = obj.gameObject.GetComponent<MonsterMovement>();
+
+                if (com.unitState == UnitState.Stun ||
+                    com.unitState == UnitState.Down ||
+                    com.unitState == UnitState.Air ||
+                    com.unitState == UnitState.Knockback ||
+                    com.unitState == UnitState.Die)
+                    continue;
+
+                com.Hit();
+            }
+        }
+    }
     public void AxeAttack()
     {
         BoxCollider col = hitRanges[3].GetComponent<BoxCollider>();
@@ -345,13 +504,51 @@ public class PlayerMovement : MonoBehaviour
         {
             if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
             {
-                obj.GetComponent<MonsterMovement>().Hit();
                 obj.GetComponent<MonsterInfo>().OnDamage(info.state.atk);
+                var com = obj.gameObject.GetComponent<MonsterMovement>();
+
+                if (com.unitState == UnitState.Stun ||
+                    com.unitState == UnitState.Down ||
+                    com.unitState == UnitState.Air ||
+                    com.unitState == UnitState.Knockback ||
+                    com.unitState == UnitState.Die)
+                    continue;
+
+                com.Hit();
             }
         }
     }
 
-    public void AxeFSkill()
+    public void AxeFSkill_1()
+    {
+
+        BoxCollider col = hitRanges[3].GetComponent<BoxCollider>();
+
+        Vector3 center = col.bounds.center;
+        Vector3 half = col.bounds.extents;
+
+        Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[3].transform.rotation);
+
+        foreach (var obj in colliders)
+        {
+            if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
+            {
+                obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk * 0.5f));
+                var com = obj.gameObject.GetComponent<MonsterMovement>();
+
+                if (com.unitState == UnitState.Stun ||
+                    com.unitState == UnitState.Down ||
+                    com.unitState == UnitState.Air ||
+                    com.unitState == UnitState.Knockback ||
+                    com.unitState == UnitState.Die)
+                    continue;
+
+                com.Hit();
+            }
+        }
+    }
+
+    public void AxeFSkill_2()
     {
 
         SphereCollider col = hitRanges[4].GetComponent<SphereCollider>();
@@ -365,12 +562,77 @@ public class PlayerMovement : MonoBehaviour
         {
             if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
             {
-                obj.GetComponent<MonsterMovement>().Hit();
-                obj.GetComponent<MonsterInfo>().OnDamage(info.state.atk);
+                obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk * 0.5f));
+                var com = obj.gameObject.GetComponent<MonsterMovement>();
+
+                if (com.unitState == UnitState.Stun ||
+                    com.unitState == UnitState.Down ||
+                    com.unitState == UnitState.Air ||
+                    com.unitState == UnitState.Knockback ||
+                    com.unitState == UnitState.Die)
+                    continue;
+
+                com.Hit();
             }
         }
-
     }
+    public void AxeFSkill_3()
+    {
+
+        SphereCollider col = hitRanges[4].GetComponent<SphereCollider>();
+
+        Vector3 center = col.bounds.center;
+        float half = col.radius;
+
+        Collider[] colliders = Physics.OverlapSphere(center, half);
+
+        foreach (var obj in colliders)
+        {
+            if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
+            {
+                obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk * 0.5f));
+                var com = obj.gameObject.GetComponent<MonsterMovement>();
+
+                if (com.unitState == UnitState.Stun ||
+                    com.unitState == UnitState.Down ||
+                    com.unitState == UnitState.Air ||
+                    com.unitState == UnitState.Knockback ||
+                    com.unitState == UnitState.Die)
+                    continue;
+
+                com.Hit();
+            }
+        }
+    }
+    public void AxeFSkill_4()
+    {
+
+        SphereCollider col = hitRanges[4].GetComponent<SphereCollider>();
+
+        Vector3 center = col.bounds.center;
+        float half = col.radius;
+
+        Collider[] colliders = Physics.OverlapSphere(center, half);
+
+        foreach (var obj in colliders)
+        {
+            if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
+            {
+                obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk * 0.5f));
+                var com = obj.gameObject.GetComponent<MonsterMovement>();
+
+                if (com.unitState == UnitState.Stun ||
+                    com.unitState == UnitState.Down ||
+                    com.unitState == UnitState.Air ||
+                    com.unitState == UnitState.Knockback ||
+                    com.unitState == UnitState.Die)
+                    continue;
+
+                com.Hit();
+            }
+        }
+    }
+
     public void AxeSSkill()
     {
         SphereCollider col = hitRanges[5].GetComponent<SphereCollider>();
@@ -384,10 +646,175 @@ public class PlayerMovement : MonoBehaviour
         {
             if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
             {
-                obj.GetComponent<MonsterMovement>().Hit();
-                obj.GetComponent<MonsterInfo>().OnDamage(info.state.atk);
+                obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk * 3f));
+                var com = obj.gameObject.GetComponent<MonsterMovement>();
+
+                if (com.unitState == UnitState.Stun ||
+                    com.unitState == UnitState.Down ||
+                    com.unitState == UnitState.Air ||
+                    com.unitState == UnitState.Knockback ||
+                    com.unitState == UnitState.Die)
+                    continue;
+
+                com.Hit();
             }
         }
+    }
 
-    } 
+    public void SpearAttack()
+    {
+        BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
+
+        Vector3 center = col.bounds.center;
+        Vector3 half = col.bounds.extents;
+
+        Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[6].transform.rotation);
+
+        foreach (var obj in colliders)
+        {
+            if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
+            {
+
+                var com = obj.gameObject.GetComponent<MonsterMovement>();
+                switch (unitState)
+                {
+                    case UnitState.Attack:
+                        obj.GetComponent<MonsterInfo>().OnDamage(info.state.atk);
+                        if (com.unitState == UnitState.Stun ||
+                            com.unitState == UnitState.Down ||
+                            com.unitState == UnitState.Air ||
+                            com.unitState == UnitState.Knockback ||
+                    com.unitState == UnitState.Die)
+                            continue;
+
+                        com.Hit();
+                        break;
+
+                    case UnitState.Skill_S:
+                        obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk *3f));
+                        com.Knockback(rb.transform.forward);
+
+                        if (com.unitState == UnitState.Stun ||
+                            com.unitState == UnitState.Down ||
+                            com.unitState == UnitState.Air ||
+                    com.unitState == UnitState.Die)
+                            continue;
+
+                        com.HitKB();
+                        break;
+                }
+
+            }
+        }
+    }
+
+    public void SpearFSkill_1()
+    {
+        BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
+
+        Vector3 center = col.bounds.center;
+        Vector3 half = col.bounds.extents;
+
+        Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[6].transform.rotation);
+
+        foreach (var obj in colliders)
+        {
+            if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
+            {
+                obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk * 0.5f));
+                var com = obj.gameObject.GetComponent<MonsterMovement>();
+
+                if (com.unitState == UnitState.Stun ||
+                    com.unitState == UnitState.Down ||
+                    com.unitState == UnitState.Air ||
+                    com.unitState == UnitState.Knockback ||
+                    com.unitState == UnitState.Die)
+                    continue;
+
+                com.Hit();
+            }
+        }
+    }
+
+    public void SpearFSkill_2()
+    {
+        BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
+
+        Vector3 center = col.bounds.center;
+        Vector3 half = col.bounds.extents;
+
+        Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[6].transform.rotation);
+
+        foreach (var obj in colliders)
+        {
+            if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
+            {
+                obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk * 0.5f));
+                var com = obj.gameObject.GetComponent<MonsterMovement>();
+
+                if (com.unitState == UnitState.Stun ||
+                    com.unitState == UnitState.Down ||
+                    com.unitState == UnitState.Air ||
+                    com.unitState == UnitState.Knockback ||
+                    com.unitState == UnitState.Die)
+                    continue;
+
+                com.Hit();
+            }
+        }
+    }
+    public void SpearFSkill_3()
+    {
+        BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
+
+        Vector3 center = col.bounds.center;
+        Vector3 half = col.bounds.extents;
+
+        Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[6].transform.rotation);
+
+        foreach (var obj in colliders)
+        {
+            if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
+            {
+                obj.GetComponent<MonsterInfo>().OnDamage(info.state.atk);
+                var com = obj.gameObject.GetComponent<MonsterMovement>();
+
+                if (com.unitState == UnitState.Stun ||
+                    com.unitState == UnitState.Down ||
+                    com.unitState == UnitState.Air ||
+                    com.unitState == UnitState.Knockback ||
+                    com.unitState == UnitState.Die)
+                    continue;
+
+                com.Hit();
+            }
+        }
+    }
+    public void SpearFSkill_4()
+    {
+        BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
+
+        Vector3 center = col.bounds.center;
+        Vector3 half = col.bounds.extents;
+
+        Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[6].transform.rotation);
+
+        foreach (var obj in colliders)
+        {
+            if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
+            {
+                obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk * 0.5f));
+                var com = obj.gameObject.GetComponent<MonsterMovement>();
+
+                if (com.unitState == UnitState.Stun ||
+                    com.unitState == UnitState.Down ||
+                    com.unitState == UnitState.Air ||
+                    com.unitState == UnitState.Knockback ||
+                    com.unitState == UnitState.Die)
+                    continue;
+
+                com.Hit();
+            }
+        }
+    }
 }
