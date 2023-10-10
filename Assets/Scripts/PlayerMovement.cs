@@ -13,8 +13,7 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody rb;
     private PlayerInfo info;
 
-    public float rotateSpeed = 180f;
-
+    public float rotateSpeed = 360f;
     public float fightTimer = 10f;
 
     public CinemachineVirtualCamera vCamera;
@@ -293,10 +292,9 @@ public class PlayerMovement : MonoBehaviour
 
     public void ReturnIdle_Attack()
     {
-        Input.ResetInputAxes();
+        ani.SetBool("Attack_2", false);
         moveVec = Vector3.zero;
         unitState = UnitState.Idle;
-        ani.SetBool("Attack_2", false);
     }
     public void ReturnIdle()
     {
@@ -307,32 +305,27 @@ public class PlayerMovement : MonoBehaviour
                 {
                     break;
                 }
-                Input.ResetInputAxes();
                 moveVec = Vector3.zero;
                 unitState = UnitState.Idle;
                 ani.SetBool("Attack_2", false);
                 break;
 
             case UnitState.Skill_F:
-                Input.ResetInputAxes();
                 moveVec = Vector3.zero;
                 unitState = UnitState.Idle;
                 break;
 
             case UnitState.Skill_S:
-                Input.ResetInputAxes();
                 moveVec = Vector3.zero;
                 unitState = UnitState.Idle;
                 break;
 
             case UnitState.Impact:
-                Input.ResetInputAxes();
                 moveVec = Vector3.zero;
                 unitState = UnitState.Idle;
                 break;
 
             case UnitState.Knockback:
-                Input.ResetInputAxes();
                 moveVec = Vector3.zero;
                 unitState = UnitState.Idle;
                 break;

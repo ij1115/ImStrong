@@ -1,27 +1,28 @@
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Rendering;
+using UnityEngine.AI;
 
 public class MonsterMovement : MonoBehaviour
 {
+    public LayerMask whitIsTarget;
+    NavMeshAgent pathFinder;
     public GameObject spawner;
     private Vector3 knockbackVec;
     private Vector3 spawnPos;
     private Coroutine currentCo;
+    private Coroutine aiCo;
     private PlayerWeapons weapons;
     private MonsterInfo mInfo;
     private Animator ani;
     private Rigidbody rb;
 
-    public float rotateSpeed = 180f;
     public float fightTimer = 10f;
-    private Vector3 moveVec = Vector3.zero;
+    public float attackDelay = 10f;
+    private bool attackBool = false;
 
     private GameObject target = null;
     public bool attack {get; private set;}
-
+    public bool finder { get; private set;}
     public UnitState unitState {  get; private set; }
 
     public GameObject[] hitRanges;
@@ -29,6 +30,7 @@ public class MonsterMovement : MonoBehaviour
 
     public void SetUp()
     {
+        pathFinder = GetComponent<NavMeshAgent>();
         mInfo = GetComponent<MonsterInfo>();
         mInfo.onDeath += Die;
         rb = GetComponent<Rigidbody>();
@@ -36,7 +38,12 @@ public class MonsterMovement : MonoBehaviour
         ani = GetComponent<Animator>();
         ani.runtimeAnimatorController = weapons.GetAni();
         unitState = UnitState.NIdle;
+        finder = true;
+        attack = false;
         spawnPos = rb.transform.position;
+        pathFinder.speed = mInfo.state.movSp;
+
+        aiCo = StartCoroutine(UpdateFath());
     }
 
     public void RunTimeSwap()
@@ -47,112 +54,169 @@ public class MonsterMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (target == null)
-            return;
-
         if (unitState == UnitState.NIdle || unitState == UnitState.Idle)
         {
-            Move();
-            Rotate();
-
-            ani.SetFloat("Move", moveVec.magnitude);
+            ani.SetFloat("Move", pathFinder.desiredVelocity.magnitude);
         }
     }
 
     private void Update()
     {
-        if (target == null)
-            return;
-
-        if(Vector3.Distance(spawner.transform.position, rb.transform.position)>12)
+        if (aiCo == null)
         {
-            attack = false;
-
-            StopCoroutine(finder);
+            aiCo = StartCoroutine(UpdateFath());
         }
 
-        switch (unitState)
+        if (target == null)
+            return;
+        
+
+        if (Vector3.Distance(spawner.transform.position, rb.transform.position) > 12)
         {
-            case UnitState.NIdle:
-                NIdleUpdate();
+            attack = false;
+            finder = false;
+        }
+    }
+
+    private void AttackWeapons()
+    {
+        switch(weapons.type)
+        {
+            case Weapons.Sword:
+                {
+                    BoxCollider col = hitRanges[0].GetComponent<BoxCollider>();
+
+                    Vector3 center = col.bounds.center;
+                    Vector3 half = col.bounds.extents;
+
+                    Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[0].transform.rotation);
+
+                    foreach (var obj in colliders)
+                    {
+                        if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
+                        {
+                            attackBool = true;
+                            StartCoroutine(AttackDelay());
+                            unitState = UnitState.Attack;
+                            ani.SetBool("Fight", true);
+                            ani.SetTrigger("Attack_1");
+                            ani.SetBool("Attack_2", true);
+                            return;
+                        }
+                    }
+                }
                 break;
 
-            case UnitState.Idle:
-                IdleUpdate();
+            case Weapons.Axe:
+                {
+                    BoxCollider col = hitRanges[3].GetComponent<BoxCollider>();
+
+                    Vector3 center = col.bounds.center;
+                    Vector3 half = col.bounds.extents;
+
+                    Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[3].transform.rotation);
+
+                    foreach (var obj in colliders)
+                    {
+                        if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
+                        {
+                            attackBool = true;
+                            StartCoroutine(AttackDelay());
+                            unitState = UnitState.Attack;
+                            ani.SetBool("Fight", true);
+                            ani.SetTrigger("Attack_1");
+                            ani.SetBool("Attack_2", true);
+                            return;
+                        }
+                    }
+                }
                 break;
 
-            case UnitState.Attack:
-                AttackUpdate();
-                break;
+            case Weapons.Spear:
+                {
+                    BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
 
-            default:
-                return;
+                    Vector3 center = col.bounds.center;
+                    Vector3 half = col.bounds.extents;
+
+                    Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[6].transform.rotation);
+
+                    foreach (var obj in colliders)
+                    {
+                        if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
+                        {
+                            attackBool = true;
+                            StartCoroutine(AttackDelay());
+                            unitState = UnitState.Attack;
+                            ani.SetBool("Fight", true);
+                            ani.SetTrigger("Attack_1");
+                            ani.SetBool("Attack_2", true);
+                            return;
+                        }
+                    }
+                }
+                break;
         }
     }
 
     private IEnumerator UpdateFath()
     {
-        while(attack)
+        while(!mInfo.dead)
         {
+            if(attack)
+            {
+                if (unitState == UnitState.NIdle || unitState == UnitState.Idle)
+                {
+                    pathFinder.isStopped = false;
+                    pathFinder.SetDestination(target.transform.position);
+
+                    if(!attackBool)
+                        AttackWeapons();
+                }
+                else
+                {
+                    pathFinder.isStopped = true;
+                }
+            }
+            else
+            {
+                if(finder)
+                {
+                    pathFinder.isStopped = true;
+                    SphereCollider col = FindRange.GetComponent<SphereCollider>();
+                    Collider[] colliders = Physics.OverlapSphere(col.gameObject.transform.position, 12f, whitIsTarget);
+                    
+                    for(int i=0; i<colliders.Length; ++i)
+                    {
+                        var p = colliders[i].GetComponent<PlayerInfo>();
+                        if(p != null && !p.dead)
+                        {
+                            target = p.gameObject;
+                            attack = true;
+                            break;
+                        }
+                    }
+                }
+                else if(!finder)
+                {
+                    pathFinder.isStopped = false;
+                    pathFinder.SetDestination(spawnPos);
+
+                    if(!pathFinder.pathPending)
+                    {
+                        if(pathFinder.remainingDistance <= pathFinder.stoppingDistance)
+                        {
+                            finder = true;
+                        }
+                    }
+                }
+            }
             yield return new WaitForSeconds(0.25f);
         }
-    }
-    private void IdleUpdate()
-    {
-        MoveVecSet();
 
-        if (!attack)
-        {
-            moveVec = Vector3.zero;
-            unitState = UnitState.Attack;
-            ani.SetTrigger("Attack_1");
-        }
-    }
-
-    private void NIdleUpdate()
-    {
-        MoveVecSet();
-
-        if (!attack)
-        {
-            moveVec = Vector3.zero;
-            unitState = UnitState.Attack;
-            ani.SetBool("Fight", true);
-            ani.SetTrigger("Attack_1");
-        }
-    }
-
-    private void AttackUpdate()
-    {
-        if (attack)
-        {
-            ani.SetBool("Attack_2", true);
-        }
-    }
-
-    private void MoveVecSet()
-    {
-        if (moveVec.magnitude > 1f)
-        {
-            moveVec.Normalize();
-        }
-    }
-
-    private void Move()
-    {
-        var position = rb.position;
-        position += moveVec * mInfo.state.movSp * Time.deltaTime;
-        rb.MovePosition(position);
-    }
-    private void Rotate()
-    {
-        if (moveVec == Vector3.zero)
-            return;
-
-        var rotation = rb.rotation;
-        var targetRotateion = Quaternion.LookRotation(moveVec, Vector3.up);
-        rotation = Quaternion.RotateTowards(rotation, targetRotateion, rotateSpeed * Time.deltaTime);
-        rb.MoveRotation(rotation);
+        finder = true;
+        attack = false;
+        aiCo = null;
     }
 
     private IEnumerator IdleToNIdle()
@@ -168,6 +232,17 @@ public class MonsterMovement : MonoBehaviour
         currentCo = null;
         unitState = UnitState.NIdle;
         ani.SetBool("Fight", false);
+    }
+
+    private IEnumerator AttackDelay()
+    {
+        float timer = attackDelay;
+        while (timer > 0)
+        {
+            yield return null;
+            timer -= Time.deltaTime;
+        }
+        attackBool = false;
     }
     private IEnumerator SpearSSkillMove()
     {
@@ -211,6 +286,8 @@ public class MonsterMovement : MonoBehaviour
 
     public void HitKB()
     {
+        finder = true;
+        pathFinder.isStopped = true;
         unitState = UnitState.Knockback;
         ani.SetBool("Fight", true);
         ani.SetTrigger("Knockback");
@@ -218,6 +295,7 @@ public class MonsterMovement : MonoBehaviour
 
     public void Hit()
     {
+        finder = true;
         unitState = UnitState.Impact;
         ani.SetBool("Fight", true);
         ani.SetTrigger("Impact");
@@ -245,10 +323,12 @@ public class MonsterMovement : MonoBehaviour
                 break;
 
             case UnitState.Impact:
+                pathFinder.isStopped = true;
                 unitState = UnitState.Idle;
                 break;
 
             case UnitState.Knockback:
+                pathFinder.isStopped = true;
                 unitState = UnitState.Idle;
                 break;
         }

@@ -20,6 +20,8 @@ public class DungeonManager : MonoBehaviour
 
     private static DungeonManager singleton;
 
+    public GameObject gameoverUI;
+
     public CinemachineVirtualCamera vCam;
     public GameObject playerPrefab;
     private GameObject playerManager;
@@ -118,6 +120,23 @@ public class DungeonManager : MonoBehaviour
 
     private void Update()
     {
+        if(GameManager.instance.isGameover)
+        {
+            if(Input.GetKeyDown(KeyCode.Escape))
+            {
+                Application.Quit();
+            }
+
+            if(Input.GetKeyDown(KeyCode.Return))
+            {
+                gameoverUI.SetActive(false);
+                GameManager.instance.isGameover = false;
+                GameManager.instance.ChangeScene("Lobby");
+            }
+
+            return;
+        }
+
         if(Input.GetKeyDown(KeyCode.Escape))
         {
             Reset();
@@ -125,12 +144,12 @@ public class DungeonManager : MonoBehaviour
             return;
         }
 
-        if(Input.GetKeyDown(KeyCode.K))
+        if(Input.GetKeyDown(KeyCode.F10))
         {
             mobActive[0].GetComponent<Spawner>().Die();
         }
 
-        if (Input.GetKeyDown(KeyCode.P))
+        if (Input.GetKeyDown(KeyCode.F11))
         {
             var obj = StateManager.Instance;
 

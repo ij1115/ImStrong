@@ -41,5 +41,7 @@ public class PlayerInfo : MonoBehaviour
     public void Die()
     {
         dead = true;
+        DungeonManager.instance.gameoverUI.SetActive(true);
+        GameManager.instance.isGameover = true;
     }
 }
