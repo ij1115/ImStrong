@@ -100,7 +100,7 @@ public class PlayerMovement : MonoBehaviour
         if (controller.attack)
         {
             unitState = UnitState.Attack;
-            moveVec = Vector3.zero;
+            ani.speed = StateManager.Instance.atkSp;
             ani.SetBool("Fight", true);
             ani.SetTrigger("Attack_1");
             return;
@@ -136,7 +136,7 @@ public class PlayerMovement : MonoBehaviour
         if (controller.attack)
         {
             unitState = UnitState.Attack;
-            moveVec = Vector3.zero;
+            ani.speed = StateManager.Instance.atkSp;
             ani.SetBool("Fight", true);
             ani.SetTrigger("Attack_1");
             return;
@@ -145,8 +145,8 @@ public class PlayerMovement : MonoBehaviour
         if (controller.firstSkill && !fSkillDelay)
         {
             unitState = UnitState.Skill_F;
-            moveVec = Vector3.zero;
             fSkillDelay = true;
+            ani.speed = StateManager.Instance.atkSp;
             StartCoroutine(FSkillDelayOn());
             ani.SetBool("Fight", true);
             ani.SetTrigger("Skill_F");
@@ -156,7 +156,7 @@ public class PlayerMovement : MonoBehaviour
         if (controller.secondSkill && !sSkillDelay)
         {
             unitState = UnitState.Skill_S;
-            moveVec = Vector3.zero;
+            ani.speed = StateManager.Instance.atkSp;
             sSkillDelay = true;
             StartCoroutine(SSkillDelayOn());
             ani.SetBool("Fight", true);
@@ -293,7 +293,7 @@ public class PlayerMovement : MonoBehaviour
     public void ReturnIdle_Attack()
     {
         ani.SetBool("Attack_2", false);
-        moveVec = Vector3.zero;
+        ani.speed = 1f;
         unitState = UnitState.Idle;
     }
     public void ReturnIdle()
@@ -306,30 +306,15 @@ public class PlayerMovement : MonoBehaviour
                     break;
                 }
                 moveVec = Vector3.zero;
+                ani.speed = 1f;
                 unitState = UnitState.Idle;
                 ani.SetBool("Attack_2", false);
                 break;
 
-            case UnitState.Skill_F:
-                moveVec = Vector3.zero;
+                default:
+                ani.speed = 1f;
                 unitState = UnitState.Idle;
                 break;
-
-            case UnitState.Skill_S:
-                moveVec = Vector3.zero;
-                unitState = UnitState.Idle;
-                break;
-
-            case UnitState.Impact:
-                moveVec = Vector3.zero;
-                unitState = UnitState.Idle;
-                break;
-
-            case UnitState.Knockback:
-                moveVec = Vector3.zero;
-                unitState = UnitState.Idle;
-                break;
-
         }
     }
 

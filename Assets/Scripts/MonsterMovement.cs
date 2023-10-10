@@ -98,6 +98,7 @@ public class MonsterMovement : MonoBehaviour
                             attackBool = true;
                             StartCoroutine(AttackDelay());
                             unitState = UnitState.Attack;
+                            ani.speed = mInfo.state.atkSp;
                             ani.SetBool("Fight", true);
                             ani.SetTrigger("Attack_1");
                             ani.SetBool("Attack_2", true);
@@ -123,6 +124,7 @@ public class MonsterMovement : MonoBehaviour
                             attackBool = true;
                             StartCoroutine(AttackDelay());
                             unitState = UnitState.Attack;
+                            ani.speed = mInfo.state.atkSp;
                             ani.SetBool("Fight", true);
                             ani.SetTrigger("Attack_1");
                             ani.SetBool("Attack_2", true);
@@ -148,6 +150,7 @@ public class MonsterMovement : MonoBehaviour
                             attackBool = true;
                             StartCoroutine(AttackDelay());
                             unitState = UnitState.Attack;
+                            ani.speed = mInfo.state.atkSp;
                             ani.SetBool("Fight", true);
                             ani.SetTrigger("Attack_1");
                             ani.SetBool("Attack_2", true);
@@ -311,24 +314,29 @@ public class MonsterMovement : MonoBehaviour
                     break;
                 }
                 unitState = UnitState.Idle;
+                ani.speed = 1f;
                 ani.SetBool("Attack_2", false);
                 break;
 
             case UnitState.Skill_F:
+                ani.speed = 1f;
                 unitState = UnitState.Idle;
                 break;
 
             case UnitState.Skill_S:
+                ani.speed = 1f;
                 unitState = UnitState.Idle;
                 break;
 
             case UnitState.Impact:
-                pathFinder.isStopped = true;
+                pathFinder.isStopped = false;
+                ani.speed = 1f;
                 unitState = UnitState.Idle;
                 break;
 
             case UnitState.Knockback:
-                pathFinder.isStopped = true;
+                pathFinder.isStopped = false;
+                ani.speed = 1f;
                 unitState = UnitState.Idle;
                 break;
         }
@@ -336,6 +344,7 @@ public class MonsterMovement : MonoBehaviour
     public void ReturnIdle_Attack()
     {
         unitState = UnitState.Idle;
+        ani.speed = 1f;
         ani.SetBool("Attack_2", false);
     }
     public void FightCoroutine()
@@ -370,7 +379,9 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die||
+                    com.unitState == UnitState.Skill_F||
+                        com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -398,7 +409,9 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                        com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -426,7 +439,9 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                        com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -454,7 +469,9 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                        com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -482,7 +499,9 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                        com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -509,7 +528,9 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                        com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -538,7 +559,9 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                        com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -567,7 +590,9 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                        com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -595,7 +620,9 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                        com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -623,7 +650,9 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                        com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -651,7 +680,9 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                        com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -682,7 +713,9 @@ public class MonsterMovement : MonoBehaviour
                             com.unitState == UnitState.Down ||
                             com.unitState == UnitState.Air ||
                             com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                        com.unitState == UnitState.Skill_S)
                             continue;
 
                         com.Hit();
@@ -695,7 +728,9 @@ public class MonsterMovement : MonoBehaviour
                         if (com.unitState == UnitState.Stun ||
                             com.unitState == UnitState.Down ||
                             com.unitState == UnitState.Air ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                        com.unitState == UnitState.Skill_S)
                             continue;
 
                         com.HitKB();
@@ -726,7 +761,9 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                        com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -754,7 +791,9 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                        com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -781,7 +820,9 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                        com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -808,7 +849,9 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                        com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();

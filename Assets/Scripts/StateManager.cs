@@ -14,7 +14,7 @@ public class StateManager : MonoBehaviour
     public int maxHp = 100;
     public int atk = 20;
     public int def = 0;
-    public float atkSp = 1f;
+    public float atkSp = 1.2f;
     public float movSp = 5f;
 
     public float mobHpSet = 1f;
