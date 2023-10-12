@@ -1,10 +1,13 @@
 using Cinemachine;
 using JetBrains.Annotations;
+using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -431,24 +434,32 @@ public class PlayerMovement : MonoBehaviour
     private IEnumerator SwordFirstSkillMove()
     {
         const float ANI_LENGTH = 3.667f;
-        float firTime = (29f / 30f) * ANI_LENGTH / info.state.atkSp;
-        float secTime = ((47f / 30f) * ANI_LENGTH / info.state.atkSp) - firTime;
-        float tirTime = ((76f / 30f) * ANI_LENGTH / info.state.atkSp) - secTime;
+        float frameTime = ANI_LENGTH / 110f;
+
+        float firTime = (25f * frameTime) / info.state.atkSp;
+        float secTime = (10f * frameTime) / info.state.atkSp;
+        float tirTime = (15f * frameTime) / info.state.atkSp;
+
+        float targetFrameTime = 1.0f / 30.0f;
+        firTime = Mathf.Ceil(firTime / targetFrameTime) * targetFrameTime;
+        secTime = Mathf.Ceil(secTime / targetFrameTime) * targetFrameTime;
+        tirTime = Mathf.Ceil(tirTime / targetFrameTime) * targetFrameTime;
+
         float timer = 0f;
 
         bool first = false;
         bool sceond = false;
 
         var startPos = rb.transform.position;
-        var firPos = rb.transform.position + rb.transform.forward * 1f;
-        var secPos = firPos + rb.transform.forward * 1f;
-        var tirPos = secPos + rb.transform.forward * 2f;
+        var firPos = rb.transform.position + rb.transform.forward;
+        var secPos = rb.transform.position + rb.transform.forward * 2f;
+        var tirPos = rb.transform.position + rb.transform.forward * 4f;
 
         while (true)
         {
             timer += Time.deltaTime;
 
-            if (timer < firTime && !first)
+            if (!first)
             {
                 rb.MovePosition(EaseOutSine(startPos, firPos, timer / firTime));
                 if(timer> firTime)
@@ -458,7 +469,7 @@ public class PlayerMovement : MonoBehaviour
                     first = true;
                 }    
             }
-            else if( timer < secTime&&!sceond)
+            else if(!sceond)
             {
                 rb.MovePosition(EaseInSine(firPos, secPos, timer / secTime));
                 if (timer > secTime)
@@ -472,72 +483,18 @@ public class PlayerMovement : MonoBehaviour
             {
                 rb.MovePosition(EaseInCubic(secPos, tirPos, timer / tirTime));
             }
-            else
+            else if(timer>tirTime)
             {
                 timer = tirTime;
                 rb.MovePosition(EaseInCubic(secPos, tirPos, timer / tirTime));
                 break;
             }
-            //    StartCoroutine(SwordFirstSkillMove_2(timer));
-            //    break;
-            //}
-            //rb.MovePosition(EaseOutSine(startPos, endPos, timer / endTime));
             yield return null;
         }
         moveCo = null;
-
-    } // 수정필요
-    //private IEnumerator SwordFirstSkillMove_2(float lateTimer)
-    //{
-    //    float aniLength = GetCurrentClip().length;
-    //    float endTime = (47f / 30f) * aniLength / info.state.atkSp;
-    //    float timer = lateTimer;
-
-    //    var startPos = rb.transform.position;
-    //    var endPos = rb.transform.position + rb.transform.forward * 1f;
-
-    //    while (true)
-    //    {
-    //        timer += Time.deltaTime;
-    //        Debug.Log(timer);
-
-    //        if (timer > endTime)
-    //        {
-    //            StartCoroutine(SwordFirstSkillMove_3(timer));
-    //            break;
-    //        }
-    //        rb.MovePosition(EaseInSine(startPos, endPos, timer / endTime));
-    //        yield return null;
-    //    }
+    }
 
 
-    //}
-
-    //private IEnumerator SwordFirstSkillMove_3(float lateTimer)
-    //{
-    //    float aniLength = GetCurrentClip().length;
-    //    float endTime = (76f / 30f) * aniLength / info.state.atkSp;
-    //    float timer = lateTimer;
-
-    //    var startPos = rb.transform.position;
-    //    var endPos = rb.transform.position + rb.transform.forward * 2f;
-
-    //    while (true)
-    //    {
-    //        timer += Time.deltaTime;
-    //        Debug.Log(timer);
-
-    //        if (timer > endTime)
-    //        {
-    //            timer = endTime;
-    //            Vector3 nowPos = EaseInCubic(startPos, endPos, timer / endTime);
-    //            rb.MovePosition(nowPos);
-    //            break;
-    //        }
-    //        rb.MovePosition(EaseInCubic(startPos, endPos, timer / endTime));
-    //        yield return null;
-    //    }
-    //}
     private IEnumerator SwordSkillTwoMovePlay()
     {
         const float ANI_LENGTH = 3.067f;
@@ -545,7 +502,7 @@ public class PlayerMovement : MonoBehaviour
         float timer = 0f;
 
         var startPos = rb.transform.position;
-        var endPos = rb.transform.position + rb.transform.forward * 2f;
+        var endPos = rb.transform.position + rb.transform.forward * 1f;
 
         while (true)
         {
@@ -709,6 +666,11 @@ public class PlayerMovement : MonoBehaviour
     {
         moveCo = StartCoroutine(AxeAttackComboMove());
     }
+
+    public void AxeSkillMovePlay()
+    {
+        moveCo = StartCoroutine(AxeSkillFirstMove());
+    }
     public void AxeSkillTwoMove()
     {
         moveCo = StartCoroutine(AxeSkillTwoMovePlay());
@@ -762,6 +724,36 @@ public class PlayerMovement : MonoBehaviour
         }
         moveCo = null;
     }
+    private IEnumerator AxeSkillFirstMove()
+    {
+        const float ANI_LENGTH = 2.900f;
+        float frameTime = ANI_LENGTH / 87f;
+        float endTime = (60f * frameTime) / info.state.atkSp;
+        float targetFrameTime = 1.0f / 30.0f;
+        endTime = Mathf.Ceil(endTime / targetFrameTime) * targetFrameTime;
+
+        float timer = 0f;
+
+        Debug.Log(endTime);
+        var startPos = rb.transform.position;
+        var endPos = rb.transform.position + rb.transform.forward * 4.5f;
+
+        while (true)
+        {
+            timer += Time.deltaTime;
+
+            if (timer > endTime)
+            {
+                timer = endTime;
+                Vector3 nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+                rb.MovePosition(nowPos);
+                break;
+            }
+            rb.MovePosition(EaselInOutCircle(startPos, endPos, timer / endTime));
+            yield return null;
+        }
+        moveCo = null;
+    }
     private IEnumerator AxeSkillTwoMovePlay()
     {
         const float ANI_LENGTH = 2.467f;
@@ -778,11 +770,11 @@ public class PlayerMovement : MonoBehaviour
             if (timer > endTime)
             {
                 timer = endTime;
-                Vector3 nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+                Vector3 nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaselInOutCircle(startPos, endPos, timer / endTime));
+            rb.MovePosition(EaseInOutQuart(startPos, endPos, timer / endTime));
             yield return null;
         }
         moveCo = null;
@@ -974,6 +966,40 @@ public class PlayerMovement : MonoBehaviour
         moveCo = StartCoroutine(SpearAttackComboMove());
     }
 
+    public void SpearSkillMovePlay()
+    {
+        moveCo = StartCoroutine(SpearFristSkillMove());
+    }
+    private IEnumerator SpearFristSkillMove()
+    {
+        const float ANI_LENGTH = 1.733f;
+        float frameTime = ANI_LENGTH / 52f;
+        float endTime = (46 * frameTime) / info.state.atkSp;
+        float targetFrameTime = 1.0f / 30.0f;
+        endTime = Mathf.Ceil(endTime / targetFrameTime) * targetFrameTime;
+
+        float timer = 0f;
+
+        Debug.Log(endTime);
+        var startPos = rb.transform.position;
+        var endPos = rb.transform.position + rb.transform.forward * 3f;
+
+        while (true)
+        {
+            timer += Time.deltaTime;
+
+            if (timer > endTime)
+            {
+                timer = endTime;
+                Vector3 nowPos = EaseOutBounce(startPos, endPos, timer / endTime);
+                rb.MovePosition(nowPos);
+                break;
+            }
+            rb.MovePosition(EaseOutBounce(startPos, endPos, timer / endTime));
+            yield return null;
+        }
+        moveCo = null;
+    }
     private IEnumerator SpearAttackMove()
     {
         const float ANI_LENGTH = 1.167f;
@@ -1221,6 +1247,12 @@ public class PlayerMovement : MonoBehaviour
         end -= start;
         return end * value * value * value * value * value + start;
     }
+    public Vector3 EaseOutQuint(Vector3 start, Vector3 end, float value)
+    {
+        value--;
+        end -= start;
+        return end * (value * value * value * value * value + 1) + start;
+    }
 
     public Vector3 EaseInCubic(Vector3 start, Vector3 end, float value)
     {
@@ -1271,6 +1303,30 @@ public class PlayerMovement : MonoBehaviour
         return end * Mathf.Sin(value * (Mathf.PI * 0.5f)) + start;
     }
 
+    public Vector3 EaseOutBounce(Vector3 start, Vector3 end, float value)
+    {
+        value /= 1f;
+        end -= start;
+        if (value < (1 / 2.75f))
+        {
+            return end * (7.5625f * value * value) + start;
+        }
+        else if (value < (2 / 2.75f))
+        {
+            value -= (1.5f / 2.75f);
+            return end * (7.5625f * (value) * value + .75f) + start;
+        }
+        else if (value < (2.5 / 2.75))
+        {
+            value -= (2.25f / 2.75f);
+            return end * (7.5625f * (value) * value + .9375f) + start;
+        }
+        else
+        {
+            value -= (2.625f / 2.75f);
+            return end * (7.5625f * (value) * value + .984375f) + start;
+        }
+    }
 
     private AnimationClip GetCurrentClip()
     {
