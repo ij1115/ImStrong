@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -10,6 +11,7 @@ public class MonsterMovement : MonoBehaviour
     private Vector3 knockbackVec;
     private Vector3 spawnPos;
     private Coroutine currentCo;
+    private Coroutine moveCo;
     private Coroutine aiCo;
     private PlayerWeapons weapons;
     private MonsterInfo mInfo;
@@ -186,17 +188,21 @@ public class MonsterMovement : MonoBehaviour
                 if (finder)
                 {
                     pathFinder.isStopped = true;
-                    SphereCollider col = FindRange.GetComponent<SphereCollider>();
-                    Collider[] colliders = Physics.OverlapSphere(col.gameObject.transform.position, 12f, whitIsTarget);
 
-                    for (int i = 0; i < colliders.Length; ++i)
+                    if (unitState == UnitState.Idle || unitState == UnitState.NIdle)
                     {
-                        var p = colliders[i].GetComponent<PlayerInfo>();
-                        if (p != null && !p.dead)
+                        SphereCollider col = FindRange.GetComponent<SphereCollider>();
+                        Collider[] colliders = Physics.OverlapSphere(col.gameObject.transform.position, 12f, whitIsTarget);
+
+                        for (int i = 0; i < colliders.Length; ++i)
                         {
-                            target = p.gameObject;
-                            attack = true;
-                            break;
+                            var p = colliders[i].GetComponent<PlayerInfo>();
+                            if (p != null && !p.dead)
+                            {
+                                target = p.gameObject;
+                                attack = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -247,6 +253,7 @@ public class MonsterMovement : MonoBehaviour
         }
         attackBool = false;
     }
+
     private IEnumerator SpearSSkillMove()
     {
         var startPos = rb.transform.position;
@@ -260,15 +267,9 @@ public class MonsterMovement : MonoBehaviour
             moveTimer += Time.deltaTime;
             yield return null;
         }
-
         rb.MovePosition(endPos);
     }
-    public void Knockback(Vector3 vec)
-    {
-        knockbackVec = vec;
 
-        StartCoroutine(SpearSSkillMove());
-    }
 
     // 이벤트
 
@@ -287,13 +288,15 @@ public class MonsterMovement : MonoBehaviour
         spawner.GetComponent<Spawner>().Die(this.gameObject);
     }
 
-    public void HitKB()
+    public void HitKB(Vector3 vec)
     {
+        knockbackVec = vec;
         finder = true;
         pathFinder.isStopped = true;
         unitState = UnitState.Knockback;
         ani.SetBool("Fight", true);
         ani.SetTrigger("Knockback");
+        StartCoroutine(SpearSSkillMove());
     }
 
     public void Hit()
@@ -343,9 +346,9 @@ public class MonsterMovement : MonoBehaviour
     }
     public void ReturnIdle_Attack()
     {
-        unitState = UnitState.Idle;
-        ani.speed = 1f;
         ani.SetBool("Attack_2", false);
+        ani.speed = 1f;
+        unitState = UnitState.Idle;
     }
     public void FightCoroutine()
     {
@@ -361,27 +364,25 @@ public class MonsterMovement : MonoBehaviour
 
     public void SwordAttackMovePlay()
     {
-        StartCoroutine(SwordAttackMove());
+        moveCo = StartCoroutine(SwordAttackMove());
     }
-
     public void SwordAttackComboMovePlay()
     {
-        StartCoroutine(SwordAttackComboMove());
+        moveCo = StartCoroutine(SwordAttackComboMove());
     }
-
     public void SwordSkillMovePlay()
     {
-        StartCoroutine(SwordFirstSkillMove());
+        moveCo = StartCoroutine(SwordFirstSkillMove());
     }
     public void SwordSkillTwoMove()
     {
-        StartCoroutine(SwordSkillTwoMovePlay());
+        moveCo = StartCoroutine(SwordSkillTwoMovePlay());
     }
 
     private IEnumerator SwordAttackMove()
     {
-        float aniLength = GetCurrentClip().length;
-        float endTime = (14f / 30f) * aniLength / mInfo.state.atkSp;
+        const float ANI_LENGTH = 1.333f;
+        float endTime = (14f / 30f) * ANI_LENGTH / mInfo.state.atkSp;
         float timer = 0f;
 
         var startPos = rb.transform.position;
@@ -401,13 +402,12 @@ public class MonsterMovement : MonoBehaviour
             rb.MovePosition(EaseInOutExpo(startPos, endPos, timer / endTime));
             yield return null;
         }
-
+        moveCo = null;
     }
-
     private IEnumerator SwordAttackComboMove()
     {
-        float aniLength = GetCurrentClip().length;
-        float endTime = (6f / 30f) * aniLength / mInfo.state.atkSp;
+        const float ANI_LENGTH = 1.367f;
+        float endTime = (6f / 30f) * ANI_LENGTH / mInfo.state.atkSp;
         float timer = 0f;
 
         var startPos = rb.transform.position;
@@ -426,29 +426,37 @@ public class MonsterMovement : MonoBehaviour
             rb.MovePosition(EaseInOutExpo(startPos, endPos, timer / endTime));
             yield return null;
         }
+        moveCo = null;
     }
-
     private IEnumerator SwordFirstSkillMove()
     {
-        float aniLength = GetCurrentClip().length;
-        float firTime = (29f / 30f) * aniLength / mInfo.state.atkSp;
-        float secTime = ((47f / 30f) * aniLength / mInfo.state.atkSp) - firTime;
-        float tirTime = ((76f / 30f) * aniLength / mInfo.state.atkSp) - secTime;
+        const float ANI_LENGTH = 3.667f;
+        float frameTime = ANI_LENGTH / 110f;
+
+        float firTime = (25f * frameTime) / mInfo.state.atkSp;
+        float secTime = (10f * frameTime) / mInfo.state.atkSp;
+        float tirTime = (15f * frameTime) / mInfo.state.atkSp;
+
+        float targetFrameTime = 1.0f / 30.0f;
+        firTime = Mathf.Ceil(firTime / targetFrameTime) * targetFrameTime;
+        secTime = Mathf.Ceil(secTime / targetFrameTime) * targetFrameTime;
+        tirTime = Mathf.Ceil(tirTime / targetFrameTime) * targetFrameTime;
+
         float timer = 0f;
 
         bool first = false;
         bool sceond = false;
 
         var startPos = rb.transform.position;
-        var firPos = rb.transform.position + rb.transform.forward * 1f;
-        var secPos = firPos + rb.transform.forward * 1f;
-        var tirPos = secPos + rb.transform.forward * 2f;
+        var firPos = rb.transform.position + rb.transform.forward;
+        var secPos = rb.transform.position + rb.transform.forward * 2f;
+        var tirPos = rb.transform.position + rb.transform.forward * 4f;
 
         while (true)
         {
             timer += Time.deltaTime;
 
-            if (timer < firTime && !first)
+            if (!first)
             {
                 rb.MovePosition(EaseOutSine(startPos, firPos, timer / firTime));
                 if (timer > firTime)
@@ -458,7 +466,7 @@ public class MonsterMovement : MonoBehaviour
                     first = true;
                 }
             }
-            else if (timer < secTime && !sceond)
+            else if (!sceond)
             {
                 rb.MovePosition(EaseInSine(firPos, secPos, timer / secTime));
                 if (timer > secTime)
@@ -472,82 +480,24 @@ public class MonsterMovement : MonoBehaviour
             {
                 rb.MovePosition(EaseInCubic(secPos, tirPos, timer / tirTime));
             }
-            else
+            else if (timer > tirTime)
             {
                 timer = tirTime;
                 rb.MovePosition(EaseInCubic(secPos, tirPos, timer / tirTime));
                 break;
             }
-            //    StartCoroutine(SwordFirstSkillMove_2(timer));
-            //    break;
-            //}
-            //rb.MovePosition(EaseOutSine(startPos, endPos, timer / endTime));
             yield return null;
         }
-
-
-    } // 수정필요
-
-    //private IEnumerator SwordFirstSkillMove_2(float lateTimer)
-    //{
-    //    float aniLength = GetCurrentClip().length;
-    //    float endTime = (47f / 30f) * aniLength / info.state.atkSp;
-    //    float timer = lateTimer;
-
-    //    var startPos = rb.transform.position;
-    //    var endPos = rb.transform.position + rb.transform.forward * 1f;
-
-    //    while (true)
-    //    {
-    //        timer += Time.deltaTime;
-    //        Debug.Log(timer);
-
-    //        if (timer > endTime)
-    //        {
-    //            StartCoroutine(SwordFirstSkillMove_3(timer));
-    //            break;
-    //        }
-    //        rb.MovePosition(EaseInSine(startPos, endPos, timer / endTime));
-    //        yield return null;
-    //    }
-
-
-    //}
-
-    //private IEnumerator SwordFirstSkillMove_3(float lateTimer)
-    //{
-    //    float aniLength = GetCurrentClip().length;
-    //    float endTime = (76f / 30f) * aniLength / info.state.atkSp;
-    //    float timer = lateTimer;
-
-    //    var startPos = rb.transform.position;
-    //    var endPos = rb.transform.position + rb.transform.forward * 2f;
-
-    //    while (true)
-    //    {
-    //        timer += Time.deltaTime;
-    //        Debug.Log(timer);
-
-    //        if (timer > endTime)
-    //        {
-    //            timer = endTime;
-    //            Vector3 nowPos = EaseInCubic(startPos, endPos, timer / endTime);
-    //            rb.MovePosition(nowPos);
-    //            break;
-    //        }
-    //        rb.MovePosition(EaseInCubic(startPos, endPos, timer / endTime));
-    //        yield return null;
-    //    }
-    //}
-
+        moveCo = null;
+    }
     private IEnumerator SwordSkillTwoMovePlay()
     {
-        float aniLength = GetCurrentClip().length;
-        float endTime = (38f / 30f) * aniLength / mInfo.state.atkSp;
+        const float ANI_LENGTH = 3.067f;
+        float endTime = (22f / 30f) * ANI_LENGTH / mInfo.state.atkSp;
         float timer = 0f;
 
         var startPos = rb.transform.position;
-        var endPos = rb.transform.position + rb.transform.forward * 2f;
+        var endPos = rb.transform.position + rb.transform.forward * 1f;
 
         while (true)
         {
@@ -564,6 +514,7 @@ public class MonsterMovement : MonoBehaviour
             rb.MovePosition(EaselInOutCircle(startPos, endPos, timer / endTime));
             yield return null;
         }
+        moveCo = null;
     }
 
     public void SwordAttack()
@@ -594,14 +545,13 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Knockback ||
                     com.unitState == UnitState.Die||
                     com.unitState == UnitState.Skill_F||
-                        com.unitState == UnitState.Skill_S)
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
             }
         }
     }
-
     public void SwordFSkill_1()
     {
         BoxCollider col = hitRanges[1].GetComponent<BoxCollider>();
@@ -629,14 +579,13 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Knockback ||
                     com.unitState == UnitState.Die ||
                     com.unitState == UnitState.Skill_F ||
-                        com.unitState == UnitState.Skill_S)
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
             }
         }
     }
-
     public void SwordFSkill_2()
     {
         BoxCollider col = hitRanges[1].GetComponent<BoxCollider>();
@@ -663,14 +612,13 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Knockback ||
                     com.unitState == UnitState.Die ||
                     com.unitState == UnitState.Skill_F ||
-                        com.unitState == UnitState.Skill_S)
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
             }
         }
     }
-
     public void SwordFSkill_3()
     {
         BoxCollider col = hitRanges[1].GetComponent<BoxCollider>();
@@ -697,14 +645,13 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Knockback ||
                     com.unitState == UnitState.Die ||
                     com.unitState == UnitState.Skill_F ||
-                        com.unitState == UnitState.Skill_S)
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
             }
         }
     }
-
     public void SwordSSkill()
     {
         BoxCollider col = hitRanges[2].GetComponent<BoxCollider>();
@@ -730,7 +677,7 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Knockback ||
                     com.unitState == UnitState.Die ||
                     com.unitState == UnitState.Skill_F ||
-                        com.unitState == UnitState.Skill_S)
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -740,22 +687,25 @@ public class MonsterMovement : MonoBehaviour
 
     public void AxeAttackMovePlay()
     {
-        StartCoroutine(AxeAttackMove());
+        moveCo = StartCoroutine(AxeAttackMove());
     }
-
     public void AxeAttackComboMovePlay()
     {
-        StartCoroutine(AxeAttackComboMove());
+        moveCo = StartCoroutine(AxeAttackComboMove());
     }
-
+    public void AxeSkillMovePlay()
+    {
+        moveCo = StartCoroutine(AxeSkillFirstMove());
+    }
     public void AxeSkillTwoMove()
     {
-        StartCoroutine(AxeSkillTwoMovePlay());
+        moveCo = StartCoroutine(AxeSkillTwoMovePlay());
     }
+
     private IEnumerator AxeAttackMove()
     {
-        float aniLength = GetCurrentClip().length;
-        float endTime = (10f / 30f) * aniLength / mInfo.state.atkSp;
+        const float ANI_LENGTH = 2.500f;
+        float endTime = (18f / 30f) * ANI_LENGTH / mInfo.state.atkSp;
         float timer = 0f;
 
         var startPos = rb.transform.position;
@@ -775,13 +725,12 @@ public class MonsterMovement : MonoBehaviour
             rb.MovePosition(EaseInOutQuart(startPos, endPos, timer / endTime));
             yield return null;
         }
-
+        moveCo = null;
     }
-
     private IEnumerator AxeAttackComboMove()
     {
-        float aniLength = GetCurrentClip().length;
-        float endTime = (6f / 30f) * aniLength / mInfo.state.atkSp;
+        const float ANI_LENGTH = 2.367f;
+        float endTime = (6f / 30f) * ANI_LENGTH / mInfo.state.atkSp;
         float timer = 0f;
 
         var startPos = rb.transform.position;
@@ -800,21 +749,24 @@ public class MonsterMovement : MonoBehaviour
             rb.MovePosition(EaseInOutExpo(startPos, endPos, timer / endTime));
             yield return null;
         }
+        moveCo = null;
     }
-
-    private IEnumerator AxeSkillTwoMovePlay()
+    private IEnumerator AxeSkillFirstMove()
     {
-        float aniLength = GetCurrentClip().length;
-        float endTime = (31f / 30f) * aniLength / mInfo.state.atkSp;
+        const float ANI_LENGTH = 2.900f;
+        float frameTime = ANI_LENGTH / 87f;
+        float endTime = (60f * frameTime) / mInfo.state.atkSp;
+        float targetFrameTime = 1.0f / 30.0f;
+        endTime = Mathf.Ceil(endTime / targetFrameTime) * targetFrameTime;
+
         float timer = 0f;
 
         var startPos = rb.transform.position;
-        var endPos = rb.transform.position + rb.transform.forward * 0.5f;
+        var endPos = rb.transform.position + rb.transform.forward * 4.5f;
 
         while (true)
         {
             timer += Time.deltaTime;
-            Debug.Log(timer);
 
             if (timer > endTime)
             {
@@ -826,7 +778,34 @@ public class MonsterMovement : MonoBehaviour
             rb.MovePosition(EaselInOutCircle(startPos, endPos, timer / endTime));
             yield return null;
         }
+        moveCo = null;
     }
+    private IEnumerator AxeSkillTwoMovePlay()
+    {
+        const float ANI_LENGTH = 2.467f;
+        float endTime = (24f / 30f) * ANI_LENGTH / mInfo.state.atkSp;
+        float timer = 0f;
+
+        var startPos = rb.transform.position;
+        var endPos = rb.transform.position + rb.transform.forward * 1f;
+
+        while (true)
+        {
+            timer += Time.deltaTime;
+
+            if (timer > endTime)
+            {
+                timer = endTime;
+                Vector3 nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
+                rb.MovePosition(nowPos);
+                break;
+            }
+            rb.MovePosition(EaseInOutQuart(startPos, endPos, timer / endTime));
+            yield return null;
+        }
+        moveCo = null;
+    }
+
     public void AxeAttack()
     {
         BoxCollider col = hitRanges[3].GetComponent<BoxCollider>();
@@ -853,17 +832,15 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Knockback ||
                     com.unitState == UnitState.Die ||
                     com.unitState == UnitState.Skill_F ||
-                        com.unitState == UnitState.Skill_S)
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
             }
         }
     }
-
     public void AxeFSkill_1()
     {
-
         BoxCollider col = hitRanges[3].GetComponent<BoxCollider>();
 
         Vector3 center = col.bounds.center;
@@ -888,17 +865,15 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Knockback ||
                     com.unitState == UnitState.Die ||
                     com.unitState == UnitState.Skill_F ||
-                        com.unitState == UnitState.Skill_S)
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
             }
         }
     }
-
     public void AxeFSkill_2()
     {
-
         SphereCollider col = hitRanges[4].GetComponent<SphereCollider>();
 
         Vector3 center = col.bounds.center;
@@ -923,7 +898,7 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Knockback ||
                     com.unitState == UnitState.Die ||
                     com.unitState == UnitState.Skill_F ||
-                        com.unitState == UnitState.Skill_S)
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -932,7 +907,6 @@ public class MonsterMovement : MonoBehaviour
     }
     public void AxeFSkill_3()
     {
-
         SphereCollider col = hitRanges[4].GetComponent<SphereCollider>();
 
         Vector3 center = col.bounds.center;
@@ -957,7 +931,7 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Knockback ||
                     com.unitState == UnitState.Die ||
                     com.unitState == UnitState.Skill_F ||
-                        com.unitState == UnitState.Skill_S)
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -966,7 +940,6 @@ public class MonsterMovement : MonoBehaviour
     }
     public void AxeFSkill_4()
     {
-
         SphereCollider col = hitRanges[4].GetComponent<SphereCollider>();
 
         Vector3 center = col.bounds.center;
@@ -990,14 +963,13 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Knockback ||
                     com.unitState == UnitState.Die ||
                     com.unitState == UnitState.Skill_F ||
-                        com.unitState == UnitState.Skill_S)
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
             }
         }
     }
-
     public void AxeSSkill()
     {
         SphereCollider col = hitRanges[5].GetComponent<SphereCollider>();
@@ -1024,7 +996,7 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Knockback ||
                     com.unitState == UnitState.Die ||
                     com.unitState == UnitState.Skill_F ||
-                        com.unitState == UnitState.Skill_S)
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -1037,24 +1009,57 @@ public class MonsterMovement : MonoBehaviour
         switch (unitState)
         {
             case UnitState.Attack:
-                StartCoroutine(SpearAttackMove());
+                moveCo = StartCoroutine(SpearAttackMove());
                 break;
 
             case UnitState.Skill_S:
-                StartCoroutine(SpearSkillTwoMovePlay());
+                moveCo = StartCoroutine(SpearSkillTwoMovePlay());
                 break;
         }
     }
-
     public void SpearAttackComboMovePlay()
     {
-        StartCoroutine(SpearAttackComboMove());
+        moveCo = StartCoroutine(SpearAttackComboMove());
+    }
+    public void SpearSkillMovePlay()
+    {
+        moveCo = StartCoroutine(SpearFristSkillMove());
     }
 
+    private IEnumerator SpearFristSkillMove()
+    {
+        const float ANI_LENGTH = 1.733f;
+        float frameTime = ANI_LENGTH / 52f;
+        float endTime = (46 * frameTime) / mInfo.state.atkSp;
+        float targetFrameTime = 1.0f / 30.0f;
+        endTime = Mathf.Ceil(endTime / targetFrameTime) * targetFrameTime;
+
+        float timer = 0f;
+
+        Debug.Log(endTime);
+        var startPos = rb.transform.position;
+        var endPos = rb.transform.position + rb.transform.forward * 3f;
+
+        while (true)
+        {
+            timer += Time.deltaTime;
+
+            if (timer > endTime)
+            {
+                timer = endTime;
+                Vector3 nowPos = EaseOutBounce(startPos, endPos, timer / endTime);
+                rb.MovePosition(nowPos);
+                break;
+            }
+            rb.MovePosition(EaseOutBounce(startPos, endPos, timer / endTime));
+            yield return null;
+        }
+        moveCo = null;
+    }
     private IEnumerator SpearAttackMove()
     {
-        float aniLength = GetCurrentClip().length;
-        float endTime = (14f / 30f) * aniLength / mInfo.state.atkSp;
+        const float ANI_LENGTH = 1.167f;
+        float endTime = (14f / 30f) * ANI_LENGTH / mInfo.state.atkSp;
         float timer = 0f;
 
         var startPos = rb.transform.position;
@@ -1074,13 +1079,12 @@ public class MonsterMovement : MonoBehaviour
             rb.MovePosition(EaseInOutQuart(startPos, endPos, timer / endTime));
             yield return null;
         }
-
+        moveCo = null;
     }
-
     private IEnumerator SpearAttackComboMove()
     {
-        float aniLength = GetCurrentClip().length;
-        float endTime = (6f / 30f) * aniLength / mInfo.state.atkSp;
+        const float ANI_LENGTH = 1.167f;
+        float endTime = (6f / 30f) * ANI_LENGTH / mInfo.state.atkSp;
         float timer = 0f;
 
         var startPos = rb.transform.position;
@@ -1099,12 +1103,12 @@ public class MonsterMovement : MonoBehaviour
             rb.MovePosition(EaseInOutExpo(startPos, endPos, timer / endTime));
             yield return null;
         }
+        moveCo = null;
     }
-
     private IEnumerator SpearSkillTwoMovePlay()
     {
-        float aniLength = GetCurrentClip().length;
-        float endTime = (14f / 30f) * aniLength / mInfo.state.atkSp;
+        const float ANI_LENGTH = 1.167f;
+        float endTime = (14f / 30f) * ANI_LENGTH / mInfo.state.atkSp;
         float timer = 0f;
 
         var startPos = rb.transform.position;
@@ -1125,8 +1129,8 @@ public class MonsterMovement : MonoBehaviour
             rb.MovePosition(EaselInOutCircle(startPos, endPos, timer / endTime));
             yield return null;
         }
+        moveCo = null;
     }
-
 
     public void SpearAttack()
     {
@@ -1154,9 +1158,9 @@ public class MonsterMovement : MonoBehaviour
                             com.unitState == UnitState.Down ||
                             com.unitState == UnitState.Air ||
                             com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die ||
-                    com.unitState == UnitState.Skill_F ||
-                        com.unitState == UnitState.Skill_S)
+                            com.unitState == UnitState.Die ||
+                            com.unitState == UnitState.Skill_F ||
+                            com.unitState == UnitState.Skill_S)
                             continue;
 
                         com.Hit();
@@ -1169,9 +1173,9 @@ public class MonsterMovement : MonoBehaviour
                         if (com.unitState == UnitState.Stun ||
                             com.unitState == UnitState.Down ||
                             com.unitState == UnitState.Air ||
-                    com.unitState == UnitState.Die ||
-                    com.unitState == UnitState.Skill_F ||
-                        com.unitState == UnitState.Skill_S)
+                            com.unitState == UnitState.Die ||
+                            com.unitState == UnitState.Skill_F ||
+                            com.unitState == UnitState.Skill_S)
                             continue;
 
                         com.HitKB();
@@ -1181,7 +1185,6 @@ public class MonsterMovement : MonoBehaviour
             }
         }
     }
-
     public void SpearFSkill_1()
     {
         BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
@@ -1208,14 +1211,13 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Knockback ||
                     com.unitState == UnitState.Die ||
                     com.unitState == UnitState.Skill_F ||
-                        com.unitState == UnitState.Skill_S)
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
             }
         }
     }
-
     public void SpearFSkill_2()
     {
         BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
@@ -1241,7 +1243,7 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Knockback ||
                     com.unitState == UnitState.Die ||
                     com.unitState == UnitState.Skill_F ||
-                        com.unitState == UnitState.Skill_S)
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -1274,7 +1276,7 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Knockback ||
                     com.unitState == UnitState.Die ||
                     com.unitState == UnitState.Skill_F ||
-                        com.unitState == UnitState.Skill_S)
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -1307,7 +1309,7 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Knockback ||
                     com.unitState == UnitState.Die ||
                     com.unitState == UnitState.Skill_F ||
-                        com.unitState == UnitState.Skill_S)
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -1323,19 +1325,22 @@ public class MonsterMovement : MonoBehaviour
         value--;
         return end * 0.5f * (-Mathf.Pow(2, -10 * value) + 2) + start;
     }
-
     public Vector3 EaseInQuint(Vector3 start, Vector3 end, float value)
     {
         end -= start;
         return end * value * value * value * value * value + start;
     }
-
+    public Vector3 EaseOutQuint(Vector3 start, Vector3 end, float value)
+    {
+        value--;
+        end -= start;
+        return end * (value * value * value * value * value + 1) + start;
+    }
     public Vector3 EaseInCubic(Vector3 start, Vector3 end, float value)
     {
         end -= start;
         return end * value * value * value + start;
     }
-
     public Vector3 EaseOutCubic(Vector3 start, Vector3 end, float value)
     {
         value--;
@@ -1350,7 +1355,6 @@ public class MonsterMovement : MonoBehaviour
         value -= 2;
         return end * 0.5f * (Mathf.Sqrt(1 - value * value) + 1) + start;
     }
-
     public Vector3 EaseInOutQuart(Vector3 start, Vector3 end, float value)
     {
         value /= .5f;
@@ -1359,19 +1363,48 @@ public class MonsterMovement : MonoBehaviour
         value -= 2;
         return -end * 0.5f * (value * value * value * value - 2) + start;
     }
-
+    public Vector3 EaseInOutQuad(Vector3 start, Vector3 end, float value)
+    {
+        value /= .5f;
+        end -= start;
+        if (value < 1) return end * 0.5f * value * value + start;
+        value--;
+        return -end * 0.5f * (value * (value - 2) - 1) + start;
+    }
     public Vector3 EaseInSine(Vector3 start, Vector3 end, float value)
     {
         end -= start;
         return -end * Mathf.Cos(value * (Mathf.PI * 0.5f)) + end + start;
     }
-
     public Vector3 EaseOutSine(Vector3 start, Vector3 end, float value)
     {
         end -= start;
         return end * Mathf.Sin(value * (Mathf.PI * 0.5f)) + start;
     }
-
+    public Vector3 EaseOutBounce(Vector3 start, Vector3 end, float value)
+    {
+        value /= 1f;
+        end -= start;
+        if (value < (1 / 2.75f))
+        {
+            return end * (7.5625f * value * value) + start;
+        }
+        else if (value < (2 / 2.75f))
+        {
+            value -= (1.5f / 2.75f);
+            return end * (7.5625f * (value) * value + .75f) + start;
+        }
+        else if (value < (2.5 / 2.75))
+        {
+            value -= (2.25f / 2.75f);
+            return end * (7.5625f * (value) * value + .9375f) + start;
+        }
+        else
+        {
+            value -= (2.625f / 2.75f);
+            return end * (7.5625f * (value) * value + .984375f) + start;
+        }
+    }
 
     private AnimationClip GetCurrentClip()
     {

@@ -275,12 +275,7 @@ public class PlayerMovement : MonoBehaviour
         StartCoroutine(SpearSSkillMove());
     }
 
-    public void ReturnIdle_Attack()
-    {
-        ani.SetBool("Attack_2", false);
-        ani.speed = 1f;
-        unitState = UnitState.Idle;
-    }
+
     public void ReturnIdle()
     {
         switch (unitState)
@@ -302,7 +297,12 @@ public class PlayerMovement : MonoBehaviour
                 break;
         }
     }
-
+    public void ReturnIdle_Attack()
+    {
+        ani.SetBool("Attack_2", false);
+        ani.speed = 1f;
+        unitState = UnitState.Idle;
+    }
     public void FightCoroutine()
     {
         if (currentCo != null)
@@ -327,25 +327,16 @@ public class PlayerMovement : MonoBehaviour
     }
     private IEnumerator EvadeMove()
     {
-        //float aniLength = GetCurrentClip().length;
-        float endTime =0f;
-        switch (weapons.type)
-        {
-            case Weapons.Sword:
-            case Weapons.Spear:
-                endTime = (24f / 30f);
-                break;
+        float endTime = 0.8f;
 
-            case Weapons.Axe:
-                endTime = (20f / 30f);
-                break;
-
-        };
+        float targetFrameTime = 1.0f / 30.0f;
+        endTime = Mathf.Ceil(endTime / targetFrameTime) * targetFrameTime;
 
         float timer = 0f;
         var startPos = rb.transform.position;
         var endPos = rb.transform.position + rb.transform.forward * 5f;
 
+        Debug.Log(endTime);
         while (true)
         {
             timer += Time.deltaTime;
@@ -363,7 +354,6 @@ public class PlayerMovement : MonoBehaviour
         ReturnIdle();
         moveCo = null;
     }
-
 
     public void SwordAttackMovePlay()
     {
@@ -493,8 +483,6 @@ public class PlayerMovement : MonoBehaviour
         }
         moveCo = null;
     }
-
-
     private IEnumerator SwordSkillTwoMovePlay()
     {
         const float ANI_LENGTH = 3.067f;
@@ -542,7 +530,9 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -569,7 +559,9 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -596,7 +588,9 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -623,7 +617,9 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -650,7 +646,9 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -666,7 +664,6 @@ public class PlayerMovement : MonoBehaviour
     {
         moveCo = StartCoroutine(AxeAttackComboMove());
     }
-
     public void AxeSkillMovePlay()
     {
         moveCo = StartCoroutine(AxeSkillFirstMove());
@@ -675,6 +672,7 @@ public class PlayerMovement : MonoBehaviour
     {
         moveCo = StartCoroutine(AxeSkillTwoMovePlay());
     }
+
     private IEnumerator AxeAttackMove()
     {
         const float ANI_LENGTH = 2.500f;
@@ -779,6 +777,7 @@ public class PlayerMovement : MonoBehaviour
         }
         moveCo = null;
     }
+
     public void AxeAttack()
     {
         BoxCollider col = hitRanges[3].GetComponent<BoxCollider>();
@@ -799,17 +798,17 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
             }
         }
     }
-
     public void AxeFSkill_1()
     {
-
         BoxCollider col = hitRanges[3].GetComponent<BoxCollider>();
 
         Vector3 center = col.bounds.center;
@@ -828,17 +827,17 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
             }
         }
     }
-
     public void AxeFSkill_2()
     {
-
         SphereCollider col = hitRanges[4].GetComponent<SphereCollider>();
 
         Vector3 center = col.bounds.center;
@@ -857,7 +856,9 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -866,7 +867,6 @@ public class PlayerMovement : MonoBehaviour
     }
     public void AxeFSkill_3()
     {
-
         SphereCollider col = hitRanges[4].GetComponent<SphereCollider>();
 
         Vector3 center = col.bounds.center;
@@ -885,7 +885,9 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -894,7 +896,6 @@ public class PlayerMovement : MonoBehaviour
     }
     public void AxeFSkill_4()
     {
-
         SphereCollider col = hitRanges[4].GetComponent<SphereCollider>();
 
         Vector3 center = col.bounds.center;
@@ -913,14 +914,15 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
             }
         }
     }
-
     public void AxeSSkill()
     {
         SphereCollider col = hitRanges[5].GetComponent<SphereCollider>();
@@ -941,13 +943,16 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
             }
         }
     }
+
     public void SpearAttackMovePlay()
     {
         switch(unitState)
@@ -965,11 +970,11 @@ public class PlayerMovement : MonoBehaviour
     {
         moveCo = StartCoroutine(SpearAttackComboMove());
     }
-
     public void SpearSkillMovePlay()
     {
         moveCo = StartCoroutine(SpearFristSkillMove());
     }
+
     private IEnumerator SpearFristSkillMove()
     {
         const float ANI_LENGTH = 1.733f;
@@ -1099,7 +1104,9 @@ public class PlayerMovement : MonoBehaviour
                             com.unitState == UnitState.Down ||
                             com.unitState == UnitState.Air ||
                             com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                            com.unitState == UnitState.Die ||
+                            com.unitState == UnitState.Skill_F ||
+                            com.unitState == UnitState.Skill_S)
                             continue;
 
                         com.Hit();
@@ -1107,22 +1114,21 @@ public class PlayerMovement : MonoBehaviour
 
                     case UnitState.Skill_S:
                         obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk * 3f));
-                        com.Knockback(rb.transform.forward);
-
                         if (com.unitState == UnitState.Stun ||
                             com.unitState == UnitState.Down ||
                             com.unitState == UnitState.Air ||
-                    com.unitState == UnitState.Die)
+                            com.unitState == UnitState.Die ||
+                            com.unitState == UnitState.Skill_F ||
+                            com.unitState == UnitState.Skill_S)
                             continue;
 
-                        com.HitKB();
+                        com.HitKB(rb.transform.forward);
                         break;
                 }
 
             }
         }
     }
-
     public void SpearFSkill_1()
     {
         BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
@@ -1143,14 +1149,15 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
             }
         }
     }
-
     public void SpearFSkill_2()
     {
         BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
@@ -1171,7 +1178,9 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -1198,7 +1207,9 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -1225,7 +1236,9 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
                     com.unitState == UnitState.Knockback ||
-                    com.unitState == UnitState.Die)
+                    com.unitState == UnitState.Die ||
+                    com.unitState == UnitState.Skill_F ||
+                    com.unitState == UnitState.Skill_S)
                     continue;
 
                 com.Hit();
@@ -1241,7 +1254,6 @@ public class PlayerMovement : MonoBehaviour
         value--;
         return end * 0.5f * (-Mathf.Pow(2, -10 * value) + 2) + start;
     }
-
     public Vector3 EaseInQuint(Vector3 start, Vector3 end, float value)
     {
         end -= start;
@@ -1253,13 +1265,11 @@ public class PlayerMovement : MonoBehaviour
         end -= start;
         return end * (value * value * value * value * value + 1) + start;
     }
-
     public Vector3 EaseInCubic(Vector3 start, Vector3 end, float value)
     {
         end -= start;
         return end * value * value * value + start;
     }
-
     public Vector3 EaseOutCubic(Vector3 start, Vector3 end, float value)
     {
         value--;
@@ -1274,7 +1284,6 @@ public class PlayerMovement : MonoBehaviour
         value -= 2;
         return end* 0.5f * (Mathf.Sqrt(1 - value* value) + 1) + start;
     }
-
     public Vector3 EaseInOutQuart(Vector3 start, Vector3 end, float value)
     {
         value /= .5f;
@@ -1296,13 +1305,11 @@ public class PlayerMovement : MonoBehaviour
         end -= start;
         return -end * Mathf.Cos(value * (Mathf.PI * 0.5f)) + end + start;
     }
-
     public Vector3 EaseOutSine(Vector3 start, Vector3 end, float value)
     {
         end -= start;
         return end * Mathf.Sin(value * (Mathf.PI * 0.5f)) + start;
     }
-
     public Vector3 EaseOutBounce(Vector3 start, Vector3 end, float value)
     {
         value /= 1f;

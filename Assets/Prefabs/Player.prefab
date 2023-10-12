@@ -1323,6 +1323,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rotateSpeed: 360
   fightTimer: 10
+  currentValue: 0
   vCamera: {fileID: 0}
   fSkillTimerSet: 5
   sSkillTimerSet: 10
