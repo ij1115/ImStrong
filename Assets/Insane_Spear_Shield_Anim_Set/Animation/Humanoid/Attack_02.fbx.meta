@@ -495,7 +495,14 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.298823
+      - time: 0
+        functionName: SpearAttackComboMovePlay
+        data: 
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.44439262
         functionName: SpearAttack
         data: 
         objectReferenceParameter: {instanceID: 0}

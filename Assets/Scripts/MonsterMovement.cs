@@ -164,16 +164,16 @@ public class MonsterMovement : MonoBehaviour
 
     private IEnumerator UpdateFath()
     {
-        while(!mInfo.dead)
+        while (!mInfo.dead)
         {
-            if(attack)
+            if (attack)
             {
                 if (unitState == UnitState.NIdle || unitState == UnitState.Idle)
                 {
                     pathFinder.isStopped = false;
                     pathFinder.SetDestination(target.transform.position);
 
-                    if(!attackBool)
+                    if (!attackBool)
                         AttackWeapons();
                 }
                 else
@@ -183,16 +183,16 @@ public class MonsterMovement : MonoBehaviour
             }
             else
             {
-                if(finder)
+                if (finder)
                 {
                     pathFinder.isStopped = true;
                     SphereCollider col = FindRange.GetComponent<SphereCollider>();
                     Collider[] colliders = Physics.OverlapSphere(col.gameObject.transform.position, 12f, whitIsTarget);
-                    
-                    for(int i=0; i<colliders.Length; ++i)
+
+                    for (int i = 0; i < colliders.Length; ++i)
                     {
                         var p = colliders[i].GetComponent<PlayerInfo>();
-                        if(p != null && !p.dead)
+                        if (p != null && !p.dead)
                         {
                             target = p.gameObject;
                             attack = true;
@@ -200,14 +200,14 @@ public class MonsterMovement : MonoBehaviour
                         }
                     }
                 }
-                else if(!finder)
+                else if (!finder)
                 {
                     pathFinder.isStopped = false;
                     pathFinder.SetDestination(spawnPos);
 
-                    if(!pathFinder.pathPending)
+                    if (!pathFinder.pathPending)
                     {
-                        if(pathFinder.remainingDistance <= pathFinder.stoppingDistance)
+                        if (pathFinder.remainingDistance <= pathFinder.stoppingDistance)
                         {
                             finder = true;
                         }
@@ -215,8 +215,8 @@ public class MonsterMovement : MonoBehaviour
                 }
             }
             yield return new WaitForSeconds(0.25f);
+            
         }
-
         finder = true;
         attack = false;
         aiCo = null;
@@ -359,6 +359,213 @@ public class MonsterMovement : MonoBehaviour
         currentCo = StartCoroutine(IdleToNIdle());
     }
 
+    public void SwordAttackMovePlay()
+    {
+        StartCoroutine(SwordAttackMove());
+    }
+
+    public void SwordAttackComboMovePlay()
+    {
+        StartCoroutine(SwordAttackComboMove());
+    }
+
+    public void SwordSkillMovePlay()
+    {
+        StartCoroutine(SwordFirstSkillMove());
+    }
+    public void SwordSkillTwoMove()
+    {
+        StartCoroutine(SwordSkillTwoMovePlay());
+    }
+
+    private IEnumerator SwordAttackMove()
+    {
+        float aniLength = GetCurrentClip().length;
+        float endTime = (14f / 30f) * aniLength / mInfo.state.atkSp;
+        float timer = 0f;
+
+        var startPos = rb.transform.position;
+        var endPos = rb.transform.position + rb.transform.forward * 0.5f;
+
+        while (true)
+        {
+            timer += Time.deltaTime;
+
+            if (timer > endTime)
+            {
+                timer = endTime;
+                Vector3 nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+                rb.MovePosition(nowPos);
+                break;
+            }
+            rb.MovePosition(EaseInOutExpo(startPos, endPos, timer / endTime));
+            yield return null;
+        }
+
+    }
+
+    private IEnumerator SwordAttackComboMove()
+    {
+        float aniLength = GetCurrentClip().length;
+        float endTime = (6f / 30f) * aniLength / mInfo.state.atkSp;
+        float timer = 0f;
+
+        var startPos = rb.transform.position;
+        var endPos = rb.transform.position + rb.transform.forward * 0.7f;
+
+        while (true)
+        {
+            timer += Time.deltaTime;
+            if (timer > endTime)
+            {
+                timer = endTime;
+                Vector3 nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+                rb.MovePosition(nowPos);
+                break;
+            }
+            rb.MovePosition(EaseInOutExpo(startPos, endPos, timer / endTime));
+            yield return null;
+        }
+    }
+
+    private IEnumerator SwordFirstSkillMove()
+    {
+        float aniLength = GetCurrentClip().length;
+        float firTime = (29f / 30f) * aniLength / mInfo.state.atkSp;
+        float secTime = ((47f / 30f) * aniLength / mInfo.state.atkSp) - firTime;
+        float tirTime = ((76f / 30f) * aniLength / mInfo.state.atkSp) - secTime;
+        float timer = 0f;
+
+        bool first = false;
+        bool sceond = false;
+
+        var startPos = rb.transform.position;
+        var firPos = rb.transform.position + rb.transform.forward * 1f;
+        var secPos = firPos + rb.transform.forward * 1f;
+        var tirPos = secPos + rb.transform.forward * 2f;
+
+        while (true)
+        {
+            timer += Time.deltaTime;
+
+            if (timer < firTime && !first)
+            {
+                rb.MovePosition(EaseOutSine(startPos, firPos, timer / firTime));
+                if (timer > firTime)
+                {
+                    timer -= firTime;
+                    rb.MovePosition(EaseInSine(firPos, secPos, timer / secTime));
+                    first = true;
+                }
+            }
+            else if (timer < secTime && !sceond)
+            {
+                rb.MovePosition(EaseInSine(firPos, secPos, timer / secTime));
+                if (timer > secTime)
+                {
+                    timer -= secTime;
+                    rb.MovePosition(EaseInCubic(secPos, tirPos, timer / tirTime));
+                    sceond = true;
+                }
+            }
+            else if (timer < tirTime)
+            {
+                rb.MovePosition(EaseInCubic(secPos, tirPos, timer / tirTime));
+            }
+            else
+            {
+                timer = tirTime;
+                rb.MovePosition(EaseInCubic(secPos, tirPos, timer / tirTime));
+                break;
+            }
+            //    StartCoroutine(SwordFirstSkillMove_2(timer));
+            //    break;
+            //}
+            //rb.MovePosition(EaseOutSine(startPos, endPos, timer / endTime));
+            yield return null;
+        }
+
+
+    } // 수정필요
+
+    //private IEnumerator SwordFirstSkillMove_2(float lateTimer)
+    //{
+    //    float aniLength = GetCurrentClip().length;
+    //    float endTime = (47f / 30f) * aniLength / info.state.atkSp;
+    //    float timer = lateTimer;
+
+    //    var startPos = rb.transform.position;
+    //    var endPos = rb.transform.position + rb.transform.forward * 1f;
+
+    //    while (true)
+    //    {
+    //        timer += Time.deltaTime;
+    //        Debug.Log(timer);
+
+    //        if (timer > endTime)
+    //        {
+    //            StartCoroutine(SwordFirstSkillMove_3(timer));
+    //            break;
+    //        }
+    //        rb.MovePosition(EaseInSine(startPos, endPos, timer / endTime));
+    //        yield return null;
+    //    }
+
+
+    //}
+
+    //private IEnumerator SwordFirstSkillMove_3(float lateTimer)
+    //{
+    //    float aniLength = GetCurrentClip().length;
+    //    float endTime = (76f / 30f) * aniLength / info.state.atkSp;
+    //    float timer = lateTimer;
+
+    //    var startPos = rb.transform.position;
+    //    var endPos = rb.transform.position + rb.transform.forward * 2f;
+
+    //    while (true)
+    //    {
+    //        timer += Time.deltaTime;
+    //        Debug.Log(timer);
+
+    //        if (timer > endTime)
+    //        {
+    //            timer = endTime;
+    //            Vector3 nowPos = EaseInCubic(startPos, endPos, timer / endTime);
+    //            rb.MovePosition(nowPos);
+    //            break;
+    //        }
+    //        rb.MovePosition(EaseInCubic(startPos, endPos, timer / endTime));
+    //        yield return null;
+    //    }
+    //}
+
+    private IEnumerator SwordSkillTwoMovePlay()
+    {
+        float aniLength = GetCurrentClip().length;
+        float endTime = (38f / 30f) * aniLength / mInfo.state.atkSp;
+        float timer = 0f;
+
+        var startPos = rb.transform.position;
+        var endPos = rb.transform.position + rb.transform.forward * 2f;
+
+        while (true)
+        {
+            timer += Time.deltaTime;
+            Debug.Log(timer);
+
+            if (timer > endTime)
+            {
+                timer = endTime;
+                Vector3 nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+                rb.MovePosition(nowPos);
+                break;
+            }
+            rb.MovePosition(EaselInOutCircle(startPos, endPos, timer / endTime));
+            yield return null;
+        }
+    }
+
     public void SwordAttack()
     {
         BoxCollider col = hitRanges[0].GetComponent<BoxCollider>();
@@ -372,8 +579,14 @@ public class MonsterMovement : MonoBehaviour
         {
             if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
             {
-                obj.GetComponent<PlayerInfo>().OnDamage(mInfo.state.atk);
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
+          
+                if(com.unitState==UnitState.Evade)
+                {
+                    continue;
+                }
+
+                obj.GetComponent<PlayerInfo>().OnDamage(mInfo.state.atk);
 
                 if (com.unitState == UnitState.Stun ||
                     com.unitState == UnitState.Down ||
@@ -402,8 +615,13 @@ public class MonsterMovement : MonoBehaviour
         {
             if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
             {
-                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
+
+                if (com.unitState == UnitState.Evade)
+                {
+                    continue;
+                }
+                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
 
                 if (com.unitState == UnitState.Stun ||
                     com.unitState == UnitState.Down ||
@@ -432,8 +650,12 @@ public class MonsterMovement : MonoBehaviour
         {
             if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
             {
-                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
+                if (com.unitState == UnitState.Evade)
+                {
+                    continue;
+                }
+                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
 
                 if (com.unitState == UnitState.Stun ||
                     com.unitState == UnitState.Down ||
@@ -462,8 +684,12 @@ public class MonsterMovement : MonoBehaviour
         {
             if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
             {
-                obj.GetComponent<PlayerInfo>().OnDamage(mInfo.state.atk);
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
+                if (com.unitState == UnitState.Evade)
+                {
+                    continue;
+                }
+                obj.GetComponent<PlayerInfo>().OnDamage(mInfo.state.atk);
 
                 if (com.unitState == UnitState.Stun ||
                     com.unitState == UnitState.Down ||
@@ -492,9 +718,12 @@ public class MonsterMovement : MonoBehaviour
         {
             if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
             {
-                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk *3f));
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
-
+                if (com.unitState == UnitState.Evade)
+                {
+                    continue;
+                }
+                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk *3f));
                 if (com.unitState == UnitState.Stun ||
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
@@ -506,6 +735,96 @@ public class MonsterMovement : MonoBehaviour
 
                 com.Hit();
             }
+        }
+    }
+
+    public void AxeAttackMovePlay()
+    {
+        StartCoroutine(AxeAttackMove());
+    }
+
+    public void AxeAttackComboMovePlay()
+    {
+        StartCoroutine(AxeAttackComboMove());
+    }
+
+    public void AxeSkillTwoMove()
+    {
+        StartCoroutine(AxeSkillTwoMovePlay());
+    }
+    private IEnumerator AxeAttackMove()
+    {
+        float aniLength = GetCurrentClip().length;
+        float endTime = (10f / 30f) * aniLength / mInfo.state.atkSp;
+        float timer = 0f;
+
+        var startPos = rb.transform.position;
+        var endPos = rb.transform.position + rb.transform.forward * 1f;
+
+        while (true)
+        {
+            timer += Time.deltaTime;
+
+            if (timer > endTime)
+            {
+                timer = endTime;
+                Vector3 nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
+                rb.MovePosition(nowPos);
+                break;
+            }
+            rb.MovePosition(EaseInOutQuart(startPos, endPos, timer / endTime));
+            yield return null;
+        }
+
+    }
+
+    private IEnumerator AxeAttackComboMove()
+    {
+        float aniLength = GetCurrentClip().length;
+        float endTime = (6f / 30f) * aniLength / mInfo.state.atkSp;
+        float timer = 0f;
+
+        var startPos = rb.transform.position;
+        var endPos = rb.transform.position + rb.transform.forward * 1.5f;
+
+        while (true)
+        {
+            timer += Time.deltaTime;
+            if (timer > endTime)
+            {
+                timer = endTime;
+                Vector3 nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+                rb.MovePosition(nowPos);
+                break;
+            }
+            rb.MovePosition(EaseInOutExpo(startPos, endPos, timer / endTime));
+            yield return null;
+        }
+    }
+
+    private IEnumerator AxeSkillTwoMovePlay()
+    {
+        float aniLength = GetCurrentClip().length;
+        float endTime = (31f / 30f) * aniLength / mInfo.state.atkSp;
+        float timer = 0f;
+
+        var startPos = rb.transform.position;
+        var endPos = rb.transform.position + rb.transform.forward * 0.5f;
+
+        while (true)
+        {
+            timer += Time.deltaTime;
+            Debug.Log(timer);
+
+            if (timer > endTime)
+            {
+                timer = endTime;
+                Vector3 nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+                rb.MovePosition(nowPos);
+                break;
+            }
+            rb.MovePosition(EaselInOutCircle(startPos, endPos, timer / endTime));
+            yield return null;
         }
     }
     public void AxeAttack()
@@ -521,8 +840,12 @@ public class MonsterMovement : MonoBehaviour
         {
             if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
             {
-                obj.GetComponent<PlayerInfo>().OnDamage(mInfo.state.atk);
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
+                if (com.unitState == UnitState.Evade)
+                {
+                    continue;
+                }
+                obj.GetComponent<PlayerInfo>().OnDamage(mInfo.state.atk);
 
                 if (com.unitState == UnitState.Stun ||
                     com.unitState == UnitState.Down ||
@@ -552,8 +875,12 @@ public class MonsterMovement : MonoBehaviour
         {
             if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
             {
-                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
+                if (com.unitState == UnitState.Evade)
+                {
+                    continue;
+                }
+                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
 
                 if (com.unitState == UnitState.Stun ||
                     com.unitState == UnitState.Down ||
@@ -583,8 +910,12 @@ public class MonsterMovement : MonoBehaviour
         {
             if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
             {
-                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
+                if (com.unitState == UnitState.Evade)
+                {
+                    continue;
+                }
+                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
 
                 if (com.unitState == UnitState.Stun ||
                     com.unitState == UnitState.Down ||
@@ -613,8 +944,12 @@ public class MonsterMovement : MonoBehaviour
         {
             if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
             {
-                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
+                if (com.unitState == UnitState.Evade)
+                {
+                    continue;
+                }
+                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
 
                 if (com.unitState == UnitState.Stun ||
                     com.unitState == UnitState.Down ||
@@ -643,9 +978,12 @@ public class MonsterMovement : MonoBehaviour
         {
             if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
             {
-                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
-
+                if (com.unitState == UnitState.Evade)
+                {
+                    continue;
+                }
+                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
                 if (com.unitState == UnitState.Stun ||
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
@@ -673,8 +1011,12 @@ public class MonsterMovement : MonoBehaviour
         {
             if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
             {
-                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk *3f));
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
+                if (com.unitState == UnitState.Evade)
+                {
+                    continue;
+                }
+                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk *3f));
 
                 if (com.unitState == UnitState.Stun ||
                     com.unitState == UnitState.Down ||
@@ -690,6 +1032,102 @@ public class MonsterMovement : MonoBehaviour
         }
     }
 
+    public void SpearAttackMovePlay()
+    {
+        switch (unitState)
+        {
+            case UnitState.Attack:
+                StartCoroutine(SpearAttackMove());
+                break;
+
+            case UnitState.Skill_S:
+                StartCoroutine(SpearSkillTwoMovePlay());
+                break;
+        }
+    }
+
+    public void SpearAttackComboMovePlay()
+    {
+        StartCoroutine(SpearAttackComboMove());
+    }
+
+    private IEnumerator SpearAttackMove()
+    {
+        float aniLength = GetCurrentClip().length;
+        float endTime = (14f / 30f) * aniLength / mInfo.state.atkSp;
+        float timer = 0f;
+
+        var startPos = rb.transform.position;
+        var endPos = rb.transform.position + rb.transform.forward * 1f;
+
+        while (true)
+        {
+            timer += Time.deltaTime;
+
+            if (timer > endTime)
+            {
+                timer = endTime;
+                Vector3 nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
+                rb.MovePosition(nowPos);
+                break;
+            }
+            rb.MovePosition(EaseInOutQuart(startPos, endPos, timer / endTime));
+            yield return null;
+        }
+
+    }
+
+    private IEnumerator SpearAttackComboMove()
+    {
+        float aniLength = GetCurrentClip().length;
+        float endTime = (6f / 30f) * aniLength / mInfo.state.atkSp;
+        float timer = 0f;
+
+        var startPos = rb.transform.position;
+        var endPos = rb.transform.position + rb.transform.forward * 1f;
+
+        while (true)
+        {
+            timer += Time.deltaTime;
+            if (timer > endTime)
+            {
+                timer = endTime;
+                Vector3 nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+                rb.MovePosition(nowPos);
+                break;
+            }
+            rb.MovePosition(EaseInOutExpo(startPos, endPos, timer / endTime));
+            yield return null;
+        }
+    }
+
+    private IEnumerator SpearSkillTwoMovePlay()
+    {
+        float aniLength = GetCurrentClip().length;
+        float endTime = (14f / 30f) * aniLength / mInfo.state.atkSp;
+        float timer = 0f;
+
+        var startPos = rb.transform.position;
+        var endPos = rb.transform.position + rb.transform.forward * 3f;
+
+        while (true)
+        {
+            timer += Time.deltaTime;
+            Debug.Log(timer);
+
+            if (timer > endTime)
+            {
+                timer = endTime;
+                Vector3 nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+                rb.MovePosition(nowPos);
+                break;
+            }
+            rb.MovePosition(EaselInOutCircle(startPos, endPos, timer / endTime));
+            yield return null;
+        }
+    }
+
+
     public void SpearAttack()
     {
         BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
@@ -703,8 +1141,11 @@ public class MonsterMovement : MonoBehaviour
         {
             if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
             {
-
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
+                if (com.unitState == UnitState.Evade)
+                {
+                    continue;
+                }
                 switch (unitState)
                 {
                     case UnitState.Attack:
@@ -754,8 +1195,12 @@ public class MonsterMovement : MonoBehaviour
         {
             if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
             {
-                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
+                if (com.unitState == UnitState.Evade)
+                {
+                    continue;
+                }
+                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
 
                 if (com.unitState == UnitState.Stun ||
                     com.unitState == UnitState.Down ||
@@ -784,9 +1229,12 @@ public class MonsterMovement : MonoBehaviour
         {
             if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
             {
-                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
-
+                if (com.unitState == UnitState.Evade)
+                {
+                    continue;
+                }
+                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
                 if (com.unitState == UnitState.Stun ||
                     com.unitState == UnitState.Down ||
                     com.unitState == UnitState.Air ||
@@ -813,8 +1261,12 @@ public class MonsterMovement : MonoBehaviour
         {
             if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
             {
-                obj.GetComponent<PlayerInfo>().OnDamage(mInfo.state.atk);
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
+                if (com.unitState == UnitState.Evade)
+                {
+                    continue;
+                }
+                obj.GetComponent<PlayerInfo>().OnDamage(mInfo.state.atk);
 
                 if (com.unitState == UnitState.Stun ||
                     com.unitState == UnitState.Down ||
@@ -842,8 +1294,12 @@ public class MonsterMovement : MonoBehaviour
         {
             if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
             {
-                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
+                if (com.unitState == UnitState.Evade)
+                {
+                    continue;
+                }
+                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk * 0.5f));
 
                 if (com.unitState == UnitState.Stun ||
                     com.unitState == UnitState.Down ||
@@ -858,4 +1314,72 @@ public class MonsterMovement : MonoBehaviour
             }
         }
     }
+
+    public Vector3 EaseInOutExpo(Vector3 start, Vector3 end, float value)
+    {
+        value /= .5f;
+        end -= start;
+        if (value < 1) return end * 0.5f * Mathf.Pow(2, 10 * (value - 1)) + start;
+        value--;
+        return end * 0.5f * (-Mathf.Pow(2, -10 * value) + 2) + start;
+    }
+
+    public Vector3 EaseInQuint(Vector3 start, Vector3 end, float value)
+    {
+        end -= start;
+        return end * value * value * value * value * value + start;
+    }
+
+    public Vector3 EaseInCubic(Vector3 start, Vector3 end, float value)
+    {
+        end -= start;
+        return end * value * value * value + start;
+    }
+
+    public Vector3 EaseOutCubic(Vector3 start, Vector3 end, float value)
+    {
+        value--;
+        end -= start;
+        return end * (value * value * value + 1) + start;
+    }
+    public Vector3 EaselInOutCircle(Vector3 start, Vector3 end, float value)
+    {
+        value /= .5f;
+        end -= start;
+        if (value < 1) return -end * 0.5f * (Mathf.Sqrt(1 - value * value) - 1) + start;
+        value -= 2;
+        return end * 0.5f * (Mathf.Sqrt(1 - value * value) + 1) + start;
+    }
+
+    public Vector3 EaseInOutQuart(Vector3 start, Vector3 end, float value)
+    {
+        value /= .5f;
+        end -= start;
+        if (value < 1) return end * 0.5f * value * value * value * value + start;
+        value -= 2;
+        return -end * 0.5f * (value * value * value * value - 2) + start;
+    }
+
+    public Vector3 EaseInSine(Vector3 start, Vector3 end, float value)
+    {
+        end -= start;
+        return -end * Mathf.Cos(value * (Mathf.PI * 0.5f)) + end + start;
+    }
+
+    public Vector3 EaseOutSine(Vector3 start, Vector3 end, float value)
+    {
+        end -= start;
+        return end * Mathf.Sin(value * (Mathf.PI * 0.5f)) + start;
+    }
+
+
+    private AnimationClip GetCurrentClip()
+    {
+        AnimatorStateInfo stateInfo = ani.GetCurrentAnimatorStateInfo(0);
+
+        AnimationClip clip = ani.GetCurrentAnimatorClipInfo(0)[0].clip;
+
+        return clip;
+    }
 }
+

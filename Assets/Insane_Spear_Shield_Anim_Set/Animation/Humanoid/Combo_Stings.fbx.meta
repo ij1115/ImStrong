@@ -495,28 +495,28 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.08423864
+      - time: 0.19499813
         functionName: SpearFSkill_1
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.27333692
+      - time: 0.33029893
         functionName: SpearFSkill_2
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.4449104
+      - time: 0.5018724
         functionName: SpearFSkill_3
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.6761653
+      - time: 0.72046906
         functionName: SpearFSkill_4
         data: 
         objectReferenceParameter: {instanceID: 0}

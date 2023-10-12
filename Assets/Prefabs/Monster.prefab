@@ -1296,7 +1296,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   spawner: {fileID: 0}
-  rotateSpeed: 180
   fightTimer: 10
   attackDelay: 1
   hitRanges:

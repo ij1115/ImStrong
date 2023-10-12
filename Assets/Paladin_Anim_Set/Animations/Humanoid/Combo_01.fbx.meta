@@ -60,21 +60,28 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.20911194
+      - time: 0
+        functionName: SwordSkillMovePlay
+        data: 
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.23759295
         functionName: SwordFSkill_1
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.3475624
+      - time: 0.3538915
         functionName: SwordFSkill_2
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.50044835
+      - time: 0.5447521
         functionName: SwordFSkill_3
         data: 
         objectReferenceParameter: {instanceID: 0}

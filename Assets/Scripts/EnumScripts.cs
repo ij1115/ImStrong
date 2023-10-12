@@ -39,4 +39,5 @@ public enum UnitState
     Down, // 넘어짐
     Air, // 부양
     Knockback, // 밀림
+    Evade, // 회피
 }
