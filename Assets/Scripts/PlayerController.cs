@@ -105,8 +105,8 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        moveFB = joystick.Vertical + Input.GetAxis(moveFBAixsName);
-        moveLR = joystick.Horizontal + Input.GetAxis(moveLRAixsName);
+        moveFB =  Input.GetAxis(moveFBAixsName);
+        moveLR =  Input.GetAxis(moveLRAixsName);
         attack = Input.GetKeyDown(KeyCode.L); //Input.GetButtonDown(attackButtonName) ||
         firstSkill = Input.GetKeyDown(KeyCode.K); //Input.GetButtonDown(firstSkillButtonName) ||
         secondSkill = Input.GetKeyDown(KeyCode.O); //Input.GetButtonDown(secondSkillButtonName) ||
