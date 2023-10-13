@@ -2,14 +2,15 @@ using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class MonsterMovement : MonoBehaviour
 {
+    public LayerMask mask;
     public LayerMask whitIsTarget;
     NavMeshAgent pathFinder;
     public GameObject spawner;
     private Vector3 knockbackVec;
-    private Vector3 spawnPos;
     private Coroutine currentCo;
     private Coroutine moveCo;
     private Coroutine aiCo;
@@ -21,14 +22,16 @@ public class MonsterMovement : MonoBehaviour
     public float fightTimer = 10f;
     public float attackDelay = 10f;
     private bool attackBool = false;
+    public bool isMoving { get; private set; }
 
     private GameObject target = null;
-    public bool attack {get; private set;}
     public bool finder { get; private set;}
     public UnitState unitState {  get; private set; }
 
     public GameObject[] hitRanges;
     public GameObject FindRange;
+
+    private int airDamage = 0;
 
     public void SetUp()
     {
@@ -41,8 +44,6 @@ public class MonsterMovement : MonoBehaviour
         ani.runtimeAnimatorController = weapons.GetAni();
         unitState = UnitState.NIdle;
         finder = true;
-        attack = false;
-        spawnPos = rb.transform.position;
         pathFinder.speed = mInfo.state.movSp;
 
         aiCo = StartCoroutine(UpdateFath());
@@ -56,6 +57,7 @@ public class MonsterMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        EngineConverter();
         if (unitState == UnitState.NIdle || unitState == UnitState.Idle)
         {
             ani.SetFloat("Move", pathFinder.desiredVelocity.magnitude);
@@ -64,19 +66,60 @@ public class MonsterMovement : MonoBehaviour
 
     private void Update()
     {
-        if (aiCo == null)
+        if (target == null && aiCo == null)
         {
             aiCo = StartCoroutine(UpdateFath());
         }
 
         if (target == null)
-            return;
-        
-
-        if (Vector3.Distance(spawner.transform.position, rb.transform.position) > 12)
         {
-            attack = false;
-            finder = false;
+            finder = true;
+            return;
+        }
+
+        if ((unitState == UnitState.NIdle || unitState == UnitState.Idle) && !attackBool)
+        {
+            var ray = new Ray(rb.transform.position, rb.transform.forward);
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 2f, whitIsTarget))
+            {
+                var target = hitInfo.collider.gameObject;
+                if (target != null)
+                {
+                    if (target.CompareTag("Player") && !target.GetComponent<PlayerInfo>().dead)
+                    {
+                        isMoving = false;
+                        AttackWeapons();
+                        return;
+                    }
+                }
+            }
+        }
+
+        if ((unitState == UnitState.NIdle || unitState == UnitState.Idle) && pathFinder.enabled)
+        {
+            pathFinder.SetDestination(target.transform.position);
+        }
+    }
+
+    private void EngineConverter()
+    {
+        switch (isMoving)
+        {
+            case true:
+                if (!pathFinder.enabled)
+                    pathFinder.enabled = true;
+
+                if (!rb.isKinematic)
+                    rb.isKinematic = true;
+                break;
+
+            case false:
+                if (pathFinder.enabled)
+                    pathFinder.enabled = false;
+
+                if (rb.isKinematic)
+                    rb.isKinematic = false;
+                break;
         }
     }
 
@@ -86,27 +129,13 @@ public class MonsterMovement : MonoBehaviour
         {
             case Weapons.Sword:
                 {
-                    BoxCollider col = hitRanges[0].GetComponent<BoxCollider>();
-
-                    Vector3 center = col.bounds.center;
-                    Vector3 half = col.bounds.extents;
-
-                    Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[0].transform.rotation);
-
-                    foreach (var obj in colliders)
-                    {
-                        if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
-                        {
-                            attackBool = true;
-                            StartCoroutine(AttackDelay());
-                            unitState = UnitState.Attack;
-                            ani.speed = mInfo.state.atkSp;
-                            ani.SetBool("Fight", true);
-                            ani.SetTrigger("Attack_1");
-                            ani.SetBool("Attack_2", true);
-                            return;
-                        }
-                    }
+                        attackBool = true;
+                        StartCoroutine(AttackDelay());
+                        unitState = UnitState.Attack;
+                        ani.speed = mInfo.state.atkSp;
+                        ani.SetBool("Fight", true);
+                        ani.SetTrigger("Attack_1");
+                        ani.SetBool("Attack_2", true);
                 }
                 break;
 
@@ -168,66 +197,30 @@ public class MonsterMovement : MonoBehaviour
     {
         while (!mInfo.dead)
         {
-            if (attack)
-            {
-                if (unitState == UnitState.NIdle || unitState == UnitState.Idle)
+            if(finder)
+            { 
+                if (unitState == UnitState.Idle || unitState == UnitState.NIdle)
                 {
-                    pathFinder.isStopped = false;
-                    pathFinder.SetDestination(target.transform.position);
+                    SphereCollider col = FindRange.GetComponent<SphereCollider>();
+                    Collider[] colliders = Physics.OverlapSphere(col.gameObject.transform.position, col.radius, whitIsTarget);
 
-                    if (!attackBool)
-                        AttackWeapons();
-                }
-                else
-                {
-                    pathFinder.isStopped = true;
-                }
-            }
-            else
-            {
-                if (finder)
-                {
-                    pathFinder.isStopped = true;
-
-                    if (unitState == UnitState.Idle || unitState == UnitState.NIdle)
+                    for (int i = 0; i < colliders.Length; ++i)
                     {
-                        SphereCollider col = FindRange.GetComponent<SphereCollider>();
-                        Collider[] colliders = Physics.OverlapSphere(col.gameObject.transform.position, 12f, whitIsTarget);
-
-                        for (int i = 0; i < colliders.Length; ++i)
+                        var p = colliders[i].GetComponent<PlayerInfo>();
+                        if (p != null && !p.dead)
                         {
-                            var p = colliders[i].GetComponent<PlayerInfo>();
-                            if (p != null && !p.dead)
-                            {
-                                target = p.gameObject;
-                                attack = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                else if (!finder)
-                {
-                    pathFinder.isStopped = false;
-                    pathFinder.SetDestination(spawnPos);
-
-                    if (!pathFinder.pathPending)
-                    {
-                        if (pathFinder.remainingDistance <= pathFinder.stoppingDistance)
-                        {
-                            finder = true;
+                            target = p.gameObject;
+                            isMoving = true;
+                            finder = false;
+                            break;
                         }
                     }
                 }
             }
             yield return new WaitForSeconds(0.25f);
-            
         }
-        finder = true;
-        attack = false;
-        aiCo = null;
     }
-
+   
     private IEnumerator IdleToNIdle()
     {
         float timer = fightTimer;
@@ -263,11 +256,46 @@ public class MonsterMovement : MonoBehaviour
 
         while (moveTimer < duration)
         {
-            rb.MovePosition(Vector3.Lerp(startPos, endPos, moveTimer / duration));
             moveTimer += Time.deltaTime;
+
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, knockbackVec);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = Vector3.Lerp(startPos, endPos, moveTimer / duration);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = Vector3.Lerp(startPos, endPos, moveTimer / duration);
+            }
+
+            if (moveTimer > duration)
+            {
+                moveTimer = duration;
+                rb.MovePosition(nowPos);
+                break;
+            }
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
-        rb.MovePosition(endPos);
     }
 
 
@@ -276,6 +304,9 @@ public class MonsterMovement : MonoBehaviour
     public void Die()
     {
         unitState = UnitState.Die;
+
+        pathFinder.enabled = false;
+        rb.isKinematic = true;
 
         var colls = GetComponents<Collider>();
         foreach (var coll in colls)
@@ -291,18 +322,60 @@ public class MonsterMovement : MonoBehaviour
     public void HitKB(Vector3 vec)
     {
         knockbackVec = vec;
-        finder = true;
-        pathFinder.isStopped = true;
+        isMoving = false;
         unitState = UnitState.Knockback;
+        ani.speed = 1f;
         ani.SetBool("Fight", true);
         ani.SetTrigger("Knockback");
         StartCoroutine(SpearSSkillMove());
     }
 
+    public void AirDamage()
+    {
+        mInfo.OnDamage(airDamage);
+        airDamage = 0;
+    }
+    public void Air(int damage)
+    {
+        isMoving = false;
+        unitState = UnitState.Air;
+        airDamage = damage;
+        ani.SetTrigger("Air");
+    }
+    public void Down()
+    {
+        isMoving = false;
+        unitState = UnitState.Down;
+        ani.SetTrigger("Down");
+    }
+
+    public void Stun(float time)
+    {
+        isMoving = false;
+        unitState = UnitState.Stun;
+        ani.speed = 1f;
+        ani.SetTrigger("Stun");
+        StartCoroutine(StunRelese(time));
+    }
+
+    private IEnumerator StunRelese(float time)
+    {
+        float stunTime = time;
+        while(stunTime>0)
+        {
+            isMoving = false;
+            stunTime -= Time.deltaTime;
+            yield return null;
+        }
+
+        ReturnIdle();
+        ani.SetTrigger("StunRelese");
+    }
     public void Hit()
     {
-        finder = true;
+        isMoving = false;
         unitState = UnitState.Impact;
+        ani.speed = 1f;
         ani.SetBool("Fight", true);
         ani.SetTrigger("Impact");
     }
@@ -317,6 +390,7 @@ public class MonsterMovement : MonoBehaviour
                     break;
                 }
                 unitState = UnitState.Idle;
+                isMoving = true;
                 ani.speed = 1f;
                 ani.SetBool("Attack_2", false);
                 break;
@@ -324,23 +398,43 @@ public class MonsterMovement : MonoBehaviour
             case UnitState.Skill_F:
                 ani.speed = 1f;
                 unitState = UnitState.Idle;
+                isMoving = true;
                 break;
 
             case UnitState.Skill_S:
                 ani.speed = 1f;
                 unitState = UnitState.Idle;
+                isMoving = true;
                 break;
 
             case UnitState.Impact:
-                pathFinder.isStopped = false;
                 ani.speed = 1f;
                 unitState = UnitState.Idle;
+                isMoving = true;
                 break;
 
             case UnitState.Knockback:
-                pathFinder.isStopped = false;
                 ani.speed = 1f;
                 unitState = UnitState.Idle;
+                isMoving = true;
+                break;
+
+            case UnitState.Stun:
+                ani.speed = 1f;
+                unitState = UnitState.Idle;
+                isMoving = true;
+                break;
+
+            case UnitState.Down:
+                ani.speed = 1f;
+                unitState = UnitState.Idle;
+                isMoving = true;
+                break;
+
+            case UnitState.Air:
+                ani.speed = 1f;
+                unitState = UnitState.Idle;
+                isMoving = true;
                 break;
         }
     }
@@ -348,6 +442,7 @@ public class MonsterMovement : MonoBehaviour
     {
         ani.SetBool("Attack_2", false);
         ani.speed = 1f;
+        isMoving = true;
         unitState = UnitState.Idle;
     }
     public void FightCoroutine()
@@ -392,14 +487,41 @@ public class MonsterMovement : MonoBehaviour
         {
             timer += Time.deltaTime;
 
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseInOutExpo(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -416,14 +538,42 @@ public class MonsterMovement : MonoBehaviour
         while (true)
         {
             timer += Time.deltaTime;
+
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseInOutExpo(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -456,36 +606,92 @@ public class MonsterMovement : MonoBehaviour
         {
             timer += Time.deltaTime;
 
-            if (!first)
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
             {
-                rb.MovePosition(EaseOutSine(startPos, firPos, timer / firTime));
-                if (timer > firTime)
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
                 {
-                    timer -= firTime;
-                    rb.MovePosition(EaseInSine(firPos, secPos, timer / secTime));
-                    first = true;
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        if (!first)
+                        {
+                            nowPos = EaseOutSine(startPos, firPos, timer / firTime);
+                            if (timer > firTime)
+                            {
+                                timer -= firTime;
+                                nowPos = EaseInSine(firPos, secPos, timer / secTime);
+                                first = true;
+                            }
+                        }
+
+                        else if (!sceond)
+                        {
+                            nowPos = EaseInSine(firPos, secPos, timer / secTime);
+
+                            if (timer > secTime)
+                            {
+                                timer -= secTime;
+                                nowPos = EaseInCubic(secPos, tirPos, timer / tirTime);
+                                sceond = true;
+                            }
+                        }
+
+                        else if (timer < tirTime)
+                        {
+                            nowPos = EaseInCubic(secPos, tirPos, timer / tirTime);
+                        }
+                    }
                 }
             }
-            else if (!sceond)
+
+            else
             {
-                rb.MovePosition(EaseInSine(firPos, secPos, timer / secTime));
-                if (timer > secTime)
+                if (!first)
                 {
-                    timer -= secTime;
-                    rb.MovePosition(EaseInCubic(secPos, tirPos, timer / tirTime));
-                    sceond = true;
+                    nowPos = EaseOutSine(startPos, firPos, timer / firTime);
+                    if (timer > firTime)
+                    {
+                        timer -= firTime;
+                        nowPos = EaseInSine(firPos, secPos, timer / secTime);
+                        first = true;
+                    }
+                }
+
+                else if (!sceond)
+                {
+                    nowPos = EaseInSine(firPos, secPos, timer / secTime);
+
+                    if (timer > secTime)
+                    {
+                        timer -= secTime;
+                        nowPos = EaseInCubic(secPos, tirPos, timer / tirTime);
+                        sceond = true;
+                    }
+                }
+                else if (timer < tirTime)
+                {
+                    nowPos = EaseInCubic(secPos, tirPos, timer / tirTime);
                 }
             }
-            else if (timer < tirTime)
+
+            if (!first && !sceond && timer > tirTime)
             {
-                rb.MovePosition(EaseInCubic(secPos, tirPos, timer / tirTime));
-            }
-            else if (timer > tirTime)
-            {
-                timer = tirTime;
-                rb.MovePosition(EaseInCubic(secPos, tirPos, timer / tirTime));
+                rb.MovePosition(nowPos);
                 break;
             }
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -502,16 +708,42 @@ public class MonsterMovement : MonoBehaviour
         while (true)
         {
             timer += Time.deltaTime;
-            Debug.Log(timer);
+
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+            }
 
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaselInOutCircle(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -648,7 +880,7 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Skill_S)
                     continue;
 
-                com.Hit();
+                com.Stun(2f);
             }
         }
     }
@@ -680,7 +912,7 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Skill_S)
                     continue;
 
-                com.Hit();
+                com.Stun(5f);
             }
         }
     }
@@ -715,14 +947,41 @@ public class MonsterMovement : MonoBehaviour
         {
             timer += Time.deltaTime;
 
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseInOutQuart(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -739,14 +998,42 @@ public class MonsterMovement : MonoBehaviour
         while (true)
         {
             timer += Time.deltaTime;
+
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseInOutExpo(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -768,14 +1055,41 @@ public class MonsterMovement : MonoBehaviour
         {
             timer += Time.deltaTime;
 
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaselInOutCircle(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -793,14 +1107,41 @@ public class MonsterMovement : MonoBehaviour
         {
             timer += Time.deltaTime;
 
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseInOutQuart(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -988,7 +1329,7 @@ public class MonsterMovement : MonoBehaviour
                 {
                     continue;
                 }
-                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk *3f));
+                obj.GetComponent<PlayerInfo>().OnDamage(Mathf.RoundToInt((float)mInfo.state.atk *1.5f));
 
                 if (com.unitState == UnitState.Stun ||
                     com.unitState == UnitState.Down ||
@@ -999,7 +1340,7 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Skill_S)
                     continue;
 
-                com.Hit();
+                com.Air(Mathf.RoundToInt((float)mInfo.state.atk * 1.5f));
             }
         }
     }
@@ -1044,14 +1385,41 @@ public class MonsterMovement : MonoBehaviour
         {
             timer += Time.deltaTime;
 
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaseOutBounce(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseOutBounce(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseOutBounce(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseOutBounce(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -1069,14 +1437,41 @@ public class MonsterMovement : MonoBehaviour
         {
             timer += Time.deltaTime;
 
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseInOutQuart(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -1093,14 +1488,42 @@ public class MonsterMovement : MonoBehaviour
         while (true)
         {
             timer += Time.deltaTime;
+
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseInOutExpo(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -1117,16 +1540,42 @@ public class MonsterMovement : MonoBehaviour
         while (true)
         {
             timer += Time.deltaTime;
-            Debug.Log(timer);
+
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+            }
 
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaselInOutCircle(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -1178,7 +1627,7 @@ public class MonsterMovement : MonoBehaviour
                             com.unitState == UnitState.Skill_S)
                             continue;
 
-                        com.HitKB();
+                        com.HitKB(rb.transform.forward);
                         break;
                 }
 
@@ -1312,7 +1761,7 @@ public class MonsterMovement : MonoBehaviour
                     com.unitState == UnitState.Skill_S)
                     continue;
 
-                com.Hit();
+                com.HitKB(rb.transform.forward);
             }
         }
     }

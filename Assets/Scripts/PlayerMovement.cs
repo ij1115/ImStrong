@@ -7,12 +7,14 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 using static UnityEditor.PlayerSettings;
 
 public class PlayerMovement : MonoBehaviour
 {
+    public LayerMask mask;
     private Vector3 knockbackVec;
-
+    private int airDamage = 0;
     private Coroutine currentCo;
     public Coroutine moveCo;
     private PlayerController controller;
@@ -35,11 +37,11 @@ public class PlayerMovement : MonoBehaviour
 
     private bool fSkillDelay = false;
     private float fSkillTimer = 0f;
-    public float fSkillTimerSet = 5f;
+    public float fSkillTimerSet = 10f;
 
     private bool sSkillDelay = false;
     private float sSkillTimer = 0f;
-    public float sSkillTimerSet = 10f;
+    public float sSkillTimerSet = 20f;
 
     public GameObject[] hitRanges;
 
@@ -65,6 +67,9 @@ public class PlayerMovement : MonoBehaviour
     {
         if (controller == null)
             return;
+
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
 
         if (unitState == UnitState.NIdle || unitState == UnitState.Idle)
         {
@@ -199,15 +204,50 @@ public class PlayerMovement : MonoBehaviour
         rb.MoveRotation(rotation);
     }
 
-    public void HitKB()
+    public void HitKB(Vector3 vec)
     {
+        knockbackVec = vec;
         unitState = UnitState.Knockback;
+        ani.speed = 1f;
         ani.SetBool("Fight", true);
         ani.SetTrigger("Knockback");
+        StartCoroutine(SpearSSkillMove());
+    }
+
+    public void Air(int damage)
+    {
+        unitState = UnitState.Air;
+        airDamage = damage;
+        ani.SetTrigger("Air");
+    }
+    public void AirDamage()
+    {
+        info.OnDamage(airDamage);
+        airDamage = 0;
+    }
+    public void Stun(float time)
+    {
+        unitState = UnitState.Stun;
+        ani.speed = 1f;
+        ani.SetTrigger("Stun");
+        StartCoroutine(StunRelese(time));
+    }
+
+    private IEnumerator StunRelese(float time)
+    {
+        float stunTime = time;
+        while (stunTime > 0)
+        {
+            stunTime -= Time.deltaTime;
+            yield return null;
+        }
+        ReturnIdle();
+        ani.SetTrigger("StunRelese");
     }
     public void Hit()
     {
         unitState = UnitState.Impact;
+        ani.speed = 1f;
         ani.SetBool("Fight", true);
         ani.SetTrigger("Impact");
     }
@@ -261,11 +301,46 @@ public class PlayerMovement : MonoBehaviour
 
         while (moveTimer < duration)
         {
-            rb.MovePosition(Vector3.Lerp(startPos, endPos, moveTimer / duration));
             moveTimer += Time.deltaTime;
+
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, knockbackVec);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = Vector3.Lerp(startPos, endPos, moveTimer / duration);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = Vector3.Lerp(startPos, endPos, moveTimer / duration);
+            }
+
+            if (moveTimer > duration)
+            {
+                moveTimer = duration;
+                rb.MovePosition(nowPos);
+                break;
+            }
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
-        rb.MovePosition(endPos);
     }
 
     public void Knockback(Vector3 vec)
@@ -274,7 +349,6 @@ public class PlayerMovement : MonoBehaviour
 
         StartCoroutine(SpearSSkillMove());
     }
-
 
     public void ReturnIdle()
     {
@@ -336,19 +410,45 @@ public class PlayerMovement : MonoBehaviour
         var startPos = rb.transform.position;
         var endPos = rb.transform.position + rb.transform.forward * 5f;
 
-        Debug.Log(endTime);
         while (true)
         {
             timer += Time.deltaTime;
 
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if(target != null)
+                {
+                    if(target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                         nowPos = EaseInOutQuad(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseInOutQuad(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseInOutQuad(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseInOutQuad(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         ReturnIdle();
@@ -385,14 +485,41 @@ public class PlayerMovement : MonoBehaviour
         {
             timer += Time.deltaTime;
 
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseInOutExpo(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -409,14 +536,42 @@ public class PlayerMovement : MonoBehaviour
         while (true)
         {
             timer += Time.deltaTime;
+
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseInOutExpo(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -449,36 +604,92 @@ public class PlayerMovement : MonoBehaviour
         {
             timer += Time.deltaTime;
 
-            if (!first)
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
             {
-                rb.MovePosition(EaseOutSine(startPos, firPos, timer / firTime));
-                if(timer> firTime)
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
                 {
-                    timer -= firTime;
-                    rb.MovePosition(EaseInSine(firPos, secPos, timer / secTime));
-                    first = true;
-                }    
-            }
-            else if(!sceond)
-            {
-                rb.MovePosition(EaseInSine(firPos, secPos, timer / secTime));
-                if (timer > secTime)
-                {
-                    timer -= secTime;
-                    rb.MovePosition(EaseInCubic(secPos, tirPos, timer / tirTime));
-                    sceond = true;
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        if (!first)
+                        {
+                            nowPos = EaseOutSine(startPos, firPos, timer / firTime);
+                            if (timer > firTime)
+                            {
+                                timer -= firTime;
+                                nowPos = EaseInSine(firPos, secPos, timer / secTime);
+                                first = true;
+                            }
+                        }
+
+                        else if (!sceond)
+                        {
+                            nowPos = EaseInSine(firPos, secPos, timer / secTime);
+
+                            if (timer > secTime)
+                            {
+                                timer -= secTime;
+                                nowPos = EaseInCubic(secPos, tirPos, timer / tirTime);
+                                sceond = true;
+                            }
+                        }
+
+                        else if (timer < tirTime)
+                        {
+                            nowPos = EaseInCubic(secPos, tirPos, timer / tirTime);
+                        }
+                    }
                 }
             }
-            else if(timer<tirTime)
+
+            else
             {
-                rb.MovePosition(EaseInCubic(secPos, tirPos, timer / tirTime));
+                if (!first)
+                {
+                    nowPos = EaseOutSine(startPos, firPos, timer / firTime);
+                    if (timer > firTime)
+                    {
+                        timer -= firTime;
+                        nowPos = EaseInSine(firPos, secPos, timer / secTime);
+                        first = true;
+                    }
+                }
+
+                else if (!sceond)
+                {
+                    nowPos = EaseInSine(firPos, secPos, timer / secTime);
+
+                    if (timer > secTime)
+                    {
+                        timer -= secTime;
+                        nowPos = EaseInCubic(secPos, tirPos, timer / tirTime);
+                        sceond = true;
+                    }
+                }
+                else if (timer < tirTime)
+                {
+                    nowPos = EaseInCubic(secPos, tirPos, timer / tirTime);
+                }
             }
-            else if(timer>tirTime)
+
+            if(!first&&!sceond&&timer>tirTime)
             {
-                timer = tirTime;
-                rb.MovePosition(EaseInCubic(secPos, tirPos, timer / tirTime));
+                rb.MovePosition(nowPos);
                 break;
             }
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -495,16 +706,42 @@ public class PlayerMovement : MonoBehaviour
         while (true)
         {
             timer += Time.deltaTime;
-            Debug.Log(timer);
+
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+            }
 
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaselInOutCircle(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -622,7 +859,7 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Skill_S)
                     continue;
 
-                com.Hit();
+                com.Stun(2f);
             }
         }
     }
@@ -651,7 +888,7 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Skill_S)
                     continue;
 
-                com.Hit();
+                com.Stun(5f);
             }
         }
     }
@@ -686,17 +923,45 @@ public class PlayerMovement : MonoBehaviour
         {
             timer += Time.deltaTime;
 
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseInOutQuart(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
+
     }
     private IEnumerator AxeAttackComboMove()
     {
@@ -710,17 +975,46 @@ public class PlayerMovement : MonoBehaviour
         while (true)
         {
             timer += Time.deltaTime;
+
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseInOutExpo(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
+
     }
     private IEnumerator AxeSkillFirstMove()
     {
@@ -740,14 +1034,41 @@ public class PlayerMovement : MonoBehaviour
         {
             timer += Time.deltaTime;
 
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaselInOutCircle(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -765,14 +1086,41 @@ public class PlayerMovement : MonoBehaviour
         {
             timer += Time.deltaTime;
 
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseInOutQuart(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -919,7 +1267,7 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Skill_S)
                     continue;
 
-                com.Hit();
+                com.Down();
             }
         }
     }
@@ -936,7 +1284,7 @@ public class PlayerMovement : MonoBehaviour
         {
             if (obj.CompareTag("Monster") && !obj.GetComponent<MonsterInfo>().dead)
             {
-                obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk * 3f));
+                obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk * 1.5f));
                 var com = obj.gameObject.GetComponent<MonsterMovement>();
 
                 if (com.unitState == UnitState.Stun ||
@@ -948,7 +1296,7 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Skill_S)
                     continue;
 
-                com.Hit();
+                com.Air(Mathf.RoundToInt((float)info.state.atk * 1.5f));
             }
         }
     }
@@ -985,7 +1333,6 @@ public class PlayerMovement : MonoBehaviour
 
         float timer = 0f;
 
-        Debug.Log(endTime);
         var startPos = rb.transform.position;
         var endPos = rb.transform.position + rb.transform.forward * 3f;
 
@@ -993,14 +1340,41 @@ public class PlayerMovement : MonoBehaviour
         {
             timer += Time.deltaTime;
 
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaseOutBounce(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseOutBounce(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseOutBounce(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseOutBounce(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -1018,14 +1392,41 @@ public class PlayerMovement : MonoBehaviour
         {
             timer += Time.deltaTime;
 
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseInOutQuart(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseInOutQuart(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -1042,14 +1443,42 @@ public class PlayerMovement : MonoBehaviour
         while (true)
         {
             timer += Time.deltaTime;
+
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
+            }
+
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaseInOutExpo(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaseInOutExpo(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -1066,16 +1495,42 @@ public class PlayerMovement : MonoBehaviour
         while (true)
         {
             timer += Time.deltaTime;
-            Debug.Log(timer);
+
+            Vector3 nowPos = rb.position;
+
+            var rbT = rb.transform.position;
+            rbT.y = 1.5f;
+            var ray = new Ray(rbT, rb.transform.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+            {
+                var target = hitInfo.collider.gameObject;
+
+                if (target != null)
+                {
+                    if (target.CompareTag("Map"))
+                    {
+                        nowPos = rb.position;
+                    }
+                    else
+                    {
+                        nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+                    }
+                }
+            }
+
+            else
+            {
+                nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
+            }
 
             if (timer > endTime)
             {
-                timer = endTime;
-                Vector3 nowPos = EaselInOutCircle(startPos, endPos, timer / endTime);
                 rb.MovePosition(nowPos);
                 break;
             }
-            rb.MovePosition(EaselInOutCircle(startPos, endPos, timer / endTime));
+
+            rb.MovePosition(nowPos);
             yield return null;
         }
         moveCo = null;
@@ -1113,7 +1568,7 @@ public class PlayerMovement : MonoBehaviour
                         break;
 
                     case UnitState.Skill_S:
-                        obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk * 3f));
+                        obj.GetComponent<MonsterInfo>().OnDamage(Mathf.RoundToInt((float)info.state.atk * 2f));
                         if (com.unitState == UnitState.Stun ||
                             com.unitState == UnitState.Down ||
                             com.unitState == UnitState.Air ||
@@ -1241,7 +1696,7 @@ public class PlayerMovement : MonoBehaviour
                     com.unitState == UnitState.Skill_S)
                     continue;
 
-                com.Hit();
+                com.HitKB(rb.transform.forward);
             }
         }
     }

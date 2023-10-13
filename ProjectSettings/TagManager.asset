@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Monster
   - weapons
+  - Map
   layers:
   - Default
   - TransparentFX
@@ -14,8 +15,8 @@ TagManager:
   - Water
   - UI
   - Player
-  - 
-  - 
+  - Monster
+  - Wall
   - 
   - 
   - 
