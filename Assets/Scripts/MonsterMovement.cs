@@ -20,8 +20,13 @@ public class MonsterMovement : MonoBehaviour
     private Rigidbody rb;
 
     public float fightTimer = 10f;
-    public float attackDelay = 10f;
+    public float attackDelay = 0f;
+    public float hitRange = 0f;
     private bool attackBool = false;
+    public float fSkillDelay = 0f;
+    private bool fSkillBool = false;
+    public float sSkillDelay = 0f;
+    private bool sSkillBool = false;
     public bool isMoving { get; private set; }
 
     private GameObject target = null;
@@ -45,7 +50,7 @@ public class MonsterMovement : MonoBehaviour
         unitState = UnitState.NIdle;
         finder = true;
         pathFinder.speed = mInfo.state.movSp;
-
+        HitRangeSwap();
         aiCo = StartCoroutine(UpdateFath());
     }
 
@@ -55,9 +60,32 @@ public class MonsterMovement : MonoBehaviour
         ani.runtimeAnimatorController = weapons.GetAni();
     }
 
+    public void HitRangeSwap()
+    {
+        switch (mInfo.type)
+        {
+            case MonsterType.Mob:
+                attackDelay = 10f;
+                break;
+
+            case MonsterType.SubBoss:
+                attackDelay = 15f;
+                fSkillDelay = 20f;
+                break;
+
+            case MonsterType.Boss:
+                attackDelay = 20f;
+                fSkillDelay = 25f;
+                sSkillDelay = 30f;
+                break;
+        }
+
+    }
+  
     private void FixedUpdate()
     {
         EngineConverter();
+
         if (unitState == UnitState.NIdle || unitState == UnitState.Idle)
         {
             ani.SetFloat("Move", pathFinder.desiredVelocity.magnitude);
@@ -77,23 +105,32 @@ public class MonsterMovement : MonoBehaviour
             return;
         }
 
+        switch (mInfo.type)
+        {
+            case MonsterType.Boss:
+                if ((unitState == UnitState.NIdle || unitState == UnitState.Idle) && !sSkillBool)
+                {
+                    UseSSkill();
+                }
+                break;
+        }
+
+        switch (mInfo.type)
+        {
+            case MonsterType.SubBoss:
+            case MonsterType.Boss:
+                if ((unitState == UnitState.NIdle || unitState == UnitState.Idle) && !fSkillBool)
+                {
+                    UseFSkill();
+                }
+                break;
+        }
+
         if ((unitState == UnitState.NIdle || unitState == UnitState.Idle) && !attackBool)
         {
-            var ray = new Ray(rb.transform.position, rb.transform.forward);
-            if (Physics.Raycast(ray, out RaycastHit hitInfo, 2f, whitIsTarget))
-            {
-                var target = hitInfo.collider.gameObject;
-                if (target != null)
-                {
-                    if (target.CompareTag("Player") && !target.GetComponent<PlayerInfo>().dead)
-                    {
-                        isMoving = false;
-                        AttackWeapons();
-                        return;
-                    }
-                }
-            }
+            AttackWeapons();
         }
+
 
         if ((unitState == UnitState.NIdle || unitState == UnitState.Idle) && pathFinder.enabled)
         {
@@ -129,13 +166,27 @@ public class MonsterMovement : MonoBehaviour
         {
             case Weapons.Sword:
                 {
-                        attackBool = true;
-                        StartCoroutine(AttackDelay());
-                        unitState = UnitState.Attack;
-                        ani.speed = mInfo.state.atkSp;
-                        ani.SetBool("Fight", true);
-                        ani.SetTrigger("Attack_1");
-                        ani.SetBool("Attack_2", true);
+                    BoxCollider col = hitRanges[0].GetComponent<BoxCollider>();
+
+                    Vector3 center = col.bounds.center;
+                    Vector3 half = col.bounds.extents;
+
+                    Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[0].transform.rotation);
+
+                    foreach (var obj in colliders)
+                    {
+                        if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
+                        {
+                            isMoving = false;
+                            attackBool = true;
+                            StartCoroutine(AttackDelay());
+                            unitState = UnitState.Attack;
+                            ani.speed = mInfo.state.atkSp;
+                            ani.SetBool("Fight", true);
+                            ani.SetTrigger("Attack_1");
+                            return;
+                        }
+                    }
                 }
                 break;
 
@@ -152,13 +203,13 @@ public class MonsterMovement : MonoBehaviour
                     {
                         if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
                         {
+                            isMoving = false;
                             attackBool = true;
                             StartCoroutine(AttackDelay());
                             unitState = UnitState.Attack;
                             ani.speed = mInfo.state.atkSp;
                             ani.SetBool("Fight", true);
                             ani.SetTrigger("Attack_1");
-                            ani.SetBool("Attack_2", true);
                             return;
                         }
                     }
@@ -178,13 +229,13 @@ public class MonsterMovement : MonoBehaviour
                     {
                         if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
                         {
+                            isMoving = false;
                             attackBool = true;
                             StartCoroutine(AttackDelay());
                             unitState = UnitState.Attack;
                             ani.speed = mInfo.state.atkSp;
                             ani.SetBool("Fight", true);
                             ani.SetTrigger("Attack_1");
-                            ani.SetBool("Attack_2", true);
                             return;
                         }
                     }
@@ -192,7 +243,168 @@ public class MonsterMovement : MonoBehaviour
                 break;
         }
     }
+    private void UseFSkill()
+    {
+        switch (weapons.type)
+        {
+            case Weapons.Sword:
+                {
+                    BoxCollider col = hitRanges[1].GetComponent<BoxCollider>();
 
+                    Vector3 center = col.bounds.center;
+                    Vector3 half = col.bounds.extents;
+
+                    Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[1].transform.rotation);
+
+                    foreach (var obj in colliders)
+                    {
+                        if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
+                        {
+                            isMoving = false;
+                            fSkillBool = true;
+                            StartCoroutine(FSkillDelay());
+                            unitState = UnitState.Skill_F;
+                            ani.speed = mInfo.state.atkSp;
+                            ani.SetBool("Fight", true);
+                            ani.SetTrigger("Skill_F");
+                            return;
+                        }
+                    }
+                }
+                break;
+
+            case Weapons.Axe:
+                {
+                    BoxCollider col = hitRanges[3].GetComponent<BoxCollider>();
+
+                    Vector3 center = col.bounds.center;
+                    Vector3 half = col.bounds.extents;
+
+                    Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[3].transform.rotation);
+
+                    foreach (var obj in colliders)
+                    {
+                        if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
+                        {
+                            isMoving = false;
+                            fSkillBool = true;
+                            StartCoroutine(FSkillDelay());
+                            unitState = UnitState.Skill_F;
+                            ani.speed = mInfo.state.atkSp;
+                            ani.SetBool("Fight", true);
+                            ani.SetTrigger("Skill_F");
+                        }
+                    }
+                }
+                break;
+
+            case Weapons.Spear:
+                {
+                    BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
+
+                    Vector3 center = col.bounds.center;
+                    Vector3 half = col.bounds.extents;
+
+                    Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[6].transform.rotation);
+
+                    foreach (var obj in colliders)
+                    {
+                        if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
+                        {
+                            isMoving = false;
+                            fSkillBool = true;
+                            StartCoroutine(FSkillDelay());
+                            unitState = UnitState.Skill_F;
+                            ani.speed = mInfo.state.atkSp;
+                            ani.SetBool("Fight", true);
+                            ani.SetTrigger("Skill_F");
+                        }
+                    }
+                }
+                break;
+        }
+    }
+
+    private void UseSSkill()
+    {
+        switch (weapons.type)
+        {
+            case Weapons.Sword:
+                {
+                    BoxCollider col = hitRanges[2].GetComponent<BoxCollider>();
+
+                    Vector3 center = col.bounds.center;
+                    Vector3 half = col.bounds.extents;
+
+                    Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[2].transform.rotation);
+
+                    foreach (var obj in colliders)
+                    {
+                        if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
+                        {
+                            isMoving = false;
+                            sSkillBool = true;
+                            StartCoroutine(SSkillDelay());
+                            unitState = UnitState.Skill_S;
+                            ani.speed = mInfo.state.atkSp;
+                            ani.SetBool("Fight", true);
+                            ani.SetTrigger("Skill_S");
+                            return;
+                        }
+                    }
+                }
+                break;
+
+            case Weapons.Axe:
+                {
+                    SphereCollider col = hitRanges[5].GetComponent<SphereCollider>();
+
+                    Vector3 center = col.bounds.center;
+                    float half = col.radius;
+
+                    Collider[] colliders = Physics.OverlapSphere(center, half);
+                    foreach (var obj in colliders)
+                    {
+                        if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
+                        {
+                            isMoving = false;
+                            sSkillBool = true;
+                            StartCoroutine(SSkillDelay());
+                            unitState = UnitState.Skill_S;
+                            ani.speed = mInfo.state.atkSp;
+                            ani.SetBool("Fight", true);
+                            ani.SetTrigger("Skill_S");
+                        }
+                    }
+                }
+                break;
+
+            case Weapons.Spear:
+                {
+                    BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
+
+                    Vector3 center = col.bounds.center;
+                    Vector3 half = col.bounds.extents;
+
+                    Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[6].transform.rotation);
+
+                    foreach (var obj in colliders)
+                    {
+                        if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
+                        {
+                            isMoving = false;
+                            sSkillBool = true;
+                            StartCoroutine(SSkillDelay());
+                            unitState = UnitState.Skill_S;
+                            ani.speed = mInfo.state.atkSp;
+                            ani.SetBool("Fight", true);
+                            ani.SetTrigger("Skill_S");
+                        }
+                    }
+                }
+                break;
+        }
+    }
     private IEnumerator UpdateFath()
     {
         while (!mInfo.dead)
@@ -247,6 +459,26 @@ public class MonsterMovement : MonoBehaviour
         attackBool = false;
     }
 
+    private IEnumerator FSkillDelay()
+    {
+        float timer = fSkillDelay;
+        while (timer > 0)
+        {
+            yield return null;
+            timer -= Time.deltaTime;
+        }
+       fSkillBool = false;
+    }
+    private IEnumerator SSkillDelay()
+    {
+        float timer = sSkillDelay;
+        while (timer > 0)
+        {
+            yield return null;
+            timer -= Time.deltaTime;
+        }
+        sSkillBool = false;
+    }
     private IEnumerator SpearSSkillMove()
     {
         var startPos = rb.transform.position;
@@ -521,6 +753,23 @@ public class MonsterMovement : MonoBehaviour
                 break;
             }
 
+            BoxCollider col = hitRanges[0].GetComponent<BoxCollider>();
+
+            Vector3 center = col.bounds.center;
+            Vector3 half = col.bounds.extents;
+
+            Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[0].transform.rotation);
+
+            foreach (var obj in colliders)
+            {
+                if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
+                {
+                    ani.SetBool("Attack_2", true);
+                    break;
+                }
+                ani.SetBool("Attack_2", false);
+            }
+
             rb.MovePosition(nowPos);
             yield return null;
         }
@@ -685,7 +934,7 @@ public class MonsterMovement : MonoBehaviour
                 }
             }
 
-            if (!first && !sceond && timer > tirTime)
+            if (first && sceond && timer > tirTime)
             {
                 rb.MovePosition(nowPos);
                 break;
@@ -979,6 +1228,23 @@ public class MonsterMovement : MonoBehaviour
             {
                 rb.MovePosition(nowPos);
                 break;
+            }
+
+            BoxCollider col = hitRanges[3].GetComponent<BoxCollider>();
+
+            Vector3 center = col.bounds.center;
+            Vector3 half = col.bounds.extents;
+
+            Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[3].transform.rotation);
+
+            foreach (var obj in colliders)
+            {
+                if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
+                {
+                    ani.SetBool("Attack_2", true);
+                    break;
+                }
+                ani.SetBool("Attack_2", false);
             }
 
             rb.MovePosition(nowPos);
@@ -1470,6 +1736,24 @@ public class MonsterMovement : MonoBehaviour
                 rb.MovePosition(nowPos);
                 break;
             }
+
+            BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
+
+            Vector3 center = col.bounds.center;
+            Vector3 half = col.bounds.extents;
+
+            Collider[] colliders = Physics.OverlapBox(center, half, hitRanges[6].transform.rotation);
+
+            foreach (var obj in colliders)
+            {
+                if (obj.CompareTag("Player") && !obj.GetComponent<PlayerInfo>().dead)
+                {
+                    ani.SetBool("Attack_2", true);
+                    break;
+                }
+                ani.SetBool("Attack_2", false);
+            }
+        
 
             rb.MovePosition(nowPos);
             yield return null;

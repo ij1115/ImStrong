@@ -683,7 +683,7 @@ public class PlayerMovement : MonoBehaviour
                 }
             }
 
-            if(!first&&!sceond&&timer>tirTime)
+            if(first&&sceond&&timer>tirTime)
             {
                 rb.MovePosition(nowPos);
                 break;
