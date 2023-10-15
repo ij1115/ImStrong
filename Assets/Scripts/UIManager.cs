@@ -23,6 +23,10 @@ public class UIManager : MonoBehaviour
 
     //DungeonUi
     [SerializeField] private GameObject option;
+    [SerializeField] private Button replayButton;
+    [SerializeField] private Button homeButton;
+
+    public GameObject gameOverUi;
 
     [SerializeField] private GameObject joystickButton;
     [SerializeField] private FixedJoystick joystick;
@@ -31,6 +35,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject[] swordButtonSet;
     [SerializeField] private GameObject[] axeButtonSet;
     [SerializeField] private GameObject[] spearButtonSet;
+
     public PlayerButtonController attack;
     public PlayerButtonController fSkill;
     public PlayerButtonController sSkill;
@@ -56,6 +61,7 @@ public class UIManager : MonoBehaviour
     private Weapons weaponType;
 
     private bool infoOnOff = false;
+
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
@@ -64,6 +70,44 @@ public class UIManager : MonoBehaviour
     public void SceneSynchronization()
     {
         currentScene = GameManager.instance.currentState;
+    }
+
+    public void OnClickPause()
+    {
+        pauseButton.interactable = false;
+        attack.interactable = false;
+        fSkill.interactable = false;
+        sSkill.interactable = false;
+        evade.interactable = false;
+        charInfoButton.interactable = false;
+
+        Time.timeScale = 0f;
+
+        option.SetActive(true);
+    }
+    public void OnClickPlay()
+    {
+        pauseButton.interactable = true;
+        attack.interactable = true;
+        fSkill.interactable = true;
+        sSkill.interactable = true;
+        evade.interactable = true;
+        charInfoButton.interactable = true;
+        option.SetActive(false);
+        Time.timeScale = 1f;
+    }
+
+    public void OnClickHome()
+    {
+        pauseButton.interactable = true;
+        attack.interactable = true;
+        fSkill.interactable = true;
+        sSkill.interactable = true;
+        evade.interactable = true;
+        charInfoButton.interactable = true;
+        option.SetActive(false);
+        Time.timeScale = 1f;
+        GameManager.instance.ChangeScene("Lobby");
     }
 
     public void OnClickInfo()
