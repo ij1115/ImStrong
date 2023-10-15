@@ -108,7 +108,7 @@ public class MonsterMovement : MonoBehaviour
         switch (mInfo.type)
         {
             case MonsterType.Boss:
-                if ((unitState == UnitState.NIdle || unitState == UnitState.Idle) && !sSkillBool)
+                if ((unitState == UnitState.NIdle || unitState == UnitState.Idle) && !sSkillBool && mInfo.hpSlider.value<0.5f)
                 {
                     UseSSkill();
                 }

@@ -19,12 +19,49 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public int targetWidth = 1600; // 원하는 해상도 너비
+    public int targetHeight = 900; // 원하는 해상도 높이
+    public bool fullScreen = true; // 전체 화면 여부
+
+    public void SetResolution(int width, int height, bool fullScreen)
+    {
+        Screen.SetResolution(width, height, fullScreen);
+    }
+
     public SceneState currentScene;
+
+    //TitleUi
+    [SerializeField] private GameObject titleLogo;
+    [SerializeField] private GameObject pressText;
+
+    //LobbyUi
+    [SerializeField] private Button lobbyOption;
+    [SerializeField] private GameObject lobbyOptionMenu;
+    [SerializeField] private Button lobbyOpClose;
+
+    [SerializeField] private GameObject weaponSelect;
+    [SerializeField] private Button swordSelectB;
+    [SerializeField] private Button axeSelectB;
+    [SerializeField] private Button spearSelectB;
+    [SerializeField] private GameObject weaponSelectInfo;
+    [SerializeField] private TextMeshProUGUI wepName;
+    [SerializeField] private TextMeshProUGUI wepCount;
+    [SerializeField] private TextMeshProUGUI atk;
+    [SerializeField] private TextMeshProUGUI maxHp;
+    [SerializeField] private TextMeshProUGUI atkSp;
+    [SerializeField] private TextMeshProUGUI movSp;
+
+
+
+
+    [SerializeField] private Button startButton;
+
 
     //DungeonUi
     [SerializeField] private GameObject option;
     [SerializeField] private Button replayButton;
     [SerializeField] private Button homeButton;
+    [SerializeField] private GameObject charInfoBox;
 
     public GameObject gameOverUi;
 
@@ -50,6 +87,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject spearInfo;
 
     [SerializeField] private Button pauseButton;
+    [SerializeField] private Button gameOverButton;
 
     [SerializeField] private GameObject charHpBar;
     [SerializeField] private GameObject bossHpBar;
@@ -65,12 +103,152 @@ public class UIManager : MonoBehaviour
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
+        SetResolution(targetWidth, targetHeight, fullScreen);
     }
 
     public void SceneSynchronization()
     {
+        switch(currentScene)
+        {
+            case SceneState.Title:
+                TitleUiClose();
+                break;
+            case SceneState.Lobby:
+                LobbyUiClose();
+                break;
+            case SceneState.Dungeon:
+                DungeonUiClose();
+                break;
+            case SceneState.BossRoom:
+                DungeonUiClose();
+                break;
+        }
+
         currentScene = GameManager.instance.currentState;
+
+        switch (currentScene)
+        {
+            case SceneState.Title:
+                TitleUiSet();
+                break;
+            case SceneState.Lobby:
+                LobbyUiSet();
+                break;
+            case SceneState.Dungeon:
+                DungeonUISet();
+                break;
+            case SceneState.BossRoom:
+                DungeonUISet();
+                break;
+        }
     }
+
+
+    //Title Ui
+    public void TitleUiSet()
+    {
+        titleLogo.SetActive(true);
+        pressText.SetActive(true);
+    }
+
+    public void TitleUiClose()
+    {
+        titleLogo.SetActive(false);
+        pressText.SetActive(false);
+    }
+
+
+    //Lobby Ui
+    
+    public void LobbyUiSet()
+    {
+        lobbyOption.gameObject.SetActive(true);
+        weaponSelect.SetActive(true);
+        startButton.gameObject.SetActive(true);
+    }
+    public void LobbyUiClose()
+    {
+        lobbyOption.gameObject.SetActive(false);
+        lobbyOptionMenu.SetActive(false);
+        weaponSelect.SetActive(false);
+        weaponSelectInfo.SetActive(false);
+        startButton.gameObject.SetActive(false);
+    }
+    public void OnClickLobbyOption()
+    {
+        lobbyOption.interactable = false;
+        swordSelectB.interactable = false;
+        axeSelectB.interactable = false;
+        spearSelectB.interactable = false;
+        startButton.interactable = false;
+
+        lobbyOptionMenu.SetActive(true);
+    }
+    public void OnClickLobbyOptionClose()
+    {
+        lobbyOption.interactable = true;
+        swordSelectB.interactable = true;
+        axeSelectB.interactable = true;
+        spearSelectB.interactable = true;
+        startButton.interactable = true;
+
+        lobbyOptionMenu.SetActive(false);
+    }
+
+    public void OnClickAxe()
+    {
+        StateManager.Instance.SetCurrentWeapons(Weapons.Axe);
+        weaponType = StateManager.Instance.GetCurrentWeapons();
+        LobbyManager.instance.WeaponsChange();
+        WeaponSelectInfoOpen();
+    }
+    public void OnClickSpear()
+    {
+        StateManager.Instance.SetCurrentWeapons(Weapons.Spear);
+        weaponType = StateManager.Instance.GetCurrentWeapons();
+        LobbyManager.instance.WeaponsChange();
+        WeaponSelectInfoOpen();
+    }
+
+    public void OnClickSword()
+    {
+        StateManager.Instance.SetCurrentWeapons(Weapons.Sword);
+        weaponType = StateManager.Instance.GetCurrentWeapons();
+        LobbyManager.instance.WeaponsChange();
+        WeaponSelectInfoOpen();
+    }
+
+    public void OnClickStageButton()
+    {
+        GameManager.instance.ChangeScene("Dungeon");
+    }
+
+    public void WeaponSelectInfoOpen()
+    {
+        weaponSelectInfo.SetActive(true);
+
+        switch (weaponType)
+        {
+            case Weapons.Sword:
+                wepName.text = "Sword";
+                wepCount.text = "+1";
+                break;
+            case Weapons.Axe:
+                wepName.text = "Axe";
+                wepCount.text = "+1";
+
+                break;
+            case Weapons.Spear:
+                wepName.text = "Spear";
+                wepCount.text = "+1";
+                break;
+        }
+        atk.text = $"ATK : {StateManager.Instance.current.atk}";
+        maxHp.text = $"Max HP : {StateManager.Instance.current.maxHp}";
+        atkSp.text = $"ATK Speed : {StateManager.Instance.current.atkSp}";
+        movSp.text = $"Move Speed : {StateManager.Instance.current.movSp}";
+    }
+    // Dungeon Ui
 
     public void OnClickPause()
     {
@@ -119,13 +297,21 @@ public class UIManager : MonoBehaviour
                 swordInfo.SetActive(false);
                 axeInfo.SetActive(false);
                 spearInfo.SetActive(false);
+                charInfoBox.SetActive(false);
                 break;
 
             case false:
                 infoOnOff = true;
+                charInfoBox.SetActive(true);
                 InfoOpen();
                 break;
         }
+    }
+
+    public void OnClickGameOver()
+    {
+        GameManager.instance.isGameover = false;
+        GameManager.instance.ChangeScene("Lobby");
     }
 
     private void InfoOpen()
@@ -215,6 +401,46 @@ public class UIManager : MonoBehaviour
                 }
                 break;
         }
+    }
+
+    public void DungeonUiClose()
+    {
+        pauseButton.gameObject.SetActive(false);
+        joystickButton.SetActive(false);
+        charInfoButton.gameObject.SetActive(false);
+        skillSet.SetActive(false);
+
+        foreach(var sword in swordButtonSet)
+        {
+            sword.SetActive(false);
+        }
+        foreach(var axe in axeButtonSet)
+        { 
+            axe.SetActive(false);
+        }
+        foreach( var spear in spearButtonSet)
+        {
+            spear.SetActive(false);
+        }
+
+        pauseButton.interactable = true;
+        attack.interactable = true;
+        fSkill.interactable = true;
+        sSkill.interactable = true;
+        evade.interactable = true;
+        charInfoButton.interactable = true;
+
+        infoOnOff = false;
+        swordInfo.SetActive(false);
+        axeInfo.SetActive(false);
+        spearInfo.SetActive(false);
+        charInfoBox.SetActive(false);
+
+        gameOverUi.SetActive(false);
+
+        option.SetActive(false);
+        charHpBar.SetActive(false);
+        bossHpBar.SetActive(false);
     }
 
     public Slider PlayerHpBarSet()

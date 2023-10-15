@@ -17,47 +17,15 @@ public class LobbyManager : MonoBehaviour
 
     private static LobbyManager singleton;
 
-    public Button start;
-    public Button exit;
-    public Button Axe;
-    public Button Spear;
-    public Button Sword;
-    public Button Select;
-
-    public GameObject selectWindow;
-
+    public GameObject player;
     private void Awake()
     {
         StateManager.Instance.StandardSetUp();
     }
 
-    public void OnClickOpenSelectWindow()
+    public void WeaponsChange()
     {
-        selectWindow.SetActive(true);
-    }
-
-    public void OnClickCloesSeletWindow()
-    {
-        selectWindow.SetActive(false);
-    }
-
-    public void OnClickAxe()
-    {
-        StateManager.Instance.SetCurrentWeapons(Weapons.Axe);
-    }
-    public void OnClickSpear()
-    {
-        StateManager.Instance.SetCurrentWeapons(Weapons.Spear);
-    }
-
-    public void OnClickSword()
-    {
-        StateManager.Instance.SetCurrentWeapons(Weapons.Sword);
-    }
-
-    public void OnClickStartTravel()
-    {
-        GameManager.instance.ChangeScene("Dungeon");
+        player.GetComponent<PlayerWeapons>().RunTimeSwap();
     }
 
     private void Update()
