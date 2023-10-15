@@ -1,12 +1,12 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MonsterInfo : MonoBehaviour
 {
     public State state;
+
+    public Slider hpSlider;
     public MonsterType type { get; private set; }
 
     private int hp;
@@ -32,12 +32,28 @@ public class MonsterInfo : MonoBehaviour
 
             case MonsterType.SubBoss:
                 state = StateManager.Instance.SubBossState();
+                hpSlider = UIManager.Instance.MonsterHpBarSet();
+                hpSlider.maxValue = state.maxHp;
+                hpSlider.minValue = 0;
+
                 hp = state.maxHp;
+
+                hpSlider.value = hp;
+                UIManager.Instance.bossHp.text = hp + " / " + state.maxHp;
+                UIManager.Instance.bossType.text = "SubBoss";
                 break;
 
             case MonsterType.Boss:
                 state = StateManager.Instance.BossState();
+                hpSlider = UIManager.Instance.MonsterHpBarSet();
+                hpSlider.maxValue = state.maxHp;
+                hpSlider.minValue = 0;
+
                 hp = state.maxHp;
+
+                hpSlider.value = hp;
+                UIManager.Instance.bossHp.text = hp + " / " + state.maxHp;
+                UIManager.Instance.bossType.text = "Boss";
                 break;
         }
 
@@ -54,8 +70,19 @@ public class MonsterInfo : MonoBehaviour
         
         hp -= hitDamage;
 
+        if(type == MonsterType.SubBoss || type == MonsterType.Boss) 
+        { 
+        hpSlider.value = hp;
+        UIManager.Instance.bossHp.text = hp + " / " + state.maxHp;
+        }
         if (hp <= 0 && !dead)
         {
+            hp = 0;
+            if (type == MonsterType.SubBoss || type == MonsterType.Boss)
+            {
+                hpSlider.value = hp;
+                UIManager.Instance.bossHp.text = hp + " / " + state.maxHp;
+            }
             Die();
         }
     }

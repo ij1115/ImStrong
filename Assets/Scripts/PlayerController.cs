@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
+using UnityEngine.UI;
 
 //public class PlayerController : MonoBehaviour, IDragHandler, IEndDragHandler
 //{
@@ -105,11 +106,12 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        moveFB =  Input.GetAxis(moveFBAixsName);
-        moveLR =  Input.GetAxis(moveLRAixsName);
-        attack = Input.GetKeyDown(KeyCode.L); //Input.GetButtonDown(attackButtonName) ||
-        firstSkill = Input.GetKeyDown(KeyCode.K); //Input.GetButtonDown(firstSkillButtonName) ||
-        secondSkill = Input.GetKeyDown(KeyCode.O); //Input.GetButtonDown(secondSkillButtonName) ||
-        evade = Input.GetKeyDown(KeyCode.Space);
+        moveFB = joystick.Vertical + Input.GetAxis(moveFBAixsName);
+        moveLR = joystick.Horizontal + Input.GetAxis(moveLRAixsName);
+        attack = Input.GetKeyDown(KeyCode.L) || UIManager.Instance.attack.ButtonPressed; 
+        firstSkill = Input.GetKeyDown(KeyCode.K) || UIManager.Instance.fSkill.ButtonPressed; 
+        secondSkill = Input.GetKeyDown(KeyCode.O) || UIManager.Instance.sSkill.ButtonPressed;
+        evade = Input.GetKeyDown(KeyCode.Space) || UIManager.Instance.evade.ButtonPressed;
     }
+    
 }

@@ -32,21 +32,27 @@ public class GameManager : MonoBehaviour
         {
             case SceneState.Title:
                 currentState = SceneState.Title;
+                UIManager.Instance.SceneSynchronization();
                 SceneManager.LoadScene(state);
                 break;
             case SceneState.Lobby:
                 currentState = SceneState.Lobby;
                 StateManager.Instance.CurrentToStandard();
+                UIManager.Instance.SceneSynchronization();
                 SceneManager.LoadScene(state);
                 break;
             case SceneState.Dungeon:
                 currentState = SceneState.Dungeon;
+                UIManager.Instance.SceneSynchronization();
                 StateManager.Instance.MonsterSetUp();
+                UIManager.Instance.DungeonUISet();
                 SceneManager.LoadScene(state);
                 break;
             case SceneState.BossRoom:
                 currentState = SceneState.BossRoom;
+                UIManager.Instance.SceneSynchronization();
                 StateManager.Instance.MonsterSetUp();
+                UIManager.Instance.DungeonUISet();
                 SceneManager.LoadScene(state);
                 break;
         }

@@ -1,14 +1,7 @@
 using Cinemachine;
-using JetBrains.Annotations;
-using System;
 using System.Collections;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.PlayerSettings;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -26,7 +19,8 @@ public class PlayerMovement : MonoBehaviour
 
     public float rotateSpeed = 360f;
     public float fightTimer = 10f;
-
+    public float attackInputDelay = 0.3f;
+    public bool attackDelay = false;
     public float currentValue = 0f;
     
     public CinemachineVirtualCamera vCamera;
@@ -35,10 +29,12 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 moveVec;
     public UnitState unitState { get; private set; }
 
+    public Slider fSkillSlider;
     private bool fSkillDelay = false;
     private float fSkillTimer = 0f;
     public float fSkillTimerSet = 10f;
 
+    public Slider sSkillSlider;
     private bool sSkillDelay = false;
     private float sSkillTimer = 0f;
     public float sSkillTimerSet = 20f;
@@ -55,6 +51,8 @@ public class PlayerMovement : MonoBehaviour
         worldCam = Camera.main;
         ani.runtimeAnimatorController = weapons.GetAni();
         unitState = UnitState.NIdle;
+        sSkillSlider.gameObject.SetActive(false);
+        fSkillSlider.gameObject.SetActive(false);
     }
 
     public void RunTimeSwap()
@@ -120,6 +118,8 @@ public class PlayerMovement : MonoBehaviour
             unitState = UnitState.Attack;
             ani.speed = info.state.atkSp;
             ani.SetBool("Fight", true);
+            attackDelay = true;
+            StartCoroutine(AttackInputDelay());
             ani.SetTrigger("Attack_1");
             return;
         }
@@ -149,7 +149,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void AttackUpdate()
     {
-        if (controller.attack)
+        if (controller.attack && !attackDelay)
         {
             ani.SetBool("Attack_2", true);
         }
@@ -252,6 +252,11 @@ public class PlayerMovement : MonoBehaviour
         ani.SetTrigger("Impact");
     }
 
+    private IEnumerator AttackInputDelay()
+    {
+        yield return new WaitForSeconds(attackInputDelay);
+        attackDelay = false;
+    }
     private IEnumerator IdleToNIdle()
     {
         float timer = fightTimer;
@@ -270,25 +275,33 @@ public class PlayerMovement : MonoBehaviour
     private IEnumerator FSkillDelayOn()
     {
         fSkillTimer = fSkillTimerSet;
-
+        fSkillSlider.gameObject.SetActive(true);
+        fSkillSlider.maxValue = fSkillTimerSet;
+        fSkillSlider.minValue = 0;
+        
         while (fSkillTimer > 0)
         {
             fSkillTimer -= Time.deltaTime;
+            fSkillSlider.value = fSkillTimer;
             yield return null;
         }
-
+        fSkillSlider.gameObject.SetActive(false);
         fSkillDelay = false;
     }
     private IEnumerator SSkillDelayOn()
     {
         sSkillTimer = sSkillTimerSet;
+        sSkillSlider.gameObject.SetActive(true);
+        sSkillSlider.maxValue = sSkillTimerSet;
+        sSkillSlider.minValue = 0;
 
         while (sSkillTimer > 0)
         {
             sSkillTimer -= Time.deltaTime;
+            sSkillSlider.value = sSkillTimer;
             yield return null;
         }
-
+        sSkillSlider.gameObject.SetActive(false);
         sSkillDelay = false;
     }
 

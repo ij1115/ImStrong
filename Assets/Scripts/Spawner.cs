@@ -61,6 +61,7 @@ public class Spawner : MonoBehaviour
     {
         if(mob.GetComponent<MonsterInfo>().type == MonsterType.SubBoss)
         {
+            UIManager.Instance.BossDieUi();
             dm.huntSubBossCount++;
         }
 
@@ -119,6 +120,7 @@ public class Spawner : MonoBehaviour
                     var movement = obj.GetComponent<MonsterMovement>();
                     info.SetType(type);
                     info.StateUpdate();
+
                     movement.SetUp();
                     movement.spawner = this.gameObject;
                     monsters.Add(obj);
