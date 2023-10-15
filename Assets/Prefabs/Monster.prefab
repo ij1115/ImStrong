@@ -1260,9 +1260,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.30982405
-  m_Height: 1.9679346
+  m_Height: 1.9068594
   m_Direction: 1
-  m_Center: {x: -0.011794388, y: 0.9125254, z: 0.023363113}
+  m_Center: {x: -0.011794388, y: 0.943063, z: 0.023363113}
 --- !u!114 &8517022511032275383
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1302,6 +1302,8 @@ MonoBehaviour:
   fightTimer: 10
   attackDelay: 10
   hitRange: 0
+  fSkillDelay: 0
+  sSkillDelay: 0
   hitRanges:
   - {fileID: 5486041758482684773}
   - {fileID: 6313905134347411293}
@@ -1337,7 +1339,7 @@ NavMeshAgent:
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 300
-  m_StoppingDistance: 0.6
+  m_StoppingDistance: 1
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1

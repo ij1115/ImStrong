@@ -2,7 +2,9 @@ using Cinemachine;
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Pool;
+using Unity.VisualScripting;
 
 public class DungeonManager : MonoBehaviour
 {
@@ -26,6 +28,7 @@ public class DungeonManager : MonoBehaviour
     public GameObject playerPrefab;
     private GameObject playerManager;
     public FixedJoystick joystic;
+    public Slider hpSlider;
 
     public float spawnTimer = 3f;
 
@@ -292,11 +295,13 @@ public class DungeonManager : MonoBehaviour
         var controller = player.GetComponent<PlayerController>();
         var movement = player.GetComponent<PlayerMovement>();
         var info = player.GetComponent<PlayerInfo>();
-      
+
         info.StateUpdate();
         info.SetUp();
 
-        controller.joystick = joystic;
+        controller.joystick = UIManager.Instance.SetJoystick();
+        movement.fSkillSlider = UIManager.Instance.fSkillSlider.GetComponent<Slider>();
+        movement.sSkillSlider = UIManager.Instance.sSkillSlider.GetComponent<Slider>();
         movement.vCamera = vCam;
         movement.vCamera.Follow = player.transform;
         movement.vCamera.LookAt = player.transform;

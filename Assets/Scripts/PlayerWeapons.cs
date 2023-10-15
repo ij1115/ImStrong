@@ -114,7 +114,6 @@ public class PlayerWeapons : MonoBehaviour
         }
     }
 
-
     public RuntimeAnimatorController GetAni()
     {
         switch(type)

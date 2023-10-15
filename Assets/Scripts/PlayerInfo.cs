@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerInfo : MonoBehaviour
 {
     public State state;
+
+    public Slider hpSlider;
 
     private int hp;
 
@@ -23,7 +26,13 @@ public class PlayerInfo : MonoBehaviour
 
     public void SetUp()
     {
+        hpSlider = UIManager.Instance.PlayerHpBarSet();
+        hpSlider.maxValue = state.maxHp;
+        hpSlider.minValue = 0;
+
         hp = state.maxHp;
+        UIManager.Instance.playerHp.text = hp + " / " + state.maxHp;
+        hpSlider.value = hp;
     }
 
     public void OnDamage(int damage)
@@ -32,8 +41,14 @@ public class PlayerInfo : MonoBehaviour
 
         hp -= hitDamage;
 
-        if(hp <=0 && !dead)
+        hpSlider.value = hp;
+        UIManager.Instance.playerHp.text = hp + " / " + state.maxHp;
+      
+        if (hp <=0 && !dead)
         {
+            hp = 0;
+            hpSlider.value = hp;
+            UIManager.Instance.playerHp.text = hp + " / " + state.maxHp;
             Die();
         }
     }
@@ -41,7 +56,7 @@ public class PlayerInfo : MonoBehaviour
     public void Die()
     {
         dead = true;
-        DungeonManager.instance.gameoverUI.SetActive(true);
+        UIManager.Instance.gameOverUi.SetActive(true);
         GameManager.instance.isGameover = true;
     }
 }

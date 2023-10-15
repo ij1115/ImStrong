@@ -1259,9 +1259,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.30982405
-  m_Height: 1.9679346
+  m_Height: 1.8950166
   m_Direction: 1
-  m_Center: {x: -0.011794388, y: 0.9125254, z: 0.023363113}
+  m_Center: {x: -0.011794388, y: 0.94898444, z: 0.023363113}
 --- !u!114 &4295026030414598564
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1292,6 +1292,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90a051c21e763304aa76a3da697210d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hpSlider: {fileID: 0}
 --- !u!114 &8517022511032275383
 MonoBehaviour:
   m_ObjectHideFlags: 0
