@@ -16,8 +16,8 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public int targetWidth = 1600; // 원하는 해상도 너비
-    public int targetHeight = 900; // 원하는 해상도 높이
+    public int targetWidth = 2340; // 원하는 해상도 너비
+    public int targetHeight = 1080; // 원하는 해상도 높이
     public bool fullScreen = true; // 전체 화면 여부
 
     public void SetResolution(int width, int height, bool fullScreen)
@@ -461,5 +461,4 @@ public class UIManager : MonoBehaviour
     {
         return joystick;
     }
-
 }

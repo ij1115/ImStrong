@@ -119,7 +119,7 @@ public class MonsterMovement : MonoBehaviour
         {
             case MonsterType.SubBoss:
             case MonsterType.Boss:
-                if ((unitState == UnitState.NIdle || unitState == UnitState.Idle) && !fSkillBool)
+                if ((unitState == UnitState.NIdle || unitState == UnitState.Idle) && !fSkillBool && attackBool)
                 {
                     UseFSkill();
                 }
@@ -1013,7 +1013,7 @@ public class MonsterMovement : MonoBehaviour
             {
                 var com = obj.gameObject.GetComponent<PlayerMovement>();
           
-                if(com.unitState==UnitState.Evade)
+                if(com.unitState == UnitState.Evade)
                 {
                     continue;
                 }
