@@ -65,18 +65,18 @@ public class MonsterMovement : MonoBehaviour
         switch (mInfo.type)
         {
             case MonsterType.Mob:
-                attackDelay = 10f;
+                attackDelay = 3f;
                 break;
 
             case MonsterType.SubBoss:
-                attackDelay = 15f;
-                fSkillDelay = 20f;
+                attackDelay = 3f;
+                fSkillDelay = 7f;
                 break;
 
             case MonsterType.Boss:
-                attackDelay = 20f;
-                fSkillDelay = 25f;
-                sSkillDelay = 30f;
+                attackDelay = 4f;
+                fSkillDelay = 9f;
+                sSkillDelay = 15f;
                 break;
         }
 
