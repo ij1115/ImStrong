@@ -14,8 +14,8 @@ public class StateManager : MonoBehaviour
     public int maxHp = 100;
     public int atk = 20;
     public int def = 0;
-    public float atkSp = 1.2f;
-    public float movSp = 5f;
+    public float atkSp = 1.20f;
+    public float movSp = 5.00f;
 
     public float mobHpSet = 1f;
     public float mobAtkSet = 0.5f;
@@ -35,6 +35,7 @@ public class StateManager : MonoBehaviour
     public float bossAtkSpSet = 0.5f;
     public float bossMovSpSet = 0.8f;
 
+    private ItemTable item;
    
     public static StateManager Instance
     {
@@ -57,12 +58,12 @@ public class StateManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+        item = DataManager.GetTable<ItemTable>();
         standard = new State();
         current = new State();
         monster = new State();
         currentWeapons = Weapons.Spear;
     }
-
     public void StandardSetUp()
     {
         if (standard != null)
@@ -77,27 +78,38 @@ public class StateManager : MonoBehaviour
 
     public void CurrentToStandard()
     {
-        current = standard;
+        current.maxHp = standard.maxHp;
+        current.atk = standard.atk;
+        current.def = standard.def;
+        current.atkSp = standard.atkSp;
+        current.movSp = standard.movSp;
     }
     
     public void PlayerStateSet()
     {
         // 인벤토리 추가시 수치 받아와서 더할 예정
-        current.maxHp = standard.maxHp;
-        current.atk = standard.atk;
+        current.maxHp = standard.maxHp + (GameData.Instance.data.maxHpUp * (int)item.GetValue(1).Item2);
+
         current.def = standard.def;
 
         switch(currentWeapons)
         {
             case Weapons.Sword:
-                current.atkSp = standard.atkSp + 0.3f;
+                current.atk = standard.atk + (GameData.Instance.data.swordLev * (int)item.GetValue(4).Item2);
+                current.atkSp = standard.atkSp + 0.3f + (GameData.Instance.data.atkSpUpLev * item.GetValue(2).Item2);
                 break;
 
-            default:
-                current.atkSp = standard.atkSp;
+            case Weapons.Axe:
+                current.atk = standard.atk + (GameData.Instance.data.axeLev * (int)item.GetValue(5).Item2);
+                current.atkSp = standard.atkSp + (GameData.Instance.data.atkSpUpLev * item.GetValue(2).Item2);
+                break;
+
+            case Weapons.Spear:
+                current.atk = standard.atk + (GameData.Instance.data.spearLev * (int)item.GetValue(6).Item2);
+                current.atkSp = standard.atkSp + (GameData.Instance.data.atkSpUpLev * item.GetValue(2).Item2);
                 break;
         }
-        current.movSp = standard.movSp;
+        current.movSp = standard.movSp + (GameData.Instance.data.movSpUpLev * item.GetValue(3).Item2);
     }
 
     public Weapons GetCurrentWeapons()

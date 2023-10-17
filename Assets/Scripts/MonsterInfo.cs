@@ -32,28 +32,28 @@ public class MonsterInfo : MonoBehaviour
 
             case MonsterType.SubBoss:
                 state = StateManager.Instance.SubBossState();
-                hpSlider = UIManager.Instance.MonsterHpBarSet();
+                hpSlider = UIManager.Instance.uis[2].GetComponent<DungeonUi>().MonsterHpBarSet();
                 hpSlider.maxValue = state.maxHp;
                 hpSlider.minValue = 0;
 
                 hp = state.maxHp;
 
                 hpSlider.value = hp;
-                UIManager.Instance.bossHp.text = hp + " / " + state.maxHp;
-                UIManager.Instance.bossType.text = "SubBoss";
+                UIManager.Instance.uis[2].GetComponent<DungeonUi>().bossHp.text = hp + " / " + state.maxHp;
+                UIManager.Instance.uis[2].GetComponent<DungeonUi>().bossType.text = "SubBoss";
                 break;
 
             case MonsterType.Boss:
                 state = StateManager.Instance.BossState();
-                hpSlider = UIManager.Instance.MonsterHpBarSet();
+                hpSlider = UIManager.Instance.uis[2].GetComponent<DungeonUi>().MonsterHpBarSet();
                 hpSlider.maxValue = state.maxHp;
                 hpSlider.minValue = 0;
 
                 hp = state.maxHp;
 
                 hpSlider.value = hp;
-                UIManager.Instance.bossHp.text = hp + " / " + state.maxHp;
-                UIManager.Instance.bossType.text = "Boss";
+                UIManager.Instance.uis[2].GetComponent<DungeonUi>().bossHp.text = hp + " / " + state.maxHp;
+                UIManager.Instance.uis[2].GetComponent<DungeonUi>().bossType.text = "Boss";
                 break;
         }
 
@@ -73,7 +73,7 @@ public class MonsterInfo : MonoBehaviour
         if(type == MonsterType.SubBoss || type == MonsterType.Boss) 
         { 
         hpSlider.value = hp;
-        UIManager.Instance.bossHp.text = hp + " / " + state.maxHp;
+        UIManager.Instance.uis[2].GetComponent<DungeonUi>().bossHp.text = hp + " / " + state.maxHp;
         }
         if (hp <= 0 && !dead)
         {
@@ -81,7 +81,7 @@ public class MonsterInfo : MonoBehaviour
             if (type == MonsterType.SubBoss || type == MonsterType.Boss)
             {
                 hpSlider.value = hp;
-                UIManager.Instance.bossHp.text = hp + " / " + state.maxHp;
+                UIManager.Instance.uis[2].GetComponent<DungeonUi>().bossHp.text = hp + " / " + state.maxHp;
             }
             Die();
         }

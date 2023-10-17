@@ -299,9 +299,9 @@ public class DungeonManager : MonoBehaviour
         info.StateUpdate();
         info.SetUp();
 
-        controller.joystick = UIManager.Instance.SetJoystick();
-        movement.fSkillSlider = UIManager.Instance.fSkillSlider.GetComponent<Slider>();
-        movement.sSkillSlider = UIManager.Instance.sSkillSlider.GetComponent<Slider>();
+        controller.joystick = UIManager.Instance.uis[2].GetComponent<DungeonUi>().SetJoystick();
+       movement.fSkillSlider = UIManager.Instance.uis[2].GetComponent<DungeonUi>().fSkillSlider.GetComponent<Slider>();
+       movement.sSkillSlider = UIManager.Instance.uis[2].GetComponent<DungeonUi>().sSkillSlider.GetComponent<Slider>();
         movement.vCamera = vCam;
         movement.vCamera.Follow = player.transform;
         movement.vCamera.LookAt = player.transform;

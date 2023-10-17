@@ -1,4 +1,5 @@
 using UnityEngine;
+using SaveDataVC = SaveDataV2;
 
 public class TitleManager : MonoBehaviour
 {
@@ -22,6 +23,8 @@ public class TitleManager : MonoBehaviour
         if(Input.anyKeyDown)
         {
             GameManager.instance.ChangeScene("Lobby");
+
+            GameData.Instance.DataLoad();
         }
     }
 }

@@ -1,46 +1,54 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System.IO;
-using System.Globalization;
-using CsvHelper;
-using CsvHelper.Configuration;
-
-public class SaveData : DataTable
+public abstract class SaveData
 {
-    public class Data
-    {
-        public string key { get; set; }
-        public int value { get; set; }
-    }
-    
-    protected Dictionary<string, int> data = new Dictionary<string, int>();
+    public int Version { get; set; }
 
-    public SaveData()
+    public abstract SaveData VersionUp();
+}
+
+public class SaveDataV1 : SaveData
+{
+    public SaveDataV1()
     {
-        path = SaveDirectory;
-        Load();
+        Version = 1;
     }
 
-    public static string SaveDirectory
+    public int stageLev {  get; set; }
+    public int swordLev {  get; set; }
+    public int axeLev { get; set; }
+    public int spearLev { get; set; }
+    public int atkSpUpLev { get; set; }
+    public int movSpUpLev { get; set; }
+
+    public override SaveData VersionUp()
     {
-        get
-        {
-            return "Save/SaveData";
-        }
+        var data = new SaveDataV2();
+        data.stageLev = stageLev;
+        data.swordLev = swordLev;
+        data.axeLev = axeLev;
+        data.spearLev = spearLev;
+        data.atkSpUpLev = atkSpUpLev;
+        data.movSpUpLev= movSpUpLev;
+        return data;
+    }
+}
+
+public class SaveDataV2 : SaveData
+{
+    public SaveDataV2()
+    {
+        Version = 2;
     }
 
-    public static void Save(string SaveDirectory)
-    {
-        var csvStr = Resources.Load<TextAsset>(SaveDirectory);
-        if (!Directory.Exists(SaveDirectory))
-        {
-            Directory.CreateDirectory(SaveDirectory);
-        }
-    }
+    public int stageLev { get; set; }
+    public int swordLev { get; set; }
+    public int axeLev { get; set; }
+    public int spearLev { get; set; }
+    public int atkSpUpLev { get; set; }
+    public int movSpUpLev { get; set; }
+    public int maxHpUp { get; set; }
 
-    public override void Load()
+    public override SaveData VersionUp()
     {
-        
+        return null;
     }
 }

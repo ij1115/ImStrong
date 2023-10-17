@@ -9,7 +9,8 @@ public static class DataManager
     {
         tables.Clear();
 
-
+        var itemTable = new ItemTable();
+        tables.Add(typeof(ItemTable), itemTable);
     }
 
     public static T GetTable<T>() where T : DataTable
