@@ -49,6 +49,11 @@ public class GameData : MonoBehaviour
         data.axeLev += 1;
     }
 
+    public void SpearLevUp()
+    {
+        data.spearLev += 1;
+    }
+
     public void AttackSpeedUp()
     {
         if (data.atkSpUpLev < 16)

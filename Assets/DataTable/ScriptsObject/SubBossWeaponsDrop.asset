@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 938930d53d1ece24691fea998f3d4cd2, type: 3}
+  m_Name: SubBossWeaponsDrop
+  m_EditorClassIdentifier: 
+  items:
+  - obj: {fileID: 0}
+    weight: 10
+  - obj: {fileID: 1035084944221040, guid: 41b151e781971e84491d3b7739914e5f, type: 3}
+    weight: 30
+  - obj: {fileID: 1035084944221040, guid: 63fa23959dcdee041971084bd8280042, type: 3}
+    weight: 30
+  - obj: {fileID: 1035084944221040, guid: 1e447393f818b9140a3b9874591833b6, type: 3}
+    weight: 30

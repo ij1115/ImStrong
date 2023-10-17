@@ -15,6 +15,10 @@ public class MonsterInfo : MonoBehaviour
 
     public bool dead { get; private set; }
 
+    public SOItem[] normalDrop;
+    public SOItem[] subBossDrop;
+    public SOItem[] bossDrop;
+
     public void Awake()
     {
         state = new State();

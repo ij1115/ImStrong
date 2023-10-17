@@ -10,7 +10,7 @@ public class PlayerInfo : MonoBehaviour
 
     public Slider hpSlider;
 
-    private int hp;
+    public int hp { get; private set; }
 
     public bool dead { get; private set; }
 
@@ -54,10 +54,37 @@ public class PlayerInfo : MonoBehaviour
         }
     }
 
+    public void RestoreHealth(int health)
+    {
+        if (dead)
+        {
+            return;
+        }
+
+        if(state.maxHp<hp+health)
+        {
+            health = state.maxHp - hp;
+        }
+
+        hp += health;
+    }
+
     public void Die()
     {
         dead = true;
         UIManager.Instance.uis[2].GetComponent<DungeonUi>().gameOverUi.SetActive(true);
         GameManager.instance.isGameover = true;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (dead)
+            return;
+
+        var item = other.GetComponent<IItem>();
+        if(item != null)
+        {
+            item.Use(gameObject);
+        }
     }
 }

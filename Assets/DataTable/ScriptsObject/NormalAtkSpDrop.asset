@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 938930d53d1ece24691fea998f3d4cd2, type: 3}
+  m_Name: NormalAtkSpDrop
+  m_EditorClassIdentifier: 
+  items:
+  - obj: {fileID: 0}
+    weight: 95
+  - obj: {fileID: 1163771896122142, guid: 7bc097d223a6b654ba807503972f5e7a, type: 3}
+    weight: 5

@@ -15,7 +15,9 @@ public class ItemTable : DataTable
         public float VALUE { get; set; }
     }
 
+
     protected Dictionary<int, (string, float)> dic = new Dictionary<int, (string, float)>();
+
 
     public ItemTable()
     {

@@ -1326,6 +1326,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hpSlider: {fileID: 0}
+  normalDrop:
+  - {fileID: 11400000, guid: 237cd46c5d1bc6841ba417ab3c1704c3, type: 2}
+  - {fileID: 11400000, guid: c66f73f60b1536e4db6a4f6dd50067dd, type: 2}
+  - {fileID: 11400000, guid: 66a34dabbf2e9fa4ea5e72c79adbbbe4, type: 2}
+  - {fileID: 11400000, guid: 1b936a905a863614f8b9ba3a700765b9, type: 2}
+  - {fileID: 11400000, guid: c6f26860f1cc5094ea955c4445d00daa, type: 2}
+  subBossDrop:
+  - {fileID: 11400000, guid: fa48223b49370df4a9d2e9d37496f340, type: 2}
+  - {fileID: 11400000, guid: 2cf4cfaf37bef4349bf2c67a1c8e5ba4, type: 2}
+  - {fileID: 11400000, guid: 51775e0d2729e9046b2c97c44c877152, type: 2}
+  - {fileID: 11400000, guid: f6b0aae893403c9448a52f86894c050c, type: 2}
+  - {fileID: 11400000, guid: c6885ae97ac699d47988bf597d59f280, type: 2}
+  bossDrop:
+  - {fileID: 11400000, guid: d46446f242b2aaf4cac7d0c6d48517fa, type: 2}
+  - {fileID: 11400000, guid: 412c6ff2ea43d204fa7f25891c4f46c2, type: 2}
+  - {fileID: 11400000, guid: d262b89c8f4cd664986e796502fb7651, type: 2}
+  - {fileID: 11400000, guid: 8de8ecd332b4cce4988fc3863f0fad6e, type: 2}
+  - {fileID: 11400000, guid: ce85941bd8debb64db4726b86e33a98a, type: 2}
 --- !u!195 &4233148618960237694
 NavMeshAgent:
   m_ObjectHideFlags: 0
