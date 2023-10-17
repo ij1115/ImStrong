@@ -33,10 +33,10 @@ public class PlayerController : MonoBehaviour
 
         moveFB = joystick.Vertical + Input.GetAxis(moveFBAixsName);
         moveLR = joystick.Horizontal + Input.GetAxis(moveLRAixsName);
-        attack = Input.GetKeyDown(KeyCode.L) || UIManager.Instance.attack.ButtonPressed; 
-        firstSkill = Input.GetKeyDown(KeyCode.K) || UIManager.Instance.fSkill.ButtonPressed; 
-        secondSkill = Input.GetKeyDown(KeyCode.O) || UIManager.Instance.sSkill.ButtonPressed;
-        evade = Input.GetKeyDown(KeyCode.Space) || UIManager.Instance.evade.ButtonPressed;
+        attack = Input.GetKeyDown(KeyCode.L) || UIManager.Instance.uis[2].GetComponent<DungeonUi>().attack.ButtonPressed; 
+        firstSkill = Input.GetKeyDown(KeyCode.K) || UIManager.Instance.uis[2].GetComponent<DungeonUi>().fSkill.ButtonPressed; 
+        secondSkill = Input.GetKeyDown(KeyCode.O) || UIManager.Instance.uis[2].GetComponent<DungeonUi>().sSkill.ButtonPressed;
+        evade = Input.GetKeyDown(KeyCode.Space) || UIManager.Instance.uis[2].GetComponent<DungeonUi>().evade.ButtonPressed;
     }
     
 }

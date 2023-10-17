@@ -1,0 +1,8 @@
+ITEM_NUMBER,NAME,VALUE
+0,Heal,0.40
+1,MaxUp,10
+2,AtkSpeed,0.05
+3,MoveSpeed,0.25
+4,SwordUp,2
+5,AxeUp,2
+6,SpearUp,2

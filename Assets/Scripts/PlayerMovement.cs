@@ -200,7 +200,7 @@ public class PlayerMovement : MonoBehaviour
 
         var rotation = rb.rotation;
         var targetRotateion = Quaternion.LookRotation(moveVec, Vector3.up);
-        rotation = Quaternion.RotateTowards(rotation, targetRotateion, rotateSpeed * Time.deltaTime);
+        rotation = Quaternion.RotateTowards(rotation, targetRotateion, rotateSpeed * Time.deltaTime * 4f);
         rb.MoveRotation(rotation);
     }
 
