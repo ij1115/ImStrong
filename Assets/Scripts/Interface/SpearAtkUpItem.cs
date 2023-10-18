@@ -10,6 +10,7 @@ public class SpearAtkUpItem : MonoBehaviour, IItem
         if (info != null)
         {
             GameData.Instance.SpearLevUp();
+            UIManager.Instance.uis[2].GetComponent<DungeonUi>().InfoWeaponsTextUpdate();
         }
 
         Destroy(gameObject);

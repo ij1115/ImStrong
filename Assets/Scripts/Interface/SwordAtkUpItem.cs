@@ -10,6 +10,7 @@ public class SwordAtkUpItem : MonoBehaviour, IItem
         if (info != null)
         {
             GameData.Instance.SwordLevUp();
+            UIManager.Instance.uis[2].GetComponent<DungeonUi>().InfoWeaponsTextUpdate();
         }
 
         Destroy(gameObject);

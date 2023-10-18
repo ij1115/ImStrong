@@ -10,6 +10,7 @@ public class AxeAtkUpItem : MonoBehaviour, IItem
         if (info != null)
         {
             GameData.Instance.AxeLevUp();
+            UIManager.Instance.uis[2].GetComponent<DungeonUi>().InfoWeaponsTextUpdate();
         }
 
         Destroy(gameObject);

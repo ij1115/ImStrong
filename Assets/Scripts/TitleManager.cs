@@ -22,9 +22,8 @@ public class TitleManager : MonoBehaviour
     {
         if(Input.anyKeyDown)
         {
-            GameManager.instance.ChangeScene("Lobby");
-
             GameData.Instance.DataLoad();
+            GameManager.instance.ChangeScene("Lobby");
         }
     }
 }
