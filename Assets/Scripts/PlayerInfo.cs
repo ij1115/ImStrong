@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Android.Types;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -67,6 +68,9 @@ public class PlayerInfo : MonoBehaviour
         }
 
         hp += health;
+        hpSlider.value = hp;
+        UIManager.Instance.uis[2].GetComponent<DungeonUi>().playerHp.text = hp + " / " + state.maxHp;
+
     }
 
     public void Die()

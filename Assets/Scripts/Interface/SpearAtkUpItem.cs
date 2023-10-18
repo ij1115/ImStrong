@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SpearAtkUpItem : MonoBehaviour
+public class SpearAtkUpItem : MonoBehaviour, IItem
 {
     public void Use(GameObject target)
     {

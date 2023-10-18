@@ -46,6 +46,6 @@ public class SOItem : ScriptableObject
         if (item == null)
             return;
 
-        Instantiate(item, pos, Quaternion.identity);
+        var iObj = Instantiate(item, pos, Quaternion.identity);
     }
 }

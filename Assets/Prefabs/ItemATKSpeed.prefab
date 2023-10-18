@@ -4910,6 +4910,7 @@ GameObject:
   - component: {fileID: 198566955500219250}
   - component: {fileID: 199536504798512130}
   - component: {fileID: 8813614413301519287}
+  - component: {fileID: 3647969807321176602}
   m_Layer: 1
   m_Name: ItemATKSpeed
   m_TagString: Untagged
@@ -9747,10 +9748,10 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
@@ -9760,6 +9761,18 @@ CapsuleCollider:
   m_Height: 1.9609522
   m_Direction: 1
   m_Center: {x: -0.0063272864, y: 0.99309736, z: 0.003080368}
+--- !u!114 &3647969807321176602
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1163771896122142}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96185234d8a38c7499dcb47a00b32b30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1289803115217724
 GameObject:
   m_ObjectHideFlags: 0

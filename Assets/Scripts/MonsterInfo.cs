@@ -97,7 +97,20 @@ public class MonsterInfo : MonoBehaviour
         {
             onDeath();
         }
-
+        switch(type)
+        {
+            case MonsterType.Mob:
+                foreach (var drop in normalDrop)
+                {
+                    drop.itemDrop(gameObject.transform.position);
+                }
+                break;
+            case MonsterType.SubBoss:
+                break;
+            case MonsterType.Boss:
+                break;
+        }
         dead = true;
+        
     }
 }

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AxeAtkUpItem : MonoBehaviour
+public class AxeAtkUpItem : MonoBehaviour, IItem
 {
     public void Use(GameObject target)
     {
