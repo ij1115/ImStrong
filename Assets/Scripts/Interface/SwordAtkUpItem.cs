@@ -9,6 +9,7 @@ public class SwordAtkUpItem : MonoBehaviour, IItem
         PlayerInfo info = target.GetComponent<PlayerInfo>();
         if (info != null)
         {
+            info.EffectCor(info.atkUp);
             GameData.Instance.SwordLevUp();
             UIManager.Instance.uis[2].GetComponent<DungeonUi>().InfoWeaponsTextUpdate();
         }

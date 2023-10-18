@@ -11,6 +11,13 @@ public class PlayerInfo : MonoBehaviour
 
     public Slider hpSlider;
 
+    public ParticleSystem atkUp;
+    public ParticleSystem atkSpUp;
+    public ParticleSystem movSpUp;
+    public ParticleSystem heal;
+    public ParticleSystem maxHpUp;
+
+
     public int hp { get; private set; }
 
     public bool dead { get; private set; }
@@ -19,6 +26,12 @@ public class PlayerInfo : MonoBehaviour
     {
         state= new State();
         dead = false;
+
+        atkUp.Stop();
+        atkSpUp.Stop();
+        movSpUp.Stop();
+        heal.Stop();
+        maxHpUp.Stop();
     }
     public void StateUpdate()
     {
@@ -90,5 +103,17 @@ public class PlayerInfo : MonoBehaviour
         {
             item.Use(gameObject);
         }
+    }
+
+    public void EffectCor(ParticleSystem effect)
+    {
+        StartCoroutine(EffectPlay(effect));
+    }
+
+    private IEnumerator EffectPlay(ParticleSystem effect)
+    {
+        effect.Play();
+        yield return new WaitForSeconds(1f);
+        effect.Stop();
     }
 }

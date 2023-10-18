@@ -30,31 +30,22 @@ public class DungeonManager : MonoBehaviour
     public FixedJoystick joystic;
     public Slider hpSlider;
 
-    public float spawnTimer = 3f;
-
     private List<GameObject> mobSpawner = new List<GameObject>();
     private List<GameObject> mobActive = new List<GameObject>();
 
-    //사냥한 몬스터의 스폰 지역
-    private GameObject mobSpawnPos = null;
-    
     private bool spawn = true;
-
-    public int SpawnCount = 0;
 
     private List<GameObject> subBossSpawner = new List<GameObject>();
     private List<GameObject> subBossActive = new List<GameObject>();
 
-    //사냥한 서브보스의 스폰 지역
-    private GameObject subBossSpawnPos = null;
-    public int huntSubBossCount = 0;
-
     private List<GameObject> portalSpawner = new List<GameObject>();
     private List<GameObject> portalActive = new List<GameObject>();
 
+    private List<GameObject> BossSpawner = new List<GameObject>();
+    private List<GameObject> BossActive = new List<GameObject>();
+
     private void Awake()
     {
-        huntSubBossCount = 0;
         foreach (Transform obj in gameObject.transform)
         {
             if (obj == null)
@@ -86,9 +77,19 @@ public class DungeonManager : MonoBehaviour
                     {
                         var list = obj.GetComponentsInChildren<Spawner>();
 
-                        foreach(var spawn in list)
+                        foreach (var spawn in list)
                         {
-                           portalSpawner.Add(spawn.gameObject);
+                            portalSpawner.Add(spawn.gameObject);
+                        }
+                    }
+                    break;
+                case "BossSpawner":
+                    {
+                        var list = obj.GetComponentsInChildren<Spawner>();
+
+                        foreach (var spawn in list)
+                        {
+                            BossSpawner.Add(spawn.gameObject);
                         }
                     }
                     break;
@@ -96,26 +97,15 @@ public class DungeonManager : MonoBehaviour
         }
 
         PlayerSpawn();
-
-        //이전 코드
-        //var list = gameObject.GetComponentsInChildren<Spawner>();
-        //foreach (var spawner in list)
-        //{
-        //    mobSpawner.Add(spawner.gameObject);
-        //}
     }
 
     public void Reset()
     {
-        huntSubBossCount = 0;
-
         mobSpawner.Clear();
         mobActive.Clear();
-        mobSpawnPos = null;
-
+        
         subBossSpawner.Clear();
         subBossActive.Clear();
-        subBossSpawnPos = null;
 
         portalSpawner.Clear();
         portalActive.Clear();
@@ -123,14 +113,14 @@ public class DungeonManager : MonoBehaviour
 
     private void Update()
     {
-        if(GameManager.instance.isGameover)
+        if (GameManager.instance.isGameover)
         {
-            if(Input.GetKeyDown(KeyCode.Escape))
+            if (Input.GetKeyDown(KeyCode.Escape))
             {
                 Application.Quit();
             }
 
-            if(Input.GetKeyDown(KeyCode.Return))
+            if (Input.GetKeyDown(KeyCode.Return))
             {
                 gameoverUI.SetActive(false);
                 GameManager.instance.isGameover = false;
@@ -140,16 +130,16 @@ public class DungeonManager : MonoBehaviour
             return;
         }
 
-        if(Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
             Reset();
             GameManager.instance.ChangeScene("Lobby");
             return;
         }
 
-        if(Input.GetKeyDown(KeyCode.F10))
+        if (Input.GetKeyDown(KeyCode.F10))
         {
-            mobActive[0].GetComponent<Spawner>().Die();
+            StageSpawn();
         }
 
         if (Input.GetKeyDown(KeyCode.F11))
@@ -160,104 +150,73 @@ public class DungeonManager : MonoBehaviour
             obj.CurrentToStandard();
             obj.MonsterSetUp();
 
-            if(playerManager!=null)
+            if (playerManager != null)
             {
                 playerManager.GetComponent<PlayerInfo>().StateUpdate();
                 playerManager.GetComponent<PlayerMovement>().RunTimeSwap();
             }
 
-            if(mobActive.Count>0)
+            if (mobActive.Count > 0)
             {
-                foreach(var mob in mobActive)
+                foreach (var mob in mobActive)
                 {
                     mob.GetComponent<Spawner>().MonsterStateSwap();
                 }
             }
-            if(subBossActive.Count>0)
+            if (subBossActive.Count > 0)
             {
-                foreach(var sub in subBossActive)
+                foreach (var sub in subBossActive)
                 {
                     sub.GetComponent<Spawner>().MonsterStateSwap();
                 }
             }
 
         }
-
-        if (mobActive.Count + mobSpawner.Count >0 &&
-            mobActive.Count<SpawnCount && 
-            spawn)
-        {
-            MonsterSpawn();
-        }
-
-        if(subBossActive.Count + subBossSpawner.Count >0 &&
-            subBossActive.Count<1 &&
-            huntSubBossCount< 2 &&
-            spawn)
-        {
-            SubBossSpawn();
-        }
     }
 
-    private void MonsterSpawn()
+    private void MonsterSpawn(int index)
     {
-        if(mobActive.Count+ mobSpawner.Count<SpawnCount)
+        if (mobActive.Count > 0)
         {
-            Debug.Log("Spawn Count Err");
-            return;
-        }
-
-        while (mobActive.Count<SpawnCount)
-        {
-            int randomIndex;
-            GameObject obj;
-            while(true)
+            foreach (var mob in mobActive)
             {
-                randomIndex = Random.RandomRange(0, mobSpawner.Count);
-                obj = mobSpawner[randomIndex];
-
-                if(obj == mobSpawnPos)
+                if (mob == mobSpawner[index].gameObject)
                 {
-                    continue;
+                    return;
                 }
-                break;
             }
-            mobActive.Add(obj);
-            mobSpawner.Remove(obj);
-
-            obj.GetComponent<Spawner>().Spawn();
         }
+
+        mobActive.Add(mobSpawner[index]);
+
+        mobSpawner[index].GetComponent<Spawner>().Spawn();
+    
     }
 
     private void SubBossSpawn()
     {
-        if (huntSubBossCount>=2)
+        if (subBossActive.Count>0)
         {
-            Debug.Log("Kill Count Over");
             return;
         }
 
-        while (subBossActive.Count < 1)
-        {
-            int randomIndex;
-            GameObject obj;
-            while (true)
-            {
-                randomIndex = Random.RandomRange(0, subBossSpawner.Count);
-                obj = subBossSpawner[randomIndex];
+        subBossActive.Add(subBossSpawner[0]);
 
-                if (obj == subBossSpawnPos)
-                {
-                    continue;
-                }
-                break;
-            }
-            subBossActive.Add(obj);
-            subBossSpawner.Remove(obj);
-
-            obj.GetComponent<Spawner>().Spawn();
-        }
+        subBossSpawner[0].GetComponent<Spawner>().Spawn();
     }
+
+    private void BossSpawn()
+    {
+        if(BossActive.Count>0)
+        {
+            return;
+        }
+
+        BossActive.Add(BossSpawner[0]);
+
+        BossSpawner[0].GetComponent<Spawner>().Spawn();
+    }
+    
 
     public void SpawnerRelese()
     {
@@ -265,10 +224,7 @@ public class DungeonManager : MonoBehaviour
         {
             if (obj.GetComponent<Spawner>().ActiveSpawner)
             {
-                mobSpawnPos = obj;
-                mobSpawner.Add(obj);
                 mobActive.Remove(obj);
-                StartCoroutine(SpawnRoutine());
                 return;
             }
         }
@@ -280,16 +236,25 @@ public class DungeonManager : MonoBehaviour
         {
             if (obj.GetComponent<Spawner>().ActiveSpawner)
             {
-                subBossSpawnPos = obj;
-                subBossSpawner.Add(obj);
                 subBossActive.Remove(obj);
-                StartCoroutine(SpawnRoutine());
                 return;
             }
         }
     }
 
-    private void PlayerSpawn()
+    public void BossRelese()
+    {
+        foreach (var obj in BossActive)
+        {
+            if (obj.GetComponent<Spawner>().ActiveSpawner)
+            {
+                BossActive.Remove(obj);
+                return;
+            }
+        }
+    }
+
+        private void PlayerSpawn()
     {
         GameObject player = Instantiate(playerPrefab, transform.position, Quaternion.identity);
         var controller = player.GetComponent<PlayerController>();
@@ -310,10 +275,43 @@ public class DungeonManager : MonoBehaviour
         playerManager = player;
     }
 
-    private IEnumerator SpawnRoutine()
+    private void StageSpawn()
     {
-        spawn = false;
-        yield return new WaitForSeconds(spawnTimer);
-        spawn = true;
+        switch(GameData.Instance.data.stageLev)
+        {
+            case 1:
+                MonsterSpawn(0);
+                break;
+            case 2:
+                MonsterSpawn(1);
+                MonsterSpawn(2);
+                break;
+            case 3:
+                MonsterSpawn(1);
+                MonsterSpawn(2);
+                break;
+            case 4:
+                SubBossSpawn();
+                break;
+            case 5:
+                MonsterSpawn(0);
+                MonsterSpawn(1);
+                MonsterSpawn(2);
+                break;
+            case 6:
+                MonsterSpawn(0);
+                MonsterSpawn(1);
+                MonsterSpawn(2);
+                break;
+            case 7:
+                MonsterSpawn(0);
+                MonsterSpawn(1);
+                MonsterSpawn(2);
+                MonsterSpawn(3);
+                break;
+            case 8:
+                BossSpawn();
+                break;
+        }
     }
 }

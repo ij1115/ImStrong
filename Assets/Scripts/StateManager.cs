@@ -18,21 +18,21 @@ public class StateManager : MonoBehaviour
     public float movSp = 5.00f;
 
     public float mobHpSet = 1f;
-    public float mobAtkSet = 0.5f;
+    public float mobAtkSet = 0.4f;
     public float mobDefSet = 0.1f;
     public float mobAtkSpSet = 0.9f;
     public float mobMovSpSet = 0.5f;
 
     public float subBossHpSet = 2f;
-    public float subBossAtkSet = 1.5f;
+    public float subBossAtkSet = 1.3f;
     public float subBossDefSet = 0.2f;
     public float subBossAtkSpSet = 0.7f;
     public float subBossMovSpSet = 0.7f;
 
     public float bossHpSet = 4f;
-    public float bossAtkSet = 2f;
+    public float bossAtkSet = 1.8f;
     public float bossDefSet = 0.4f;
-    public float bossAtkSpSet = 0.5f;
+    public float bossAtkSpSet = 0.6f;
     public float bossMovSpSet = 0.8f;
 
     private ItemTable item;

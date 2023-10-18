@@ -43,6 +43,11 @@ public class Spawner : MonoBehaviour
                 break;
 
             case MonsterType.Boss:
+                if (monsters.Count == 0)
+                {
+                    dm.SubBossRelese();
+                    ActiveSpawner = false;
+                }
                 break;
         }
 
@@ -59,10 +64,9 @@ public class Spawner : MonoBehaviour
     
     public void Die(GameObject mob)
     {
-        if(mob.GetComponent<MonsterInfo>().type == MonsterType.SubBoss)
+        if(mob.GetComponent<MonsterInfo>().type == MonsterType.SubBoss || mob.GetComponent<MonsterInfo>().type == MonsterType.Boss)
         {
             UIManager.Instance.uis[2].GetComponent<DungeonUi>().BossDieUi();
-            dm.huntSubBossCount++;
         }
 
         foreach(var obj in monsters)
@@ -83,7 +87,7 @@ public class Spawner : MonoBehaviour
         {
             case MonsterType.Mob:
                 { 
-                int spawnCount = Random.RandomRange(3, 6);
+                int spawnCount = Random.RandomRange(2, 5);
 
                 Vector3 spawnPos;
 
@@ -109,13 +113,29 @@ public class Spawner : MonoBehaviour
 
             case MonsterType.SubBoss:
                 {
+                    var obj = Instantiate(monsterPrefabs, gameObject.transform.position, Quaternion.identity);
+                    obj.transform.parent = this.transform;
+                    obj.transform.localScale *= 1.5f;
+                    var info = obj.GetComponent<MonsterInfo>();
+                    var movement = obj.GetComponent<MonsterMovement>();
+                    info.SetType(type);
+                    info.StateUpdate();
+
+                    movement.SetUp();
+                    movement.spawner = this.gameObject;
+                    monsters.Add(obj);
+                }
+                break;
+
+            case MonsterType.Boss:
+                {
                     Vector3 spawnPos;
                     spawnPos.x = Random.Range(collider.bounds.min.x, collider.bounds.max.x);
                     spawnPos.y = 0f;
                     spawnPos.z = Random.Range(collider.bounds.min.z, collider.bounds.max.z);
                     var obj = Instantiate(monsterPrefabs, spawnPos, Quaternion.identity);
                     obj.transform.parent = this.transform;
-                    obj.transform.localScale *= 1.5f;
+                    obj.transform.localScale *= 2f;
                     var info = obj.GetComponent<MonsterInfo>();
                     var movement = obj.GetComponent<MonsterMovement>();
                     info.SetType(type);

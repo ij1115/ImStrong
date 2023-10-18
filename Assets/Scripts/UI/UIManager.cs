@@ -34,6 +34,7 @@ public class UIManager : MonoBehaviour
     {
         DontDestroyOnLoad(gameObject);
         SetResolution(targetWidth, targetHeight, fullScreen);
+        Open(defaultUi);
     }
 
     public SceneUI Open(SceneState scene)

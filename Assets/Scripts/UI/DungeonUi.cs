@@ -6,17 +6,18 @@ using UnityEngine.UI;
 
 public class DungeonUi : SceneUI
 {
+    //메뉴
     [SerializeField] private GameObject option;
     [SerializeField] private Text title;
     [SerializeField] private Button replayButton;
     [SerializeField] private Button homeButton;
-    [SerializeField] private GameObject charInfoBox;
+    [SerializeField] private Button pauseButton;
 
-    public GameObject gameOverUi;
-
+    //조이스틱
     [SerializeField] private GameObject joystickButton;
     [SerializeField] private FixedJoystick joystick;
 
+    //스킬 버튼
     [SerializeField] private GameObject skillSet;
     [SerializeField] private GameObject[] swordButtonSet;
     [SerializeField] private GameObject[] axeButtonSet;
@@ -30,10 +31,13 @@ public class DungeonUi : SceneUI
     public GameObject fSkillSlider;
     public GameObject sSkillSlider;
 
+    //캐릭터 인포
+    [SerializeField] private GameObject charInfoBox;
     [SerializeField] private Button charInfoButton;
     [SerializeField] private GameObject swordInfo;
     [SerializeField] private GameObject axeInfo;
     [SerializeField] private GameObject spearInfo;
+
     [SerializeField] private TextMeshProUGUI mSwLev;
     [SerializeField] private TextMeshProUGUI mSwVal;
     [SerializeField] private TextMeshProUGUI mSwSALev;
@@ -49,9 +53,37 @@ public class DungeonUi : SceneUI
     [SerializeField] private TextMeshProUGUI mSpSALev;
     [SerializeField] private TextMeshProUGUI mSpSSwLev;
 
-    [SerializeField] private Button pauseButton;
+
+    //클리어시
+    [SerializeField] private GameObject nextSelectWindow;
+    [SerializeField] private Button nextSwordButton;
+    [SerializeField] private Button nextAxeButton;
+    [SerializeField] private Button nextSpearButton;
+    [SerializeField] private TextMeshProUGUI nextSwordLev;
+    [SerializeField] private TextMeshProUGUI nextAxeLev;
+    [SerializeField] private TextMeshProUGUI nextSpearLev;
+
+    [SerializeField] private GameObject backGround;
+    [SerializeField] private GameObject infoAtk;
+    [SerializeField] private GameObject infoMaxHp;
+    [SerializeField] private GameObject infoAtkSp; 
+    [SerializeField] private GameObject infoMovSp;
+
+    [SerializeField] private TextMeshProUGUI atk;
+    [SerializeField] private TextMeshProUGUI maxHp;
+    [SerializeField] private TextMeshProUGUI atkSp;
+    [SerializeField] private TextMeshProUGUI movSp;
+
+
+    [SerializeField] private Button returnButton;
+    [SerializeField] private Button nextStageButton;
+
+
+    //패배시
     [SerializeField] private Button gameOverButton;
 
+
+    //체력바
     [SerializeField] private GameObject charHpBar;
     [SerializeField] private GameObject bossHpBar;
 
@@ -62,6 +94,8 @@ public class DungeonUi : SceneUI
     private Weapons weaponType;
 
     private bool infoOnOff = false;
+
+    public GameObject gameOverUi;
 
     public override void Open()
     {
@@ -288,6 +322,23 @@ public class DungeonUi : SceneUI
         mSpSSwLev.text = $"+{GameData.Instance.data.swordLev + 1}";
         mSpSALev.text = $"+{GameData.Instance.data.axeLev + 1}";
     }
+
+
+    public void NextStageWepSelect()
+    {
+        if (infoOnOff)
+            OnClickInfo();
+
+        joystickButton.SetActive(false);
+        charHpBar.SetActive(false);
+        skillSet.SetActive(false);
+        pauseButton.gameObject.SetActive(false);
+        charInfoButton.gameObject.SetActive(false);
+
+        nextSelectWindow.SetActive(true);
+    }
+
+
     public Slider PlayerHpBarSet()
     {
         charHpBar.SetActive(true);

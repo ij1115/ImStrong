@@ -10,7 +10,7 @@ public class HealItem : MonoBehaviour, IItem
         if(info != null)
         {
             int healHp = Mathf.RoundToInt(info.hp * 0.4f);
-
+            info.EffectCor(info.heal);
             info.RestoreHealth(healHp);
         }
 

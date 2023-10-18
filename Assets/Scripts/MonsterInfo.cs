@@ -9,7 +9,7 @@ public class MonsterInfo : MonoBehaviour
     public Slider hpSlider;
     public MonsterType type { get; private set; }
 
-    private int hp;
+    public int hp;
 
     public event Action onDeath;
 
