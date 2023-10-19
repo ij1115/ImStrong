@@ -11,6 +11,7 @@ public class MovSpUpItem : MonoBehaviour, IItem
         {
             info.EffectCor(info.movSpUp);
             GameData.Instance.MoveSpeedUp();
+            StateManager.Instance.PlayerStateSet();
         }
 
         Destroy(gameObject);

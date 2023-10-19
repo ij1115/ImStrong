@@ -55,31 +55,9 @@ public class GameManager : MonoBehaviour
                 currentState = SceneState.BossRoom;
                 UIManager.Instance.Open(currentState);
                 StateManager.Instance.MonsterSetUp();
-                //UIManager.Instance.DungeonUISet();
                 SceneManager.LoadScene(state);
                 UIManager.Instance.StartFadeOut();
                 break;
         }
     }
-
-    public void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.Alpha7))
-        {
-            StateManager.Instance.PlayerStateLog();
-        }
-        if(Input.GetKeyDown(KeyCode.Alpha8))
-        {
-            StateManager.Instance.MobStateLog();
-        }
-        if(Input.GetKeyDown(KeyCode.Alpha9))
-        { 
-            StateManager.Instance.SubBossStateLog();
-        }
-        if(Input.GetKeyDown(KeyCode.Alpha0))
-        {
-            StateManager.Instance.BossStateLog();
-        }
-    }
-
 }

@@ -11,6 +11,7 @@ public class AxeAtkUpItem : MonoBehaviour, IItem
         {
             info.EffectCor(info.atkUp);
             GameData.Instance.AxeLevUp();
+            StateManager.Instance.PlayerStateSet();
             UIManager.Instance.uis[2].GetComponent<DungeonUi>().InfoWeaponsTextUpdate();
         }
 

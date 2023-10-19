@@ -160,44 +160,6 @@ public class StateManager : MonoBehaviour
 
         return state;
     }
-
-    // 디버깅용 코드
-    public void PlayerStateLog()
-    {
-        Debug.Log($"PlayerInfo\n" +
-            $"MaxHP : {current.maxHp}\n" +
-            $"ATK : {current.atk}\n" +
-            $"DEF : {current.def}\n" +
-            $"AttackSpeed : {current.atkSp}\n" +
-            $"MoveSpeed : {current.movSp}");
-    }
-    public void MobStateLog()
-    {
-        Debug.Log($"MonsterInfo\n" +
-            $"MaxHP : {Mathf.RoundToInt((float)monster.maxHp * mobHpSet)}\n" +
-            $"ATK : {Mathf.RoundToInt((float)monster.atk * mobAtkSet)}\n" +
-            $"DEF : {Mathf.RoundToInt((float)monster.def * mobDefSet)}\n" +
-            $"AttackSpeed : {monster.atkSp * mobAtkSpSet}\n" +
-            $"MoveSpeed : {monster.movSp * mobMovSpSet}");
-    }
-    public void SubBossStateLog()
-    {
-        Debug.Log($"SubBossInfo\n" +
-            $"MaxHP : {Mathf.RoundToInt((float)monster.maxHp * subBossHpSet)}\n" +
-            $"ATK : {Mathf.RoundToInt((float)monster.atk * subBossAtkSet)}\n" +
-            $"DEF : {Mathf.RoundToInt((float)monster.def * subBossDefSet)}\n" +
-            $"AttackSpeed : {monster.atkSp * subBossAtkSpSet}\n" +
-            $"MoveSpeed : {monster.movSp * subBossMovSpSet}");
-    }
-    public void BossStateLog()
-    {
-        Debug.Log($"BossInfo\n" +
-            $"MaxHP : {Mathf.RoundToInt((float)monster.maxHp * bossHpSet)}\n" +
-            $"ATK : {Mathf.RoundToInt((float)monster.atk * bossAtkSet)}\n" +
-            $"DEF : {Mathf.RoundToInt((float)monster.def * bossDefSet)}\n" +
-            $"AttackSpeed : {monster.atkSp * bossAtkSpSet}\n" +
-            $"MoveSpeed : {monster.movSp * bossMovSpSet}");
-    }
 }
 
 public class State

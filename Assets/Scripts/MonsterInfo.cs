@@ -21,10 +21,16 @@ public class MonsterInfo : MonoBehaviour
     public SOItem[] subBossDrop;
     public SOItem[] bossDrop;
 
+    private bool healDrop = false;
+    private bool maxHpDrop = false;
+
+
     public void Awake()
     {
         state = new State();
         dead = false;
+        healDrop = false;
+        maxHpDrop = false;
     }
 
     public void Update()
@@ -88,9 +94,11 @@ public class MonsterInfo : MonoBehaviour
         hp -= hitDamage;
 
         if(type == MonsterType.SubBoss || type == MonsterType.Boss) 
-        { 
-        hpSlider.value = hp;
-        UIManager.Instance.uis[2].GetComponent<DungeonUi>().bossHp.text = hp + " / " + state.maxHp;
+        {
+            HealDrop(type);
+            MaxHpDrop(type);
+            hpSlider.value = hp;
+            UIManager.Instance.uis[2].GetComponent<DungeonUi>().bossHp.text = hp + " / " + state.maxHp;
         }
         else if(type == MonsterType.Mob)
         {
@@ -112,24 +120,122 @@ public class MonsterInfo : MonoBehaviour
             Die();
         }
     }
+    private void HealDrop(MonsterType t)
+    {
+        if((hp/state.maxHp) < 0.5f && !healDrop)
+        {
+            healDrop = true;
+            switch (t)
+            {
+                case MonsterType.SubBoss:
+                    for (int i = 0; i < 2; i++)
+                    {
+                        Vector3 dropPos = gameObject.transform.position;
+                        dropPos.x += UnityEngine.Random.Range(-5f, 5f);
+                        dropPos.z += UnityEngine.Random.Range(-5f, 5f);
+                        subBossDrop[2].itemDrop(dropPos);
+                    }
+                    break;
 
+                case MonsterType.Boss:
+                    {
+                        for (int i = 0; i < 3; i++)
+                        {
+                            Vector3 dropPos = gameObject.transform.position;
+                            dropPos.x += UnityEngine.Random.Range(-5f, 5f);
+                            dropPos.z += UnityEngine.Random.Range(-5f, 5f);
+                            bossDrop[2].itemDrop(dropPos);
+                        }
+                    }
+                    break;
+            }
+
+        }
+      
+    }
+
+    private void MaxHpDrop(MonsterType t)
+    {
+        if ((hp / state.maxHp) < 0.5f && !maxHpDrop)
+        {
+            maxHpDrop = true;
+            switch (t)
+            {
+                case MonsterType.SubBoss:
+                    { 
+                    Vector3 dropPos = gameObject.transform.position;
+                    dropPos.x += UnityEngine.Random.Range(-5f, 5f);
+                    dropPos.z += UnityEngine.Random.Range(-5f, 5f);
+
+                    subBossDrop[1].itemDrop(dropPos);
+                    }
+                 break;
+
+                case MonsterType.Boss:
+                {
+                    for (int i = 0; i < 2; i++)
+                    {
+                        Vector3 dropPos = gameObject.transform.position;
+                        dropPos.x += UnityEngine.Random.Range(-5f, 5f);
+                        dropPos.z += UnityEngine.Random.Range(-5f, 5f);
+                        bossDrop[1].itemDrop(dropPos);
+                    }
+                }
+                 break;
+            }
+          
+        }
+    }
     public void Die()
     {
         if(onDeath != null)
         {
             onDeath();
         }
-        switch(type)
+        switch (type)
         {
             case MonsterType.Mob:
                 foreach (var drop in normalDrop)
                 {
-                    drop.itemDrop(gameObject.transform.position);
+                    Vector3 dropPos = gameObject.transform.position;
+                    dropPos.x += UnityEngine.Random.Range(-2f, 2f);
+                    dropPos.z += UnityEngine.Random.Range(-2f, 2f);
+
+                    drop.itemDrop(dropPos);
                 }
                 break;
             case MonsterType.SubBoss:
+                for(int i=0; i<5; i++)
+                {
+                    Vector3 dropPos = gameObject.transform.position;
+                    dropPos.x += UnityEngine.Random.Range(-2f, 2f);
+                    dropPos.z += UnityEngine.Random.Range(-2f, 2f);
+
+                    subBossDrop[0].itemDrop(dropPos);
+
+                    if(i<2)
+                    {
+                        subBossDrop[1].itemDrop(dropPos);
+                        subBossDrop[3].itemDrop(dropPos);
+                        subBossDrop[4].itemDrop(dropPos);
+                    }
+                }
                 break;
             case MonsterType.Boss:
+                for (int i = 0; i < 10; i++)
+                {
+                    Vector3 dropPos = gameObject.transform.position;
+                    dropPos.x += UnityEngine.Random.Range(-2f, 2f);
+                    dropPos.z += UnityEngine.Random.Range(-2f, 2f);
+                    subBossDrop[0].itemDrop(dropPos);
+
+                    if (i < 3)
+                    {
+                        subBossDrop[1].itemDrop(dropPos);
+                        subBossDrop[3].itemDrop(dropPos);
+                        subBossDrop[4].itemDrop(dropPos);
+                    }
+                }
                 break;
         }
         dead = true;

@@ -12,6 +12,7 @@ public class AtkSpUpItem : MonoBehaviour, IItem
         {
             info.EffectCor(info.atkSpUp);
             GameData.Instance.AttackSpeedUp();
+            StateManager.Instance.PlayerStateSet();
         }
 
         Destroy(gameObject);

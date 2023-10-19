@@ -115,7 +115,7 @@ public class DungeonManager : MonoBehaviour
 
     private void Update()
     {
-        if(!stageClear&&!spawn)
+        if (!stageClear && !spawn)
         {
             StageSpawn();
             spawn = true;
@@ -123,9 +123,9 @@ public class DungeonManager : MonoBehaviour
             return;
         }
 
-        if(!stageClear&&spawn)
+        if (!stageClear && spawn)
         {
-            if(mobActive.Count == 0 && subBossActive.Count == 0 && BossActive.Count == 0)
+            if (mobActive.Count == 0 && subBossActive.Count == 0 && BossActive.Count == 0)
             {
                 PortalSpawn();
                 stageClear = true;
@@ -149,50 +149,8 @@ public class DungeonManager : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Reset();
-            UIManager.Instance.Open(SceneState.Lobby);
-            GameManager.instance.ChangeScene("Lobby");
-            return;
-        }
-
-        if (Input.GetKeyDown(KeyCode.F10))
-        {
-            StageSpawn();
-        }
-
-        if (Input.GetKeyDown(KeyCode.F11))
-        {
-            var obj = StateManager.Instance;
-
-            obj.StandardSetUp();
-            obj.CurrentToStandard();
-            obj.MonsterSetUp();
-
-            if (playerManager != null)
-            {
-                playerManager.GetComponent<PlayerInfo>().StateUpdate();
-                playerManager.GetComponent<PlayerMovement>().RunTimeSwap();
-            }
-
-            if (mobActive.Count > 0)
-            {
-                foreach (var mob in mobActive)
-                {
-                    mob.GetComponent<Spawner>().MonsterStateSwap();
-                }
-            }
-            if (subBossActive.Count > 0)
-            {
-                foreach (var sub in subBossActive)
-                {
-                    sub.GetComponent<Spawner>().MonsterStateSwap();
-                }
-            }
-
-        }
     }
+    
 
     private void MonsterSpawn(int index)
     {
@@ -319,7 +277,7 @@ public class DungeonManager : MonoBehaviour
 
     private void StageSpawn()
     {
-        switch(GameData.Instance.data.stageLev)
+        switch(GameData.Instance.data.stageLev%8)
         {
             case 1:
                 MonsterSpawn(0);
@@ -351,7 +309,7 @@ public class DungeonManager : MonoBehaviour
                 MonsterSpawn(2);
                 MonsterSpawn(3);
                 break;
-            case 8:
+            case 0:
                 BossSpawn();
                 break;
         }

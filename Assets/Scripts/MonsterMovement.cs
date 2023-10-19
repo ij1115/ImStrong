@@ -1643,7 +1643,6 @@ public class MonsterMovement : MonoBehaviour
 
         float timer = 0f;
 
-        Debug.Log(endTime);
         var startPos = rb.transform.position;
         var endPos = rb.transform.position + rb.transform.forward * 3f;
 

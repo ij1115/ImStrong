@@ -506,6 +506,7 @@ public class DungeonUi : SceneUI
 
         GameData.Instance.StageUp();
         GameData.Instance.DataSave();
+        GameData.Instance.DungeonInData();
         UIManager.Instance.StartFadeIn("Dungeon");
     }
     public Slider PlayerHpBarSet()

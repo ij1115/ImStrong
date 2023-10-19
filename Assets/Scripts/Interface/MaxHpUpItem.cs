@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class MaxHpUpItem : MonoBehaviour, IItem
@@ -11,6 +12,8 @@ public class MaxHpUpItem : MonoBehaviour, IItem
         {
             info.EffectCor(info.maxHpUp);
             GameData.Instance.MaxHpUp();
+            StateManager.Instance.PlayerStateSet();
+            info.RestoreHealth(0);
         }
 
         Destroy(gameObject);
