@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -57,6 +55,10 @@ public class DungeonUi : SceneUI
     //클리어시
     public bool OpenPortal = false;
 
+    [SerializeField] private GameObject nextCheckWindow;
+    [SerializeField] private Button SelectWindow;
+    [SerializeField] private Button CloseWindow;
+
     [SerializeField] private GameObject nextSelectWindow;
     [SerializeField] private Button nextSwordButton;
     [SerializeField] private Button nextAxeButton;
@@ -77,12 +79,16 @@ public class DungeonUi : SceneUI
     [SerializeField] private TextMeshProUGUI atkSp;
     [SerializeField] private TextMeshProUGUI movSp;
 
-
-    [SerializeField] private Button returnButton;
+    [SerializeField] private Button lobbyButton;
     [SerializeField] private Button nextStageButton;
 
 
     //패배시
+    [SerializeField] private GameObject dieBackGround;
+    [SerializeField] private GameObject restartCheckWindow;
+    [SerializeField] private Button yes;
+    [SerializeField] private Button no;
+
     [SerializeField] private Button resetButton;
     [SerializeField] private Button retryButton;
 
@@ -200,7 +206,15 @@ public class DungeonUi : SceneUI
         spearInfo.SetActive(false);
         charInfoBox.SetActive(false);
 
+        OpenPortal = false;
+
+        nextCheckWindow.SetActive(false);
+        nextSelectWindow.SetActive(false);
         gameOverUi.SetActive(false);
+        restartCheckWindow.SetActive(false);
+        dieBackGround.SetActive(true);
+        resetButton.gameObject.SetActive(true);
+        retryButton.gameObject.SetActive(true);
 
         option.SetActive(false);
         charHpBar.SetActive(false);
@@ -275,13 +289,49 @@ public class DungeonUi : SceneUI
         }
     }
 
-    public void OnClickReStart()
+    public void PlayerDie()
+    {
+        if (infoOnOff)
+            OnClickInfo();
+
+        joystickButton.SetActive(false);
+        charHpBar.SetActive(false);
+        skillSet.SetActive(false);
+        pauseButton.gameObject.SetActive(false);
+        charInfoButton.gameObject.SetActive(false);
+
+        Time.timeScale = 0f;
+
+        gameOverUi.SetActive(true);
+    }
+    public void OnClickOpenReStart()
+    {
+        restartCheckWindow.SetActive(true);
+        dieBackGround.SetActive(false);
+        resetButton.gameObject.SetActive(false);
+        retryButton.gameObject.SetActive(false);
+    }
+    public void OnClickReStartNo()
+    {
+        restartCheckWindow.SetActive(false);
+        dieBackGround.SetActive(true);
+        resetButton.gameObject.SetActive(true);
+        retryButton.gameObject.SetActive(true);
+    }
+    public void OnClickReStartYes()
     {
         GameManager.instance.isGameover = false;
+        Time.timeScale = 1f;
         GameData.Instance.DataReset();
         UIManager.Instance.StartFadeIn("Lobby");
     }
-
+    public void OnClickReTry()
+    {
+        GameManager.instance.isGameover = false;
+        Time.timeScale = 1f;
+        GameData.Instance.DungeonRetry();
+        UIManager.Instance.StartFadeIn("Lobby");
+    }
     private void InfoOpen()
     {
         switch (weaponType)
@@ -328,6 +378,42 @@ public class DungeonUi : SceneUI
         mSpSALev.text = $"+{GameData.Instance.data.axeLev + 1}";
     }
 
+    public void NextCheckWindow()
+    {
+        pauseButton.interactable = false;
+        attack.interactable = false;
+        fSkill.interactable = false;
+        sSkill.interactable = false;
+        evade.interactable = false;
+        charInfoButton.interactable = false;
+        Time.timeScale = 0f;
+        nextCheckWindow.SetActive(true);
+    }
+
+    public void OnClickCloseCheck()
+    {
+        pauseButton.interactable = true;
+        attack.interactable = true;
+        fSkill.interactable = true;
+        sSkill.interactable = true;
+        evade.interactable = true;
+        charInfoButton.interactable = true;
+        nextCheckWindow.SetActive(false);
+        Time.timeScale = 1f;
+        OpenPortal = false;
+    }
+    public void OnClickWepSelectWindow()
+    {
+        pauseButton.interactable = true;
+        attack.interactable = true;
+        fSkill.interactable = true;
+        sSkill.interactable = true;
+        evade.interactable = true;
+        charInfoButton.interactable = true;
+
+        nextCheckWindow.SetActive(false);
+        NextStageWepSelect();
+    }
     public void NextStageWepSelect()
     {
         if (infoOnOff)
@@ -339,10 +425,89 @@ public class DungeonUi : SceneUI
         pauseButton.gameObject.SetActive(false);
         charInfoButton.gameObject.SetActive(false);
 
+        backGround.SetActive(true);
+        nextSwordLev.text = $"+{GameData.Instance.data.swordLev + 1}";
+        nextAxeLev.text = $"+{GameData.Instance.data.axeLev + 1}";
+        nextSpearLev.text = $"+{GameData.Instance.data.spearLev + 1}";
+
         nextSelectWindow.SetActive(true);
     }
 
+    public void OnClickNextWepSword()
+    {
+        StateManager.Instance.SetCurrentWeapons(Weapons.Sword);
+        weaponType = StateManager.Instance.GetCurrentWeapons();
+        InfomationUpdate();
+    }
 
+    public void OnClickNextWepAxe()
+    {
+        StateManager.Instance.SetCurrentWeapons(Weapons.Axe);
+        weaponType = StateManager.Instance.GetCurrentWeapons();
+        InfomationUpdate();
+    }
+
+    public void OnClickNextWepSpear()
+    {
+        StateManager.Instance.SetCurrentWeapons(Weapons.Spear);
+        weaponType = StateManager.Instance.GetCurrentWeapons();
+        InfomationUpdate();
+    }
+
+    public void InfomationUpdate()
+    {
+        backGround.SetActive(false);
+        infoAtk.SetActive(true);
+        infoAtkSp.SetActive(true);
+        infoLine.SetActive(true);
+        infoMaxHp.SetActive(true);
+        infoMovSp.SetActive(true);
+        StateManager.Instance.PlayerStateSet();
+
+        atk.text = $"{StateManager.Instance.current.atk}";
+        atkSp.text = $"{StateManager.Instance.current.atkSp}";
+        maxHp.text = $"{StateManager.Instance.current.maxHp}";
+        movSp.text = $"{StateManager.Instance.current.movSp}";
+    }
+
+    public void OnClickLobby()
+    {
+        infoAtk.SetActive(false);
+        infoAtkSp.SetActive(false);
+        infoLine.SetActive(false);
+        infoMaxHp.SetActive(false);
+        infoMovSp.SetActive(false);
+        nextSelectWindow.SetActive(false);
+
+        OpenPortal = false;
+        DungeonManager.instance.Reset();
+
+        Time.timeScale = 1f;
+
+        GameData.Instance.StageUp();
+        GameData.Instance.DataSave();
+        UIManager.Instance.StartFadeIn("Lobby");
+    }
+
+    public void OnClickNextStage()
+    {
+        infoAtk.SetActive(false);
+        infoAtkSp.SetActive(false);
+        infoLine.SetActive(false);
+        infoMaxHp.SetActive(false);
+        infoMovSp.SetActive(false);
+        nextSelectWindow.SetActive(false);
+
+        OpenPortal = false;
+
+        DungeonManager.instance.Reset();
+
+        Time.timeScale = 1f;
+
+        GameData.Instance.StageUp();
+        GameData.Instance.DataSave();
+        UIManager.Instance.StartFadeIn("Dungeon");
+    }
     public Slider PlayerHpBarSet()
     {
         charHpBar.SetActive(true);

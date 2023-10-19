@@ -12,7 +12,7 @@ public class Portal : MonoBehaviour, IItem
             if(!UIManager.Instance.uis[2].GetComponent<DungeonUi>().OpenPortal)
             {
                 UIManager.Instance.uis[2].GetComponent<DungeonUi>().OpenPortal = true;
-                UIManager.Instance.uis[2].GetComponent<DungeonUi>().NextStageWepSelect();
+                UIManager.Instance.uis[2].GetComponent<DungeonUi>().NextCheckWindow();
             }
         }
     }

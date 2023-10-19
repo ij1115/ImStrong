@@ -89,7 +89,7 @@ public class PlayerInfo : MonoBehaviour
     public void Die()
     {
         dead = true;
-        UIManager.Instance.uis[2].GetComponent<DungeonUi>().gameOverUi.SetActive(true);
+        UIManager.Instance.uis[2].GetComponent<DungeonUi>().PlayerDie();
         GameManager.instance.isGameover = true;
     }
 

@@ -30,7 +30,7 @@ public class Spawner : MonoBehaviour
             case MonsterType.Mob:
                 if (monsters.Count == 0)
                 {
-                    dm.SpawnerRelese();
+                    dm.SpawnerRelese(gameObject);
                     ActiveSpawner = false;
                 }
                 break;

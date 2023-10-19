@@ -104,14 +104,13 @@ public class DungeonManager : MonoBehaviour
         spawn = false;
         stageClear = false;
 
-        mobSpawner.Clear();
         mobActive.Clear();
         
-        subBossSpawner.Clear();
         subBossActive.Clear();
 
-        portalSpawner.Clear();
         portalActive.Clear();
+
+        BossActive.Clear();
     }
 
     private void Update()
@@ -249,11 +248,11 @@ public class DungeonManager : MonoBehaviour
         portalSpawner[0].GetComponent<Spawner>().Spawn();
     }
 
-    public void SpawnerRelese()
+    public void SpawnerRelese(GameObject reObj)
     {
         foreach (var obj in mobActive)
         {
-            if (obj.GetComponent<Spawner>().ActiveSpawner)
+            if (obj.GetComponent<Spawner>().ActiveSpawner && obj == reObj)
             {
                 mobActive.Remove(obj);
                 return;

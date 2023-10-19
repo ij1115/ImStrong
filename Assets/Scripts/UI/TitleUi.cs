@@ -65,7 +65,7 @@ public class TitleUi : SceneUI
         if (makeName.GetComponentInChildren<InputField>().text.Length > 0)
         {
             GameData.Instance.data.name = makeName.GetComponentInChildren<InputField>().text;
-            SaveLoadSystem.Save(GameData.Instance.data);
+            GameData.Instance.DataSave();
             UIManager.Instance.StartFadeIn("Lobby");
         }
     }
