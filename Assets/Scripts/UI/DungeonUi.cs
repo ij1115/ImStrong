@@ -6,16 +6,18 @@ using UnityEngine.UI;
 
 public class DungeonUi : SceneUI
 {
+    //메뉴
     [SerializeField] private GameObject option;
+    [SerializeField] private Text title;
     [SerializeField] private Button replayButton;
     [SerializeField] private Button homeButton;
-    [SerializeField] private GameObject charInfoBox;
+    [SerializeField] private Button pauseButton;
 
-    public GameObject gameOverUi;
-
+    //조이스틱
     [SerializeField] private GameObject joystickButton;
     [SerializeField] private FixedJoystick joystick;
 
+    //스킬 버튼
     [SerializeField] private GameObject skillSet;
     [SerializeField] private GameObject[] swordButtonSet;
     [SerializeField] private GameObject[] axeButtonSet;
@@ -29,14 +31,63 @@ public class DungeonUi : SceneUI
     public GameObject fSkillSlider;
     public GameObject sSkillSlider;
 
+    //캐릭터 인포
+    [SerializeField] private GameObject charInfoBox;
     [SerializeField] private Button charInfoButton;
     [SerializeField] private GameObject swordInfo;
     [SerializeField] private GameObject axeInfo;
     [SerializeField] private GameObject spearInfo;
 
-    [SerializeField] private Button pauseButton;
-    [SerializeField] private Button gameOverButton;
+    [SerializeField] private TextMeshProUGUI mSwLev;
+    [SerializeField] private TextMeshProUGUI mSwVal;
+    [SerializeField] private TextMeshProUGUI mSwSALev;
+    [SerializeField] private TextMeshProUGUI mSwSpLev;
 
+    [SerializeField] private TextMeshProUGUI mALev;
+    [SerializeField] private TextMeshProUGUI mAVal;
+    [SerializeField] private TextMeshProUGUI mASSwLev;
+    [SerializeField] private TextMeshProUGUI mASSpLev;
+
+    [SerializeField] private TextMeshProUGUI mSpLev;
+    [SerializeField] private TextMeshProUGUI mSpVal;
+    [SerializeField] private TextMeshProUGUI mSpSALev;
+    [SerializeField] private TextMeshProUGUI mSpSSwLev;
+
+
+    //클리어시
+    public bool OpenPortal = false;
+
+    [SerializeField] private GameObject nextSelectWindow;
+    [SerializeField] private Button nextSwordButton;
+    [SerializeField] private Button nextAxeButton;
+    [SerializeField] private Button nextSpearButton;
+    [SerializeField] private TextMeshProUGUI nextSwordLev;
+    [SerializeField] private TextMeshProUGUI nextAxeLev;
+    [SerializeField] private TextMeshProUGUI nextSpearLev;
+
+    [SerializeField] private GameObject backGround;
+    [SerializeField] private GameObject infoAtk;
+    [SerializeField] private GameObject infoMaxHp;
+    [SerializeField] private GameObject infoAtkSp; 
+    [SerializeField] private GameObject infoMovSp;
+    [SerializeField] private GameObject infoLine;
+
+    [SerializeField] private TextMeshProUGUI atk;
+    [SerializeField] private TextMeshProUGUI maxHp;
+    [SerializeField] private TextMeshProUGUI atkSp;
+    [SerializeField] private TextMeshProUGUI movSp;
+
+
+    [SerializeField] private Button returnButton;
+    [SerializeField] private Button nextStageButton;
+
+
+    //패배시
+    [SerializeField] private Button resetButton;
+    [SerializeField] private Button retryButton;
+
+
+    //체력바
     [SerializeField] private GameObject charHpBar;
     [SerializeField] private GameObject bossHpBar;
 
@@ -47,6 +98,8 @@ public class DungeonUi : SceneUI
     private Weapons weaponType;
 
     private bool infoOnOff = false;
+
+    public GameObject gameOverUi;
 
     public override void Open()
     {
@@ -167,6 +220,9 @@ public class DungeonUi : SceneUI
         Time.timeScale = 0f;
 
         option.SetActive(true);
+        title.gameObject.SetActive(true);
+        replayButton.gameObject.SetActive(true);
+        homeButton.gameObject.SetActive(true);
     }
     public void OnClickPlay()
     {
@@ -177,6 +233,9 @@ public class DungeonUi : SceneUI
         evade.interactable = true;
         charInfoButton.interactable = true;
         option.SetActive(false);
+        title.gameObject.SetActive(false);
+        replayButton.gameObject.SetActive(false);
+        homeButton.gameObject.SetActive(false);
         Time.timeScale = 1f;
     }
 
@@ -189,6 +248,9 @@ public class DungeonUi : SceneUI
         evade.interactable = true;
         charInfoButton.interactable = true;
         option.SetActive(false);
+        title.gameObject.SetActive(false);
+        replayButton.gameObject.SetActive(false);
+        homeButton.gameObject.SetActive(false);
         Time.timeScale = 1f;
         GameManager.instance.ChangeScene("Lobby");
     }
@@ -213,10 +275,11 @@ public class DungeonUi : SceneUI
         }
     }
 
-    public void OnClickGameOver()
+    public void OnClickReStart()
     {
         GameManager.instance.isGameover = false;
-        GameManager.instance.ChangeScene("Lobby");
+        GameData.Instance.DataReset();
+        UIManager.Instance.StartFadeIn("Lobby");
     }
 
     private void InfoOpen()
@@ -224,18 +287,21 @@ public class DungeonUi : SceneUI
         switch (weaponType)
         {
             case Weapons.Sword:
+                InfoWeaponsTextUpdate();
                 swordInfo.SetActive(true);
                 axeInfo.SetActive(false);
                 spearInfo.SetActive(false);
                 break;
 
             case Weapons.Axe:
+                InfoWeaponsTextUpdate();
                 swordInfo.SetActive(false);
                 axeInfo.SetActive(true);
                 spearInfo.SetActive(false);
                 break;
 
             case Weapons.Spear:
+                InfoWeaponsTextUpdate();
                 swordInfo.SetActive(false);
                 axeInfo.SetActive(false);
                 spearInfo.SetActive(true);
@@ -243,6 +309,39 @@ public class DungeonUi : SceneUI
         }
 
     }
+
+    public void InfoWeaponsTextUpdate()
+    {
+        mSwLev.text = $"+{GameData.Instance.data.swordLev + 1}";
+        mSwVal.text = $"{StateManager.Instance.current.atk}";
+        mSwSALev.text = $"+{GameData.Instance.data.axeLev + 1}";
+        mSwSpLev.text = $"+{GameData.Instance.data.spearLev + 1}";
+
+        mALev.text = $"+{GameData.Instance.data.axeLev + 1}";
+        mAVal.text = $"{StateManager.Instance.current.atk}";
+        mASSwLev.text = $"+{GameData.Instance.data.swordLev + 1}";
+        mASSpLev.text = $"+{GameData.Instance.data.spearLev + 1}";
+
+        mSpLev.text = $"+{GameData.Instance.data.spearLev + 1}";
+        mSpVal.text = $"{StateManager.Instance.current.atk}";
+        mSpSSwLev.text = $"+{GameData.Instance.data.swordLev + 1}";
+        mSpSALev.text = $"+{GameData.Instance.data.axeLev + 1}";
+    }
+
+    public void NextStageWepSelect()
+    {
+        if (infoOnOff)
+            OnClickInfo();
+
+        joystickButton.SetActive(false);
+        charHpBar.SetActive(false);
+        skillSet.SetActive(false);
+        pauseButton.gameObject.SetActive(false);
+        charInfoButton.gameObject.SetActive(false);
+
+        nextSelectWindow.SetActive(true);
+    }
+
 
     public Slider PlayerHpBarSet()
     {

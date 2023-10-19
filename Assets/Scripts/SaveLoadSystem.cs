@@ -4,7 +4,7 @@ using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
 using System.Linq;
-using SaveDataVC = SaveDataV2;
+using SaveDataVC = SaveDataV3;
 
 public class SaveDataV1Map : ClassMap<SaveDataV1>
 {
@@ -35,9 +35,25 @@ public class SaveDataV2Map : ClassMap<SaveDataV2>
     }
 }
 
+public class SaveDataV3Map : ClassMap<SaveDataV3>
+{
+    public SaveDataV3Map()
+    {
+        Map(m => m.Version).Name("Version");
+        Map(m => m.stageLev).Name("stageLev");
+        Map(m => m.swordLev).Name("swordLev");
+        Map(m => m.axeLev).Name("axeLev");
+        Map(m => m.spearLev).Name("spearLev");
+        Map(m => m.atkSpUpLev).Name("atkSpUpLev");
+        Map(m => m.movSpUpLev).Name("movSpUpLev");
+        Map(m => m.maxHpUp).Name("maxHpUp");
+        Map(m => m.name).Name("name");
+    }
+}
+
 public static class SaveLoadSystem
 {
-    public static int SaveDataVersion { get; } = 2;
+    public static int SaveDataVersion { get; } = 3;
 
     public static string SavePath
     {
@@ -58,7 +74,7 @@ public static class SaveLoadSystem
         using (var writer = new StreamWriter(SavePath))
         using (var csv = new CsvWriter(writer, new CsvConfiguration(CultureInfo.InvariantCulture)))
         {
-            csv.Context.RegisterClassMap<SaveDataV2Map>();
+            csv.Context.RegisterClassMap<SaveDataV3Map>();
             csv.WriteHeader<SaveDataVC>();
             csv.NextRecord();
             csv.WriteRecord(data);
@@ -69,7 +85,7 @@ public static class SaveLoadSystem
     {
         if(!File.Exists(SavePath))
         {
-            var savedata = new SaveDataVC { stageLev = 1, maxHpUp = 0, swordLev = 0, axeLev = 0, spearLev = 0, atkSpUpLev = 0, movSpUpLev = 0 };
+            var savedata = new SaveDataVC { name = null, stageLev = 1, maxHpUp = 0, swordLev = 0, axeLev = 0, spearLev = 0, atkSpUpLev = 0, movSpUpLev = 0 };
             Save(savedata);
         }
 
@@ -88,6 +104,10 @@ public static class SaveLoadSystem
                 case 2:
                     csv.Context.RegisterClassMap<SaveDataV2Map>();
                     data = csv.GetRecords<SaveDataV2>().FirstOrDefault();
+                    break;
+                case 3:
+                    csv.Context.RegisterClassMap<SaveDataV3Map>();
+                    data = csv.GetRecords<SaveDataV3>().FirstOrDefault();
                     break;
             }
 

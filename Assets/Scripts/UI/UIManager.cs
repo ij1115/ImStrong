@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using UnityEngine.UI;
 using TMPro;
 public class UIManager : MonoBehaviour
@@ -29,11 +30,18 @@ public class UIManager : MonoBehaviour
 
     public SceneState currentUi;
     public SceneState defaultUi;
-   
+
+    public GameObject fadeInOut;
+    public Coroutine fadeCo;
+
+    public float fadeTime = 0.5f;
+    private float accumTime = 0f;
+
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
         SetResolution(targetWidth, targetHeight, fullScreen);
+        Open(defaultUi);
     }
 
     public SceneUI Open(SceneState scene)
@@ -46,5 +54,59 @@ public class UIManager : MonoBehaviour
 
         uis[(int)currentUi].Open();
         return uis[(int)currentUi];
+    }
+
+    public void StartFadeIn(string scene)
+    {
+        fadeInOut.SetActive(true);
+
+        if(fadeCo != null)
+        {
+            StopCoroutine(fadeCo);
+            fadeCo = null;
+        }
+        fadeCo = StartCoroutine(FadeIn(scene));
+    }
+
+    public void StartFadeOut()
+    {
+        if(fadeCo != null)
+        {
+            StopCoroutine(fadeCo);
+            fadeCo = null;
+        }
+        fadeCo = StartCoroutine(FadeOut());
+    }
+    public IEnumerator FadeIn(string scene)
+    {
+        accumTime = 0f;
+        Color nextColor = fadeInOut.GetComponent<Image>().color;
+        while (accumTime<fadeTime)
+        {
+            nextColor.a = Mathf.Lerp(0f, 1f, accumTime / fadeTime);
+            fadeInOut.GetComponent<Image>().color = nextColor;
+            yield return null;
+            accumTime += Time.deltaTime;
+        }
+        nextColor.a = 1f;
+        fadeInOut.GetComponent<Image>().color = nextColor;
+
+        GameManager.instance.ChangeScene(scene);
+    }
+    public IEnumerator FadeOut()
+    {
+        accumTime = 0f;
+        Color nextColor = fadeInOut.GetComponent<Image>().color;
+        while (accumTime < fadeTime)
+        {
+            nextColor.a = Mathf.Lerp(1f, 0f, accumTime / fadeTime);
+            fadeInOut.GetComponent<Image>().color = nextColor;
+            yield return null;
+            accumTime += Time.deltaTime;
+        }
+        nextColor.a = 0f;
+        fadeInOut.GetComponent<Image>().color = nextColor;
+
+        fadeInOut.SetActive(false);
     }
 }

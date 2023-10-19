@@ -9,6 +9,7 @@ public class MaxHpUpItem : MonoBehaviour, IItem
         PlayerInfo info = target.GetComponent<PlayerInfo>();
         if (info != null)
         {
+            info.EffectCor(info.maxHpUp);
             GameData.Instance.MaxHpUp();
         }
 

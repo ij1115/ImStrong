@@ -9,6 +9,7 @@ public class MovSpUpItem : MonoBehaviour, IItem
         PlayerInfo info = target.GetComponent<PlayerInfo>();
         if (info != null)
         {
+            info.EffectCor(info.movSpUp);
             GameData.Instance.MoveSpeedUp();
         }
 

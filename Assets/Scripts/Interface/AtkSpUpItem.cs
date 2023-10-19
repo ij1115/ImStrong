@@ -10,6 +10,7 @@ public class AtkSpUpItem : MonoBehaviour, IItem
 
         if (info != null)
         {
+            info.EffectCor(info.atkSpUp);
             GameData.Instance.AttackSpeedUp();
         }
 

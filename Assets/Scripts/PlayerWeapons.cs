@@ -78,6 +78,13 @@ public class PlayerWeapons : MonoBehaviour
 
         switch(type)
         {
+            case Weapons.None:
+                foreach (var weapon in weaponList)
+                {
+                    weapon.SetActive(false);
+                }
+                break;
+
             case Weapons.Sword:
                 {
                     foreach (var weapon in weaponList)
