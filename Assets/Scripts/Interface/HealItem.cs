@@ -9,7 +9,7 @@ public class HealItem : MonoBehaviour, IItem
         PlayerInfo info = target.GetComponent<PlayerInfo>();
         if(info != null)
         {
-            int healHp = Mathf.RoundToInt(info.hp * 0.4f);
+            int healHp = Mathf.RoundToInt(info.state.maxHp * 0.4f);
             info.EffectCor(info.heal);
             info.RestoreHealth(healHp);
         }

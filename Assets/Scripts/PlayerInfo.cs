@@ -1,7 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
-using Unity.Android.Types;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 

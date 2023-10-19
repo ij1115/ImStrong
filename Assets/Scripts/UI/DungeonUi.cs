@@ -14,6 +14,7 @@ public class DungeonUi : SceneUI
     //조이스틱
     [SerializeField] private GameObject joystickButton;
     [SerializeField] private FixedJoystick joystick;
+    [SerializeField] private FloatingJoystick fJoystick;
 
     //스킬 버튼
     [SerializeField] private GameObject skillSet;
@@ -529,5 +530,10 @@ public class DungeonUi : SceneUI
     public FixedJoystick SetJoystick()
     {
         return joystick;
+    }
+
+    public FloatingJoystick SetFJoyStick()
+    {
+        return fJoystick;
     }
 }

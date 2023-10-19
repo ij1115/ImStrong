@@ -26,6 +26,7 @@ public class DungeonManager : MonoBehaviour
     public GameObject playerPrefab;
     private GameObject playerManager;
     public FixedJoystick joystic;
+    public FloatingJoystick fjoystick;
     public Slider hpSlider;
 
     private List<GameObject> mobSpawner = new List<GameObject>();
@@ -265,6 +266,7 @@ public class DungeonManager : MonoBehaviour
         info.SetUp();
 
         controller.joystick = UIManager.Instance.uis[2].GetComponent<DungeonUi>().SetJoystick();
+        controller.fjoystick = UIManager.Instance.uis[2].GetComponent<DungeonUi>().SetFJoyStick();
         movement.fSkillSlider = UIManager.Instance.uis[2].GetComponent<DungeonUi>().fSkillSlider.GetComponent<Slider>();
         movement.sSkillSlider = UIManager.Instance.uis[2].GetComponent<DungeonUi>().sSkillSlider.GetComponent<Slider>();
         movement.vCamera = vCam;

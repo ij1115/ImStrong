@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public FixedJoystick joystick;
+    public FloatingJoystick fjoystick;
     public string moveFBAixsName = "Vertical";
     public string moveLRAixsName = "Horizontal";
     public string attackButtonName = "Attack";
@@ -31,8 +32,8 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        moveFB = joystick.Vertical + Input.GetAxis(moveFBAixsName);
-        moveLR = joystick.Horizontal + Input.GetAxis(moveLRAixsName);
+        moveFB = joystick.Vertical + fjoystick.Vertical + Input.GetAxis(moveFBAixsName);
+        moveLR = joystick.Horizontal + fjoystick.Horizontal+ Input.GetAxis(moveLRAixsName);
         attack = Input.GetKeyDown(KeyCode.L) || UIManager.Instance.uis[2].GetComponent<DungeonUi>().attack.ButtonPressed; 
         firstSkill = Input.GetKeyDown(KeyCode.K) || UIManager.Instance.uis[2].GetComponent<DungeonUi>().fSkill.ButtonPressed; 
         secondSkill = Input.GetKeyDown(KeyCode.O) || UIManager.Instance.uis[2].GetComponent<DungeonUi>().sSkill.ButtonPressed;

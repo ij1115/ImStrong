@@ -4957,7 +4957,7 @@ ParticleSystem:
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}
   emitterVelocityMode: 0
-  looping: 1
+  looping: 0
   prewarm: 0
   playOnAwake: 1
   useUnscaledTime: 0
@@ -24518,7 +24518,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4600120975325910
 Transform:
   m_ObjectHideFlags: 0
@@ -24527,9 +24527,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1872147318604286}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.036521032, y: -0.13434932, z: -0.25976244, w: 0.9555836}
+  m_LocalRotation: {x: 0.036520883, y: -0.13434966, z: -0.2597608, w: 0.95558405}
   m_LocalPosition: {x: 0.52934384, y: 1.7566504, z: -0.31691647}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 1, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4237770578335892}
@@ -24553,7 +24553,7 @@ ParticleSystem:
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}
   emitterVelocityMode: 0
-  looping: 1
+  looping: 0
   prewarm: 0
   playOnAwake: 1
   useUnscaledTime: 0
