@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,14 +19,27 @@ public class LobbyManager : MonoBehaviour
     private static LobbyManager singleton;
 
     public GameObject player;
+    public GameObject nameCanv;
+    public TextMeshProUGUI playerName;
+
     private void Awake()
     {
         StateManager.Instance.StandardSetUp();
+        NameSet();
     }
 
     public void WeaponsChange()
     {
         player.GetComponent<PlayerWeapons>().RunTimeSwap();
+    }
+
+    public void NameSet()
+    {
+        if (playerName.text.Length < 1)
+        {
+            playerName.text = GameData.Instance.data.name;
+        }
+        nameCanv.SetActive(true);
     }
 
     private void Update()

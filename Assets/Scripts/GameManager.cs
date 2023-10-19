@@ -34,19 +34,22 @@ public class GameManager : MonoBehaviour
                 currentState = SceneState.Title;
                 UIManager.Instance.Open(currentState);
                 SceneManager.LoadScene(state);
+                UIManager.Instance.StartFadeOut();
                 break;
             case SceneState.Lobby:
                 currentState = SceneState.Lobby;
                 StateManager.Instance.CurrentToStandard();
                 UIManager.Instance.Open(currentState);
+                StateManager.Instance.PlayerStateSet();
                 SceneManager.LoadScene(state);
+                UIManager.Instance.StartFadeOut();
                 break;
             case SceneState.Dungeon:
                 currentState = SceneState.Dungeon;
                 UIManager.Instance.Open(currentState);
                 StateManager.Instance.MonsterSetUp();
-                //UIManager.Instance.DungeonUISet();
                 SceneManager.LoadScene(state);
+                UIManager.Instance.StartFadeOut();
                 break;
             case SceneState.BossRoom:
                 currentState = SceneState.BossRoom;
@@ -54,6 +57,7 @@ public class GameManager : MonoBehaviour
                 StateManager.Instance.MonsterSetUp();
                 //UIManager.Instance.DungeonUISet();
                 SceneManager.LoadScene(state);
+                UIManager.Instance.StartFadeOut();
                 break;
         }
     }

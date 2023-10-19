@@ -49,6 +49,35 @@ public class SaveDataV2 : SaveData
 
     public override SaveData VersionUp()
     {
+        var data = new SaveDataV3();
+        data.stageLev = stageLev;
+        data.swordLev = swordLev;
+        data.axeLev = axeLev;
+        data.spearLev = spearLev;
+        data.atkSpUpLev = atkSpUpLev;
+        data.movSpUpLev = movSpUpLev;
+        data.maxHpUp = maxHpUp;
+        return data;
+    }
+}
+
+public class SaveDataV3 : SaveData
+{
+    public SaveDataV3()
+    {
+        Version = 3;
+    }
+    public string name { get; set; }
+    public int stageLev { get; set; }
+    public int swordLev { get; set; }
+    public int axeLev { get; set; }
+    public int spearLev { get; set; }
+    public int atkSpUpLev { get; set; }
+    public int movSpUpLev { get; set; }
+    public int maxHpUp { get; set; }
+
+    public override SaveData VersionUp()
+    {
         return null;
     }
 }

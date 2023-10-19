@@ -55,6 +55,8 @@ public class DungeonUi : SceneUI
 
 
     //클리어시
+    public bool OpenPortal = false;
+
     [SerializeField] private GameObject nextSelectWindow;
     [SerializeField] private Button nextSwordButton;
     [SerializeField] private Button nextAxeButton;
@@ -68,6 +70,7 @@ public class DungeonUi : SceneUI
     [SerializeField] private GameObject infoMaxHp;
     [SerializeField] private GameObject infoAtkSp; 
     [SerializeField] private GameObject infoMovSp;
+    [SerializeField] private GameObject infoLine;
 
     [SerializeField] private TextMeshProUGUI atk;
     [SerializeField] private TextMeshProUGUI maxHp;
@@ -80,7 +83,8 @@ public class DungeonUi : SceneUI
 
 
     //패배시
-    [SerializeField] private Button gameOverButton;
+    [SerializeField] private Button resetButton;
+    [SerializeField] private Button retryButton;
 
 
     //체력바
@@ -271,10 +275,11 @@ public class DungeonUi : SceneUI
         }
     }
 
-    public void OnClickGameOver()
+    public void OnClickReStart()
     {
         GameManager.instance.isGameover = false;
-        GameManager.instance.ChangeScene("Lobby");
+        GameData.Instance.DataReset();
+        UIManager.Instance.StartFadeIn("Lobby");
     }
 
     private void InfoOpen()
@@ -322,7 +327,6 @@ public class DungeonUi : SceneUI
         mSpSSwLev.text = $"+{GameData.Instance.data.swordLev + 1}";
         mSpSALev.text = $"+{GameData.Instance.data.axeLev + 1}";
     }
-
 
     public void NextStageWepSelect()
     {

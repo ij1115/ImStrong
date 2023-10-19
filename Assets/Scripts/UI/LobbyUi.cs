@@ -31,7 +31,6 @@ public class LobbyUi : SceneUI
 
     [SerializeField] private Button startButton;
 
-
     private Weapons weaponType;
 
     public override void Open()
@@ -44,6 +43,31 @@ public class LobbyUi : SceneUI
         swordSelectBLev.text = $"+{GameData.Instance.data.swordLev + 1}";
         axeSelectBLev.text = $"+{GameData.Instance.data.axeLev + 1}";
         spearSelectBLev.text = $"+{GameData.Instance.data.spearLev + 1}";
+
+        switch(weaponType)
+        {
+            case Weapons.Sword:
+                Color swColor = Color.red;
+                swColor.a = 0.7f;
+                axeSelectB.gameObject.GetComponent<Image>().color = Color.black;
+                swordSelectB.gameObject.GetComponent<Image>().color = swColor;
+                spearSelectB.gameObject.GetComponent<Image>().color = Color.black;
+                break;
+            case Weapons.Axe:
+                Color axColor = Color.red;
+                axColor.a = 0.7f;
+                axeSelectB.gameObject.GetComponent<Image>().color = axColor;
+                swordSelectB.gameObject.GetComponent<Image>().color = Color.black;
+                spearSelectB.gameObject.GetComponent<Image>().color = Color.black;
+                break;
+            case Weapons.Spear:
+                Color spColor = Color.red;
+                spColor.a = 0.7f;
+                axeSelectB.gameObject.GetComponent<Image>().color = Color.black;
+                swordSelectB.gameObject.GetComponent<Image>().color = Color.black;
+                spearSelectB.gameObject.GetComponent<Image>().color = spColor;
+                break;
+        }
         base.Open();
     }
 
@@ -54,7 +78,6 @@ public class LobbyUi : SceneUI
         weaponSelect.SetActive(false);
         weaponSelectInfo.SetActive(false);
         startButton.gameObject.SetActive(false);
-
         base.Close();
     }
     
@@ -85,6 +108,11 @@ public class LobbyUi : SceneUI
 
     public void OnClickAxe()
     {
+        Color axColor = Color.red;
+        axColor.a = 0.7f;
+        axeSelectB.gameObject.GetComponent<Image>().color = axColor;
+        swordSelectB.gameObject.GetComponent<Image>().color = Color.black;
+        spearSelectB.gameObject.GetComponent<Image>().color = Color.black;
         StateManager.Instance.SetCurrentWeapons(Weapons.Axe);
         weaponType = StateManager.Instance.GetCurrentWeapons();
         LobbyManager.instance.WeaponsChange();
@@ -92,6 +120,11 @@ public class LobbyUi : SceneUI
     }
     public void OnClickSpear()
     {
+        Color spColor = Color.red;
+        spColor.a = 0.7f;
+        axeSelectB.gameObject.GetComponent<Image>().color = Color.black;
+        swordSelectB.gameObject.GetComponent<Image>().color = Color.black;
+        spearSelectB.gameObject.GetComponent<Image>().color = spColor;
         StateManager.Instance.SetCurrentWeapons(Weapons.Spear);
         weaponType = StateManager.Instance.GetCurrentWeapons();
         LobbyManager.instance.WeaponsChange();
@@ -100,6 +133,11 @@ public class LobbyUi : SceneUI
 
     public void OnClickSword()
     {
+        Color swColor = Color.red;
+        swColor.a = 0.7f;
+        axeSelectB.gameObject.GetComponent<Image>().color = Color.black;
+        swordSelectB.gameObject.GetComponent<Image>().color = swColor;
+        spearSelectB.gameObject.GetComponent<Image>().color = Color.black;
         StateManager.Instance.SetCurrentWeapons(Weapons.Sword);
         weaponType = StateManager.Instance.GetCurrentWeapons();
         LobbyManager.instance.WeaponsChange();
@@ -113,7 +151,8 @@ public class LobbyUi : SceneUI
 
     public void OnClickStageButton()
     {
-        GameManager.instance.ChangeScene("Dungeon");
+        GameData.Instance.DungeonInData();
+        UIManager.Instance.StartFadeIn("Dungeon");
     }
 
     public void WeaponSelectInfoOpen()

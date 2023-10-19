@@ -1,6 +1,5 @@
 using UnityEngine;
 
-
 public class StateManager : MonoBehaviour
 {
     private static StateManager instance;
@@ -51,7 +50,7 @@ public class StateManager : MonoBehaviour
         }
     }
 
-    private void Awake()
+    public void StateManagerLoad()
     {
         if(instance != null && instance!=this)
         {

@@ -7,6 +7,8 @@ public class MonsterInfo : MonoBehaviour
     public State state;
 
     public Slider hpSlider;
+    [SerializeField] private Transform canvasform;
+    [SerializeField] private Transform monsform;
     public MonsterType type { get; private set; }
 
     public int hp;
@@ -25,13 +27,24 @@ public class MonsterInfo : MonoBehaviour
         dead = false;
     }
 
+    public void Update()
+    {
+        if(type == MonsterType.Mob)
+        {
+            canvasform.LookAt(Camera.main.transform);
+        }
+    }
     public void StateUpdate()
     {
         switch(type)
         {
             case MonsterType.Mob:
                 state = StateManager.Instance.MobState();
+                hpSlider.gameObject.SetActive(true);
+                hpSlider.maxValue = state.maxHp;
+                hpSlider.minValue = 0;
                 hp = state.maxHp;
+                hpSlider.value = hp;
                 break;
 
             case MonsterType.SubBoss:
@@ -79,6 +92,10 @@ public class MonsterInfo : MonoBehaviour
         hpSlider.value = hp;
         UIManager.Instance.uis[2].GetComponent<DungeonUi>().bossHp.text = hp + " / " + state.maxHp;
         }
+        else if(type == MonsterType.Mob)
+        {
+            hpSlider.value = hp;
+        }
         if (hp <= 0 && !dead)
         {
             hp = 0;
@@ -86,6 +103,11 @@ public class MonsterInfo : MonoBehaviour
             {
                 hpSlider.value = hp;
                 UIManager.Instance.uis[2].GetComponent<DungeonUi>().bossHp.text = hp + " / " + state.maxHp;
+            }
+            else if (type == MonsterType.Mob)
+            {
+                hpSlider.value = hp;
+                hpSlider.gameObject.SetActive(false);
             }
             Die();
         }

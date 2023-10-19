@@ -22,8 +22,6 @@ public class DungeonManager : MonoBehaviour
 
     private static DungeonManager singleton;
 
-    public GameObject gameoverUI;
-
     public CinemachineVirtualCamera vCam;
     public GameObject playerPrefab;
     private GameObject playerManager;
@@ -33,7 +31,7 @@ public class DungeonManager : MonoBehaviour
     private List<GameObject> mobSpawner = new List<GameObject>();
     private List<GameObject> mobActive = new List<GameObject>();
 
-    private bool spawn = true;
+    private bool spawn = false;
 
     private List<GameObject> subBossSpawner = new List<GameObject>();
     private List<GameObject> subBossActive = new List<GameObject>();
@@ -43,6 +41,8 @@ public class DungeonManager : MonoBehaviour
 
     private List<GameObject> BossSpawner = new List<GameObject>();
     private List<GameObject> BossActive = new List<GameObject>();
+
+    private bool stageClear = false;
 
     private void Awake()
     {
@@ -101,6 +101,9 @@ public class DungeonManager : MonoBehaviour
 
     public void Reset()
     {
+        spawn = false;
+        stageClear = false;
+
         mobSpawner.Clear();
         mobActive.Clear();
         
@@ -113,6 +116,23 @@ public class DungeonManager : MonoBehaviour
 
     private void Update()
     {
+        if(!stageClear&&!spawn)
+        {
+            StageSpawn();
+            spawn = true;
+
+            return;
+        }
+
+        if(!stageClear&&spawn)
+        {
+            if(mobActive.Count == 0 && subBossActive.Count == 0 && BossActive.Count == 0)
+            {
+                PortalSpawn();
+                stageClear = true;
+            }
+        }
+
         if (GameManager.instance.isGameover)
         {
             if (Input.GetKeyDown(KeyCode.Escape))
@@ -122,8 +142,8 @@ public class DungeonManager : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Return))
             {
-                gameoverUI.SetActive(false);
                 GameManager.instance.isGameover = false;
+                UIManager.Instance.Open(SceneState.Lobby);
                 GameManager.instance.ChangeScene("Lobby");
             }
 
@@ -133,6 +153,7 @@ public class DungeonManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Reset();
+            UIManager.Instance.Open(SceneState.Lobby);
             GameManager.instance.ChangeScene("Lobby");
             return;
         }
@@ -216,7 +237,17 @@ public class DungeonManager : MonoBehaviour
 
         BossSpawner[0].GetComponent<Spawner>().Spawn();
     }
-    
+    private void PortalSpawn()
+    {
+        if(portalActive.Count>0)
+        { 
+            return;
+        }
+
+        portalActive.Add(portalSpawner[0]);
+
+        portalSpawner[0].GetComponent<Spawner>().Spawn();
+    }
 
     public void SpawnerRelese()
     {
@@ -254,7 +285,19 @@ public class DungeonManager : MonoBehaviour
         }
     }
 
-        private void PlayerSpawn()
+    public void PortalRelese()
+    {
+        foreach (var obj in portalActive)
+        {
+            if (obj.GetComponent<Spawner>().ActiveSpawner)
+            {
+                portalActive.Remove(obj);
+                return;
+            }
+        }
+    }
+
+    private void PlayerSpawn()
     {
         GameObject player = Instantiate(playerPrefab, transform.position, Quaternion.identity);
         var controller = player.GetComponent<PlayerController>();

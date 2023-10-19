@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Spawner : MonoBehaviour
@@ -45,7 +46,15 @@ public class Spawner : MonoBehaviour
             case MonsterType.Boss:
                 if (monsters.Count == 0)
                 {
-                    dm.SubBossRelese();
+                    dm.BossRelese();
+                    ActiveSpawner = false;
+                }
+                break;
+
+            case MonsterType.Portal:
+                if (monsters.Count == 0)
+                {
+                    dm.PortalRelese();
                     ActiveSpawner = false;
                 }
                 break;
@@ -143,6 +152,19 @@ public class Spawner : MonoBehaviour
 
                     movement.SetUp();
                     movement.spawner = this.gameObject;
+                    monsters.Add(obj);
+                }
+                break;
+
+            case MonsterType.Portal:
+                {
+                    Vector3 spawnPos;
+                    spawnPos.x = Random.Range(collider.bounds.min.x, collider.bounds.max.x);
+                    spawnPos.y = 1.5f;
+                    spawnPos.z = Random.Range(collider.bounds.min.z, collider.bounds.max.z);
+                    var obj = Instantiate(monsterPrefabs, spawnPos, Quaternion.Euler(0f, 90f, 0f));
+                    obj.transform.parent = this.transform;
+
                     monsters.Add(obj);
                 }
                 break;
