@@ -85,7 +85,9 @@ public static class SaveLoadSystem
     {
         if(!File.Exists(SavePath))
         {
-            var savedata = new SaveDataVC { name = null, stageLev = 1, maxHpUp = 0, swordLev = 0, axeLev = 0, spearLev = 0, atkSpUpLev = 0, movSpUpLev = 0 };
+            var savedata = new SaveDataVC 
+            { name = null, stageLev = 1, maxHpUp = 0, swordLev = 0,
+                axeLev = 0, spearLev = 0, atkSpUpLev = 0, movSpUpLev = 0 };
             Save(savedata);
         }
 

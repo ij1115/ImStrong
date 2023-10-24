@@ -68,6 +68,7 @@ public class LobbyUi : SceneUI
                 spearSelectB.gameObject.GetComponent<Image>().color = spColor;
                 break;
         }
+        SoundManager.Instance.PlaySound("Lobby");
         base.Open();
     }
 

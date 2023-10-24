@@ -24,6 +24,8 @@ public class MonsterInfo : MonoBehaviour
     private bool healDrop = false;
     private bool maxHpDrop = false;
 
+    [SerializeField] private ParticleSystem[] particle;
+
 
     public void Awake()
     {
@@ -46,6 +48,11 @@ public class MonsterInfo : MonoBehaviour
         {
             case MonsterType.Mob:
                 state = StateManager.Instance.MobState();
+                for(int i =0; i< particle.Length; i++)
+                {
+                    var main = particle[i].main;
+                    main.simulationSpeed = state.atkSp;
+                }
                 hpSlider.gameObject.SetActive(true);
                 hpSlider.maxValue = state.maxHp;
                 hpSlider.minValue = 0;
@@ -55,6 +62,11 @@ public class MonsterInfo : MonoBehaviour
 
             case MonsterType.SubBoss:
                 state = StateManager.Instance.SubBossState();
+                for (int i = 0; i < particle.Length; i++)
+                {
+                    var main = particle[i].main;
+                    main.simulationSpeed = state.atkSp;
+                }
                 hpSlider = UIManager.Instance.uis[2].GetComponent<DungeonUi>().MonsterHpBarSet();
                 hpSlider.maxValue = state.maxHp;
                 hpSlider.minValue = 0;
@@ -68,6 +80,11 @@ public class MonsterInfo : MonoBehaviour
 
             case MonsterType.Boss:
                 state = StateManager.Instance.BossState();
+                for (int i = 0; i < particle.Length; i++)
+                {
+                    var main = particle[i].main;
+                    main.simulationSpeed = state.atkSp;
+                }
                 hpSlider = UIManager.Instance.uis[2].GetComponent<DungeonUi>().MonsterHpBarSet();
                 hpSlider.maxValue = state.maxHp;
                 hpSlider.minValue = 0;

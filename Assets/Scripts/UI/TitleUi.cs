@@ -19,6 +19,7 @@ public class TitleUi : SceneUI
         loading.gameObject.SetActive(true);
         pressText.SetActive(false);
         makeName.SetActive(false);
+        SoundManager.Instance.PlaySound("Title");
 
         base.Open();
     }

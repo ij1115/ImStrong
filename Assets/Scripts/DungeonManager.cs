@@ -128,6 +128,7 @@ public class DungeonManager : MonoBehaviour
         {
             if (mobActive.Count == 0 && subBossActive.Count == 0 && BossActive.Count == 0)
             {
+                SoundManager.Instance.PlaySound("Victory");
                 PortalSpawn();
                 stageClear = true;
             }
@@ -282,36 +283,44 @@ public class DungeonManager : MonoBehaviour
         switch(GameData.Instance.data.stageLev%8)
         {
             case 1:
+                SoundManager.Instance.PlaySound("Normal");
                 MonsterSpawn(0);
                 break;
             case 2:
+                SoundManager.Instance.PlaySound("Normal");
                 MonsterSpawn(1);
                 MonsterSpawn(2);
                 break;
             case 3:
+                SoundManager.Instance.PlaySound("Normal");
                 MonsterSpawn(1);
                 MonsterSpawn(2);
                 break;
             case 4:
+                SoundManager.Instance.PlaySound("SubBoss");
                 SubBossSpawn();
                 break;
             case 5:
+                SoundManager.Instance.PlaySound("Normal");
                 MonsterSpawn(0);
                 MonsterSpawn(1);
                 MonsterSpawn(2);
                 break;
             case 6:
+                SoundManager.Instance.PlaySound("Normal");
                 MonsterSpawn(0);
                 MonsterSpawn(1);
                 MonsterSpawn(2);
                 break;
             case 7:
+                SoundManager.Instance.PlaySound("Normal");
                 MonsterSpawn(0);
                 MonsterSpawn(1);
                 MonsterSpawn(2);
                 MonsterSpawn(3);
                 break;
             case 0:
+                SoundManager.Instance.PlaySound("Boss");
                 BossSpawn();
                 break;
         }
