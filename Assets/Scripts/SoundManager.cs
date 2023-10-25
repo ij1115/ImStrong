@@ -75,6 +75,7 @@ public class SoundManager : MonoBehaviour
         }
 
         soundPlayer.loop = true;
+        soundPlayer.volume = 1f;
 
         soundPlayer.Play();
     }
@@ -87,6 +88,7 @@ public class SoundManager : MonoBehaviour
         }
 
         soundPlayer.loop = true;
+        soundPlayer.volume = 1f;
 
         soundPlayer.Play();
     }
@@ -99,6 +101,7 @@ public class SoundManager : MonoBehaviour
         }
 
         soundPlayer.loop = true;
+        soundPlayer.volume = 1f;
 
         soundPlayer.Play();
     }
@@ -111,7 +114,7 @@ public class SoundManager : MonoBehaviour
         }
 
         soundPlayer.loop = true;
-
+        soundPlayer.volume = 0.5f;
         soundPlayer.Play();
     }
 
@@ -123,7 +126,7 @@ public class SoundManager : MonoBehaviour
         }
 
         soundPlayer.loop = true;
-
+        soundPlayer.volume = 0.5f;
         soundPlayer.Play();
     }
 
@@ -135,7 +138,7 @@ public class SoundManager : MonoBehaviour
         }
 
         soundPlayer.loop = false;
-
+        soundPlayer.volume = 0.5f;
         soundPlayer.Play();
     }
 }

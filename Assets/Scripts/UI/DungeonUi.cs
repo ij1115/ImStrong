@@ -170,6 +170,7 @@ public class DungeonUi : SceneUI
                 }
                 break;
         }
+        //gameObject.GetComponentInParent<UIManager>().GetComponent<Canvas>().worldCamera = Camera.main;
         base.Open();
     }
 

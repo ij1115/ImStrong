@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine;
@@ -69,6 +68,7 @@ public class LobbyUi : SceneUI
                 break;
         }
         SoundManager.Instance.PlaySound("Lobby");
+        //gameObject.GetComponentInParent<UIManager>().GetComponent<Canvas>().worldCamera = Camera.main;
         base.Open();
     }
 

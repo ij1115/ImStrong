@@ -976,7 +976,7 @@ ParticleSystem:
     m_BurstCount: 1
     m_Bursts:
     - serializedVersion: 2
-      time: 1.15
+      time: 0.1
       countCurve:
         serializedVersion: 2
         minMaxState: 0
@@ -4924,7 +4924,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &473567853793363859
 Transform:
   m_ObjectHideFlags: 0
@@ -5889,7 +5889,7 @@ ParticleSystem:
     m_BurstCount: 1
     m_Bursts:
     - serializedVersion: 2
-      time: 1.15
+      time: 0.1
       countCurve:
         serializedVersion: 2
         minMaxState: 0
@@ -10796,7 +10796,7 @@ ParticleSystem:
     m_BurstCount: 1
     m_Bursts:
     - serializedVersion: 2
-      time: 4.6
+      time: 0.15
       countCurve:
         serializedVersion: 2
         minMaxState: 0
@@ -15694,7 +15694,7 @@ ParticleSystem:
     m_BurstCount: 1
     m_Bursts:
     - serializedVersion: 2
-      time: 2.3
+      time: 0.15
       countCurve:
         serializedVersion: 2
         minMaxState: 0
@@ -20592,7 +20592,7 @@ ParticleSystem:
     m_BurstCount: 1
     m_Bursts:
     - serializedVersion: 2
-      time: 1.2
+      time: 0.1
       countCurve:
         serializedVersion: 2
         minMaxState: 0
@@ -25501,7 +25501,7 @@ ParticleSystem:
     m_BurstCount: 1
     m_Bursts:
     - serializedVersion: 2
-      time: 1.2
+      time: 0.1
       countCurve:
         serializedVersion: 2
         minMaxState: 0
@@ -30399,7 +30399,7 @@ ParticleSystem:
     m_BurstCount: 1
     m_Bursts:
     - serializedVersion: 2
-      time: 1.2
+      time: 0.1
       countCurve:
         serializedVersion: 2
         minMaxState: 0
@@ -35297,11 +35297,11 @@ ParticleSystem:
     m_BurstCount: 1
     m_Bursts:
     - serializedVersion: 2
-      time: 2.4
+      time: 0.15
       countCurve:
         serializedVersion: 2
         minMaxState: 0
-        scalar: 1
+        scalar: 1.36
         minScalar: 0
         maxCurve:
           serializedVersion: 2
@@ -40195,7 +40195,7 @@ ParticleSystem:
     m_BurstCount: 1
     m_Bursts:
     - serializedVersion: 2
-      time: 1.15
+      time: 0.1
       countCurve:
         serializedVersion: 2
         minMaxState: 0

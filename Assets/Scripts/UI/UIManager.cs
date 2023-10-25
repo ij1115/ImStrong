@@ -17,15 +17,6 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public int targetWidth = 3200; // 원하는 해상도 너비
-    public int targetHeight = 1440; // 원하는 해상도 높이
-    public bool fullScreen = true; // 전체 화면 여부
-
-    public void SetResolution(int width, int height, bool fullScreen)
-    {
-        Screen.SetResolution(width, height, fullScreen);
-    }
-
     public SceneUI[] uis;
 
     public SceneState currentUi;
@@ -37,10 +28,9 @@ public class UIManager : MonoBehaviour
     public float fadeTime = 0.5f;
     private float accumTime = 0f;
 
-    private void Awake()
+    private void Start()
     {
         DontDestroyOnLoad(gameObject);
-        SetResolution(targetWidth, targetHeight, fullScreen);
         Open(defaultUi);
     }
 
@@ -92,6 +82,9 @@ public class UIManager : MonoBehaviour
         fadeInOut.GetComponent<Image>().color = nextColor;
 
         GameManager.instance.ChangeScene(scene);
+
+        Camera cam = gameObject.GetComponent<Canvas>().worldCamera = Camera.main;
+        cam.GetComponent<CameraScreen>().CameraViewSize();
     }
     public IEnumerator FadeOut()
     {
@@ -106,7 +99,6 @@ public class UIManager : MonoBehaviour
         }
         nextColor.a = 0f;
         fadeInOut.GetComponent<Image>().color = nextColor;
-
         fadeInOut.SetActive(false);
     }
 }
