@@ -762,6 +762,7 @@ public class PlayerMovement : MonoBehaviour
    
     public void SwordAttack()
     {
+        SoundManager.Instance.SfxPlay("Sword_Attack");
         BoxCollider col = hitRanges[0].GetComponent<BoxCollider>();
 
         Vector3 center = col.bounds.center;
@@ -791,6 +792,8 @@ public class PlayerMovement : MonoBehaviour
     }
     public void SwordFSkill_1()
     {
+        SoundManager.Instance.SfxPlay("Sword_FSkill");
+
         BoxCollider col = hitRanges[1].GetComponent<BoxCollider>();
 
         Vector3 center = col.bounds.center;
@@ -820,6 +823,8 @@ public class PlayerMovement : MonoBehaviour
     }
     public void SwordFSkill_2()
     {
+        SoundManager.Instance.SfxPlay("Sword_FSkill");
+
         BoxCollider col = hitRanges[1].GetComponent<BoxCollider>();
 
         Vector3 center = col.bounds.center;
@@ -849,6 +854,8 @@ public class PlayerMovement : MonoBehaviour
     }
     public void SwordFSkill_3()
     {
+        SoundManager.Instance.SfxPlay("Sword_FSkill");
+
         BoxCollider col = hitRanges[1].GetComponent<BoxCollider>();
 
         Vector3 center = col.bounds.center;
@@ -878,6 +885,8 @@ public class PlayerMovement : MonoBehaviour
     }
     public void SwordSSkill()
     {
+        SoundManager.Instance.SfxPlay("Sword_SSkill");
+
         BoxCollider col = hitRanges[2].GetComponent<BoxCollider>();
 
         Vector3 center = col.bounds.center;
@@ -1140,6 +1149,8 @@ public class PlayerMovement : MonoBehaviour
 
     public void AxeAttack()
     {
+        SoundManager.Instance.SfxPlay("Axe_Attack");
+
         BoxCollider col = hitRanges[3].GetComponent<BoxCollider>();
 
         Vector3 center = col.bounds.center;
@@ -1169,6 +1180,8 @@ public class PlayerMovement : MonoBehaviour
     }
     public void AxeFSkill_1()
     {
+        SoundManager.Instance.SfxPlay("Axe_FSkill_1");
+
         BoxCollider col = hitRanges[3].GetComponent<BoxCollider>();
 
         Vector3 center = col.bounds.center;
@@ -1198,6 +1211,8 @@ public class PlayerMovement : MonoBehaviour
     }
     public void AxeFSkill_2()
     {
+        SoundManager.Instance.SfxPlay("Axe_FSkill_1");
+
         SphereCollider col = hitRanges[4].GetComponent<SphereCollider>();
 
         Vector3 center = col.bounds.center;
@@ -1227,6 +1242,8 @@ public class PlayerMovement : MonoBehaviour
     }
     public void AxeFSkill_3()
     {
+        SoundManager.Instance.SfxPlay("Axe_FSkill_1");
+
         SphereCollider col = hitRanges[4].GetComponent<SphereCollider>();
 
         Vector3 center = col.bounds.center;
@@ -1256,6 +1273,8 @@ public class PlayerMovement : MonoBehaviour
     }
     public void AxeFSkill_4()
     {
+        SoundManager.Instance.SfxPlay("Axe_FSkill_2");
+
         SphereCollider col = hitRanges[4].GetComponent<SphereCollider>();
 
         Vector3 center = col.bounds.center;
@@ -1285,6 +1304,8 @@ public class PlayerMovement : MonoBehaviour
     }
     public void AxeSSkill()
     {
+        SoundManager.Instance.SfxPlay("Axe_SSkill");
+
         SphereCollider col = hitRanges[5].GetComponent<SphereCollider>();
 
         Vector3 center = col.bounds.center;
@@ -1550,6 +1571,19 @@ public class PlayerMovement : MonoBehaviour
 
     public void SpearAttack()
     {
+        switch (unitState)
+        {
+            case UnitState.Attack:
+                SoundManager.Instance.SfxPlay("Spear_Attack");
+
+                break;
+            case UnitState.Skill_S:
+                SoundManager.Instance.SfxPlay("Spear_SSkill");
+
+                break;
+        }
+
+
         BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
 
         Vector3 center = col.bounds.center;
@@ -1598,6 +1632,8 @@ public class PlayerMovement : MonoBehaviour
     }
     public void SpearFSkill_1()
     {
+        SoundManager.Instance.SfxPlay("Spear_FSkill");
+
         BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
 
         Vector3 center = col.bounds.center;
@@ -1627,6 +1663,8 @@ public class PlayerMovement : MonoBehaviour
     }
     public void SpearFSkill_2()
     {
+        SoundManager.Instance.SfxPlay("Spear_FSkill");
+
         BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
 
         Vector3 center = col.bounds.center;
@@ -1656,6 +1694,8 @@ public class PlayerMovement : MonoBehaviour
     }
     public void SpearFSkill_3()
     {
+        SoundManager.Instance.SfxPlay("Spear_FSkill");
+
         BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
 
         Vector3 center = col.bounds.center;
@@ -1685,6 +1725,8 @@ public class PlayerMovement : MonoBehaviour
     }
     public void SpearFSkill_4()
     {
+        SoundManager.Instance.SfxPlay("Spear_FSkill");
+
         BoxCollider col = hitRanges[6].GetComponent<BoxCollider>();
 
         Vector3 center = col.bounds.center;

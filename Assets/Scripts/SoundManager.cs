@@ -17,7 +17,8 @@ public class SoundManager : MonoBehaviour
         }
     }
 
-    private AudioSource soundPlayer;
+    [SerializeField] private AudioSource bgmPlayer;
+    [SerializeField] private AudioSource sfxPlayer;
 
     [SerializeField] private AudioClip bg_Dungeon_Boss;
     [SerializeField] private AudioClip bg_Dungeon_SubBoss;
@@ -25,18 +26,64 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private AudioClip bg_Title;
     [SerializeField] private AudioClip bg_Lobby;
     [SerializeField] private AudioClip bg_Dungeon_Victory;
+    [SerializeField] private AudioClip axe_Attack;
+    [SerializeField] private AudioClip axe_FSkill_1;
+    [SerializeField] private AudioClip axe_FSkill_2;
+    [SerializeField] private AudioClip axe_SSkill;
+    [SerializeField] private AudioClip spear_Attack;
+    [SerializeField] private AudioClip spear_FSkill;
+    [SerializeField] private AudioClip spear_SSkill;
+    [SerializeField] private AudioClip sword_Attack;
+    [SerializeField] private AudioClip sword_FSkill;
+    [SerializeField] private AudioClip sword_SSkill;
 
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
-        soundPlayer = GetComponent<AudioSource>();
     }
 
+    public void SfxPlay(string id)
+    {
+        switch (id)
+        {
+            case "Axe_Attack":
+                sfxPlayer.PlayOneShot(axe_Attack);
+                break;
+
+            case "Axe_FSkill_1":
+                sfxPlayer.PlayOneShot(axe_FSkill_1);
+                break;
+            case "Axe_FSkill_2":
+                sfxPlayer.PlayOneShot(axe_FSkill_2);
+                break;
+            case "Axe_SSkill":
+                sfxPlayer.PlayOneShot(axe_SSkill);
+                break;
+            case "Spear_Attack":
+                sfxPlayer.PlayOneShot(spear_FSkill);
+                break;
+            case "Spear_FSkill":
+                sfxPlayer.PlayOneShot(spear_SSkill);
+                break;
+            case "Spear_SSkill":
+                sfxPlayer.PlayOneShot(spear_SSkill);
+                break;
+            case "Sword_Attack":
+                sfxPlayer.PlayOneShot(sword_Attack);
+                break;
+            case "Sword_FSkill":
+                sfxPlayer.PlayOneShot(sword_FSkill);
+                break;
+            case "Sword_SSkill":
+                sfxPlayer.PlayOneShot(sword_SSkill);
+                break;
+        }
+    }
     public void PlaySound(string id)
     {
-        if(soundPlayer.isPlaying)
+        if(bgmPlayer.isPlaying)
         {
-            soundPlayer.Stop();
+            bgmPlayer.Stop();
         }
 
         switch(id)
@@ -62,83 +109,83 @@ public class SoundManager : MonoBehaviour
                 break;
 
             case "Victory":
-                 VictoryBGM();
+                VictoryBGM();
                 break;
         }
     }
 
     private void BossBGM()
     {
-        if (soundPlayer.clip != bg_Dungeon_Boss)
+        if (bgmPlayer.clip != bg_Dungeon_Boss)
         {
-            soundPlayer.clip = bg_Dungeon_Boss;
+            bgmPlayer.clip = bg_Dungeon_Boss;
         }
 
-        soundPlayer.loop = true;
-        soundPlayer.volume = 1f;
+        bgmPlayer.loop = true;
+        bgmPlayer.volume = 1f;
 
-        soundPlayer.Play();
+        bgmPlayer.Play();
     }
 
     private void SubBossBGM()
     {
-        if (soundPlayer.clip != bg_Dungeon_SubBoss)
+        if (bgmPlayer.clip != bg_Dungeon_SubBoss)
         {
-            soundPlayer.clip = bg_Dungeon_SubBoss;
+            bgmPlayer.clip = bg_Dungeon_SubBoss;
         }
 
-        soundPlayer.loop = true;
-        soundPlayer.volume = 1f;
+        bgmPlayer.loop = true;
+        bgmPlayer.volume = 1f;
 
-        soundPlayer.Play();
+        bgmPlayer.Play();
     }
 
     private void NormalBGM()
     {
-        if (soundPlayer.clip != bg_Dungeon_Normal)
+        if (bgmPlayer.clip != bg_Dungeon_Normal)
         {
-            soundPlayer.clip = bg_Dungeon_Normal;
+            bgmPlayer.clip = bg_Dungeon_Normal;
         }
 
-        soundPlayer.loop = true;
-        soundPlayer.volume = 1f;
+        bgmPlayer.loop = true;
+        bgmPlayer.volume = 1f;
 
-        soundPlayer.Play();
+        bgmPlayer.Play();
     }
 
     private void TitleBGM()
     {
-        if (soundPlayer.clip != bg_Title)
+        if (bgmPlayer.clip != bg_Title)
         {
-            soundPlayer.clip = bg_Title;
+            bgmPlayer.clip = bg_Title;
         }
 
-        soundPlayer.loop = true;
-        soundPlayer.volume = 0.5f;
-        soundPlayer.Play();
+        bgmPlayer.loop = true;
+        bgmPlayer.volume = 0.5f;
+        bgmPlayer.Play();
     }
 
     private void LobbyBGM()
     {
-        if (soundPlayer.clip != bg_Lobby)
+        if (bgmPlayer.clip != bg_Lobby)
         {
-            soundPlayer.clip = bg_Lobby;
+            bgmPlayer.clip = bg_Lobby;
         }
 
-        soundPlayer.loop = true;
-        soundPlayer.volume = 0.5f;
-        soundPlayer.Play();
+        bgmPlayer.loop = true;
+        bgmPlayer.volume = 0.5f;
+        bgmPlayer.Play();
     }
 
     private void VictoryBGM()
     {
-        if (soundPlayer.clip != bg_Dungeon_Victory)
+        if (bgmPlayer.clip != bg_Dungeon_Victory)
         {
-            soundPlayer.clip = bg_Dungeon_Victory;
+            bgmPlayer.clip = bg_Dungeon_Victory;
         }
 
-        soundPlayer.loop = false;
-        soundPlayer.volume = 0.5f;
-        soundPlayer.Play();
+        bgmPlayer.loop = false;
+        bgmPlayer.volume = 0.5f;
+        bgmPlayer.Play();
     }
 }
