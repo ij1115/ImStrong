@@ -22,9 +22,12 @@ public class LobbyManager : MonoBehaviour
     public GameObject nameCanv;
     public TextMeshProUGUI playerName;
 
+    public Camera currCamera;
+
     private void Awake()
     {
         StateManager.Instance.StandardSetUp();
+        UIManager.Instance.ChangeCamera(currCamera);
         NameSet();
     }
 

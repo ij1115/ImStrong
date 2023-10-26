@@ -51,13 +51,6 @@ public class GameManager : MonoBehaviour
                 SceneManager.LoadScene(state);
                 UIManager.Instance.StartFadeOut();
                 break;
-            //case SceneState.BossRoom:
-            //    currentState = SceneState.BossRoom;
-            //    UIManager.Instance.Open(currentState);
-            //    StateManager.Instance.MonsterSetUp();
-            //    SceneManager.LoadScene(state);
-            //    UIManager.Instance.StartFadeOut();
-            //    break;
         }
     }
 }

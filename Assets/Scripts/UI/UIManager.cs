@@ -46,6 +46,12 @@ public class UIManager : MonoBehaviour
         return uis[(int)currentUi];
     }
 
+    public void ChangeCamera(Camera camera)
+    {
+        Camera cam = gameObject.GetComponent<Canvas>().worldCamera = camera;
+        cam.GetComponent<CameraScreen>().CameraViewSize();
+    }
+
     public void StartFadeIn(string scene)
     {
         fadeInOut.SetActive(true);
@@ -67,6 +73,7 @@ public class UIManager : MonoBehaviour
         }
         fadeCo = StartCoroutine(FadeOut());
     }
+
     public IEnumerator FadeIn(string scene)
     {
         accumTime = 0f;
@@ -82,9 +89,6 @@ public class UIManager : MonoBehaviour
         fadeInOut.GetComponent<Image>().color = nextColor;
 
         GameManager.instance.ChangeScene(scene);
-
-        Camera cam = gameObject.GetComponent<Canvas>().worldCamera = Camera.main;
-        cam.GetComponent<CameraScreen>().CameraViewSize();
     }
     public IEnumerator FadeOut()
     {

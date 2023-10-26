@@ -22,6 +22,8 @@ public class DungeonManager : MonoBehaviour
 
     private static DungeonManager singleton;
 
+
+    public Camera currCamera;
     public CinemachineVirtualCamera vCam;
     public GameObject playerPrefab;
     private GameObject playerManager;
@@ -47,6 +49,7 @@ public class DungeonManager : MonoBehaviour
 
     private void Awake()
     {
+        UIManager.Instance.ChangeCamera(currCamera);
         foreach (Transform obj in gameObject.transform)
         {
             if (obj == null)

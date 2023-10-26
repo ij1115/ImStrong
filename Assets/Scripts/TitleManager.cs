@@ -26,6 +26,8 @@ public class TitleManager : MonoBehaviour
 
     private bool makeName = false;
 
+    public Camera currCamera;
+
     // Update is called once per frame
     void Update()
     {
@@ -53,6 +55,8 @@ public class TitleManager : MonoBehaviour
 
     private IEnumerator SetUp()
     {
+        UIManager.Instance.ChangeCamera(currCamera);
+
         Slider loadbar = GetComponent<Slider>();
         int loadingCount = 0;
         while (loadingCount < 3)

@@ -1656,6 +1656,7 @@ MonoBehaviour:
   player: {fileID: 1085226224}
   nameCanv: {fileID: 1995507583}
   playerName: {fileID: 1668276736}
+  currCamera: {fileID: 1749241199}
 --- !u!114 &432757506
 MonoBehaviour:
   m_ObjectHideFlags: 0
