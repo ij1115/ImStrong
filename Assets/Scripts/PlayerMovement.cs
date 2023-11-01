@@ -1,5 +1,6 @@
 using Cinemachine;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,7 +18,7 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody rb;
     private PlayerInfo info;
 
-    public float rotateSpeed = 360f;
+    public float rotateSpeed = 1440f;
     public float fightTimer = 10f;
     public float attackInputDelay = 0.3f;
     public bool attackDelay = false;
@@ -40,6 +41,18 @@ public class PlayerMovement : MonoBehaviour
     public float sSkillTimerSet = 20f;
 
     public GameObject[] hitRanges;
+
+    //이동 관련 
+
+    private float endTime;
+
+    private float targetFrameTime;
+
+    private float timer;
+    private Vector3 startPos;
+    private Vector3 endPos;
+
+
 
     public void Setup()
     {
@@ -82,15 +95,18 @@ public class PlayerMovement : MonoBehaviour
     {
         if (controller.evade &&
             unitState!=UnitState.Evade&&
-                    unitState != UnitState.Stun &&
-                    unitState != UnitState.Down &&
-                    unitState != UnitState.Air &&
-                    unitState != UnitState.Knockback &&
-                    unitState != UnitState.Die&&
-                    unitState!=UnitState.Impact)
+            unitState != UnitState.Stun &&
+            unitState != UnitState.Down &&
+            unitState != UnitState.Air &&
+            unitState != UnitState.Knockback &&
+            unitState != UnitState.Die&&
+            unitState!=UnitState.Impact)
         {
+            EvadeMoveSetting();
             unitState = UnitState.Evade;
+            ani.speed = 1f;
             ani.SetTrigger("evade");
+            return;
         }
 
         switch (unitState)
@@ -104,6 +120,35 @@ public class PlayerMovement : MonoBehaviour
                 AttackUpdate();
                 break;
 
+            case UnitState.Attack_2:
+                Attack_2Update();
+                break;
+
+            case UnitState.Skill_F:
+                break;
+
+            case UnitState.Skill_S:
+                break;
+
+            case UnitState.Impact:
+                break;
+
+            case UnitState.Stun:
+                break;
+
+            case UnitState.Down:
+                break;
+
+            case UnitState.Air:
+                break;
+
+            case UnitState.Knockback:
+                break;
+
+            case UnitState.Evade:
+                EvadeUpdate();
+                break;
+            
             default:
                 return;
         }
@@ -152,7 +197,73 @@ public class PlayerMovement : MonoBehaviour
         if (controller.attack && !attackDelay)
         {
             ani.SetBool("Attack_2", true);
+
+            return;
         }
+    }
+
+    private void Attack_2Update()
+    {
+        if(unitState != UnitState.Attack_2)
+            return;
+
+
+    }
+
+    public void EvadeMoveSetting()
+    {
+        endTime = 0.8f;
+
+        targetFrameTime = 1.0f / 30.0f;
+        endTime = Mathf.Ceil(endTime / targetFrameTime) * targetFrameTime;
+
+        timer = 0f;
+        startPos = rb.transform.position;
+        endPos = rb.transform.position + rb.transform.forward * 5f;
+    }
+
+    private void EvadeUpdate()
+    {
+        if(unitState!=UnitState.Evade)
+            return;
+
+        timer += Time.deltaTime;
+
+        Vector3 nowPos = rb.position;
+
+        var rbT = rb.transform.position;
+        rbT.y = 1.5f;
+        var ray = new Ray(rbT, rb.transform.forward);
+
+        if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+        {
+            var target = hitInfo.collider.gameObject;
+
+            if (target != null)
+            {
+                if (target.CompareTag("Map"))
+                {
+                    nowPos = rb.position;
+                }
+                else
+                {
+                    nowPos = EaseInOutQuad(startPos, endPos, timer / endTime);
+                }
+            }
+        }
+
+        else
+        {
+            nowPos = EaseInOutQuad(startPos, endPos, timer / endTime);
+        }
+
+        if (timer > endTime)
+        {
+            rb.MovePosition(nowPos);
+            ReturnIdle();
+            return;
+        }
+        rb.MovePosition(nowPos);
     }
 
     private void MoveVecSet()
@@ -200,7 +311,7 @@ public class PlayerMovement : MonoBehaviour
 
         var rotation = rb.rotation;
         var targetRotateion = Quaternion.LookRotation(moveVec, Vector3.up);
-        rotation = Quaternion.RotateTowards(rotation, targetRotateion, rotateSpeed * Time.deltaTime * 4f);
+        rotation = Quaternion.RotateTowards(rotation, targetRotateion, rotateSpeed * Time.deltaTime);
         rb.MoveRotation(rotation);
     }
 
@@ -401,73 +512,6 @@ public class PlayerMovement : MonoBehaviour
 
         currentCo = StartCoroutine(IdleToNIdle());
     }
-
-    public void EvadeMovePlay()
-    {
-        if (moveCo != null)
-        {
-            StopCoroutine(moveCo);
-            moveCo = null;
-        }
-        ani.speed = 1f;
-        moveCo = StartCoroutine(EvadeMove());
-    }
-    private IEnumerator EvadeMove()
-    {
-        float endTime = 0.8f;
-
-        float targetFrameTime = 1.0f / 30.0f;
-        endTime = Mathf.Ceil(endTime / targetFrameTime) * targetFrameTime;
-
-        float timer = 0f;
-        var startPos = rb.transform.position;
-        var endPos = rb.transform.position + rb.transform.forward * 5f;
-
-        while (true)
-        {
-            timer += Time.deltaTime;
-
-            Vector3 nowPos = rb.position;
-
-            var rbT = rb.transform.position;
-            rbT.y = 1.5f;
-            var ray = new Ray(rbT, rb.transform.forward);
-
-            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
-            {
-                var target = hitInfo.collider.gameObject;
-
-                if(target != null)
-                {
-                    if(target.CompareTag("Map"))
-                    {
-                        nowPos = rb.position;
-                    }
-                    else
-                    {
-                         nowPos = EaseInOutQuad(startPos, endPos, timer / endTime);
-                    }
-                }
-            }
-
-            else
-            {
-                nowPos = EaseInOutQuad(startPos, endPos, timer / endTime);
-            }
-
-            if (timer > endTime)
-            {
-                rb.MovePosition(nowPos);
-                break;
-            }
-
-            rb.MovePosition(nowPos);
-            yield return null;
-        }
-        ReturnIdle();
-        moveCo = null;
-    }
-
     public void SwordAttackMovePlay()
     {
         moveCo = StartCoroutine(SwordAttackMove());
@@ -1853,3 +1897,70 @@ public class PlayerMovement : MonoBehaviour
         return clip;
     }
 }
+
+
+//public void EvadeMovePlay()
+//{
+//    if (moveCo != null)
+//    {
+//        StopCoroutine(moveCo);
+//        moveCo = null;
+//    }
+//    ani.speed = 1f;
+//    moveCo = StartCoroutine(EvadeMove());
+//}
+//private IEnumerator EvadeMove()
+//{
+//    float endTime = 0.8f;
+
+//    float targetFrameTime = 1.0f / 30.0f;
+//    endTime = Mathf.Ceil(endTime / targetFrameTime) * targetFrameTime;
+
+//    float timer = 0f;
+//    var startPos = rb.transform.position;
+//    var endPos = rb.transform.position + rb.transform.forward * 5f;
+
+//    while (true)
+//    {
+//        timer += Time.deltaTime;
+
+//        Vector3 nowPos = rb.position;
+
+//        var rbT = rb.transform.position;
+//        rbT.y = 1.5f;
+//        var ray = new Ray(rbT, rb.transform.forward);
+
+//        if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f, mask))
+//        {
+//            var target = hitInfo.collider.gameObject;
+
+//            if (target != null)
+//            {
+//                if (target.CompareTag("Map"))
+//                {
+//                    nowPos = rb.position;
+//                }
+//                else
+//                {
+//                    nowPos = EaseInOutQuad(startPos, endPos, timer / endTime);
+//                }
+//            }
+//        }
+
+//        else
+//        {
+//            nowPos = EaseInOutQuad(startPos, endPos, timer / endTime);
+//        }
+
+//        if (timer > endTime)
+//        {
+//            rb.MovePosition(nowPos);
+//            break;
+//        }
+
+//        rb.MovePosition(nowPos);
+//        yield return null;
+//    }
+//    ReturnIdle();
+//    moveCo = null;
+//}

@@ -27,6 +27,7 @@ public enum UnitState
     NIdle, // 기본
     Idle, // 경계
     Attack, // 공격
+    Attack_2,
     Skill_F, // 스킬 1
     Skill_S, // 스킬 2
     Impact, // 피격
