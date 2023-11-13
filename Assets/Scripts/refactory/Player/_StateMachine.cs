@@ -37,12 +37,12 @@ public class _StateMachine : MonoBehaviour
         currentState?.Open();
     }
 
-    public void UpdateState()
+    public void Update()
     {
         currentState?.OnUpdate();
     }
 
-    public void FixedUpdateState()
+    public void FixedUpdate()
     {
         currentState?.OnFixedUpdate();
     }

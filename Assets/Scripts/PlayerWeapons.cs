@@ -7,11 +7,60 @@ public class PlayerWeapons : MonoBehaviour
 {
     public Weapons type;
 
+    public PlayerWeapon[] weapons = new PlayerWeapon[3];
+    public PlayerWeapon CurrentWeapon { get; private set; }
+    public Transform lHandDummy;
+    public Transform rHandDummy;
+    private GameObject rHandWeapon;
+    private GameObject lHandWeapon;
+
     public RuntimeAnimatorController swordAni;
     public RuntimeAnimatorController axeAni;
     public RuntimeAnimatorController spearAni;
 
     public List<GameObject> weaponList = new List<GameObject>();
+
+
+    public void RightHandEquipWeapon(PlayerWeapon newWeapon, Transform parent)
+    {
+        if (newWeapon == null)
+            return;
+
+        RightHandUnEquipWeapon();
+
+        rHandWeapon = Instantiate(newWeapon.prefab, parent);
+        CurrentWeapon = newWeapon;
+    }
+
+    public void LeftHandEquipWeapon(PlayerWeapon newWeapon, Transform parent)
+    {
+        if(newWeapon == null) 
+            return;
+
+        LeftHandUnEquipWeapon();
+
+        lHandWeapon = Instantiate(newWeapon.prefab,parent);
+        CurrentWeapon = newWeapon;
+    }
+
+    public void RightHandUnEquipWeapon()
+    {
+        if(CurrentWeapon != null)
+        {      
+            Destroy(rHandWeapon);
+            CurrentWeapon = null;
+        }
+    }
+
+    public void LeftHandUnEquipWeapon()
+    {
+        if(CurrentWeapon != null)
+        {
+            Destroy(lHandWeapon);
+            CurrentWeapon = null;
+        }
+    }
+
 
     private void Awake()
     {

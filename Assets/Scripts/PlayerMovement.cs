@@ -206,8 +206,6 @@ public class PlayerMovement : MonoBehaviour
     {
         if(unitState != UnitState.Attack_2)
             return;
-
-
     }
 
     public void EvadeMoveSetting()

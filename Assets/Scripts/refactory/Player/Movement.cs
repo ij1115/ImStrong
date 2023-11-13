@@ -51,12 +51,12 @@ public class Movement : MonoBehaviour
 
     private void Update()
     {
-        stateMachine?.UpdateState();
+        stateMachine?.Update();
     }
 
     private void FixedUpdate()
     {
-        stateMachine?.FixedUpdateState();
+        stateMachine?.FixedUpdate();
     }
 
     public void FSkillDelayOn()
